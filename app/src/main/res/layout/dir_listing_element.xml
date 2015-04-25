@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal" >
+
+
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="fill_parent"
+        android:id="@+id/wDirListElement_DirOrFile"
+        android:src="@android:drawable/ic_dialog_info" />
+
+    <TextView
+        android:layout_width="40dp"
+        android:layout_weight="9"
+        android:layout_height="fill_parent"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="File name"
+        android:onClick="dirListElement_OnClickCallback"
+        android:id="@+id/wDirListElement_Name" />
+
+    <ImageButton
+        android:id="@+id/wDirListElement_Action"
+        android:layout_width="40dp"
+        android:layout_height="fill_parent"
+        android:contentDescription="HOLA!"
+        android:onClick="dirListElement_ActionCallback"
+        android:src="@android:drawable/ic_menu_delete" />
+
+</LinearLayout>
