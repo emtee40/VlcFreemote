@@ -25,7 +25,7 @@ public class HttpUtils {
 
         final XmlPullParser xpp;
         try {
-            final XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+            final XmlPullParserFactory factory = XmlPullParserFactory.newInstance(); // TODO Static'ize?
             xpp = factory.newPullParser();
             xpp.setInput( new StringReader(xmlMsg) );
         } catch (XmlPullParserException e) {

@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.nico.vlcfremote.utils.HttpUtils;
+import com.nico.vlcfremote.utils.VlcConnector;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -25,62 +26,31 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (item.getItemId() == R.id.action_settings) {
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    public void zdfs(View view) {
-        final TextView tv = (TextView) findViewById(R.id.textoFeo);
-        new VlcConnector("http://192.168.1.5:8080/", "qwepoi").getDirList("/home/laptus");
-    }
-
-    private static class VlcConnector {
-        final static String DIR_LIST_ACTION = "requests/browse.xml?dir=";
-
-        final String urlBase;
-        final String authStr;
-        final HttpClient httpClient = new DefaultHttpClient();
-
-        VlcConnector(final String url, final String pass) {
-            urlBase = url;
-            authStr = "Basic " + Base64.encodeToString((":"+pass).getBytes(), Base64.DEFAULT);
-        }
-
-        void getDirList(final String path) {
-            HttpGet getOp = new HttpGet(urlBase + DIR_LIST_ACTION + path);
-            getOp.addHeader("Authorization", authStr);
-            new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
-                @Override
-                public void responseReceived(final String msg) {
-                    String[] interestingAttrs = {"path", "name", "type"};
-                    List<String[]> dirList = HttpUtils.parseXmlList(msg, "element", interestingAttrs);
-                    for (String[] s : dirList) {
-                        Log.i("ASD", s[0]);
-                    }
-                    Log.i("ASD", msg);
+    public void refreshDirectoryListing(View view) {
+        VlcConnector vlc = new VlcConnector("http://192.168.1.5:8080/", "qwepoi");
+        vlc.getDirList("/home/laptus", new VlcConnector.DirListCallback() {
+            @Override
+            public void dirContents(String requestedPath, List<String[]> contents) {
+                for (String[] x : contents) {
+                    Log.i("ASD", x[1]);
                 }
-            }).execute();
-        }
+            }
+        });
     }
-
-
 }
