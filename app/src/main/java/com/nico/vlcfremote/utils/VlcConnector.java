@@ -20,20 +20,47 @@ public class VlcConnector {
         authStr = "Basic " + Base64.encodeToString((":" + pass).getBytes(), Base64.DEFAULT);
     }
 
+    public static class DirListEntry {
+        public boolean isDirectory;
+        public String name;
+        public String path;
+    }
 
     public static interface DirListCallback {
         // contents == {Path, Name, Type}
-        void dirContents(final String requestedPath, final List<String[]> contents);
+        void dirContents(final String requestedPath, final List<DirListEntry> contents);
     }
 
     public void getDirList(final String path, final DirListCallback callback) {
         final HttpGet getOp = new HttpGet(urlBase + DIR_LIST_ACTION + path);
         getOp.addHeader("Authorization", authStr);
+
         new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
             @Override
             public void responseReceived(final String msg) {
-                String[] interestingAttrs = {"path", "name", "type"};
-                List<String[]> dirList = HttpUtils.parseXmlList(msg, "element", interestingAttrs);
+                List<DirListEntry> dirList = HttpUtils.parseXmlList(msg, "element", new HttpUtils.XmlMogrifierCallback<DirListEntry>() {
+                    private DirListEntry object;
+
+                    @Override
+                    public void reset() {
+                        this.object = new DirListEntry();
+                    }
+
+                    @Override
+                    public void parseValue(String name, String value) {
+                        switch (name) {
+                            case "path": object.path = value; break;
+                            case "name": object.name = value; break;
+                            case "type": object.isDirectory = (value.equals("dir")); break;
+                        }
+                    }
+
+                    @Override
+                    public DirListEntry getParsedObject() {
+                        return object;
+                    }
+                });
+
                 callback.dirContents(path, dirList);
             }
         }).execute();

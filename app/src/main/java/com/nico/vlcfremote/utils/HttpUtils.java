@@ -14,14 +14,18 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class HttpUtils {
 
-    public static List<String[]> parseXmlList(final String xmlMsg, final String interestingTags, String[] interestingAttrs) {
-        final List<String> interestingAttrsLst = Arrays.asList(interestingAttrs);
-        List<String[]> foundObjects = new ArrayList<String[]>();
+    public static interface XmlMogrifierCallback<T> {
+        void reset();
+        void parseValue(final String name, final String value);
+        T getParsedObject();
+    }
+
+    public static <T> List<T> parseXmlList(final String xmlMsg, final String interestingTag, XmlMogrifierCallback<T> callback) {
+        List<T> foundObjects = new ArrayList<>();
 
         final XmlPullParser xpp;
         try {
@@ -32,19 +36,17 @@ public class HttpUtils {
             Log.e("ASD", "Can't setup XML parser");
             return foundObjects; // TODO: Notify user, throw something
         }
-
         try {
             int eventType = xpp.getEventType();
             while (eventType != XmlPullParser.END_DOCUMENT) {
-                if(eventType == XmlPullParser.START_TAG && (xpp.getName().equals(interestingTags))) {
-                    String[] obj = new String[interestingTags.length()];
+                if(eventType == XmlPullParser.START_TAG && (xpp.getName().equals(interestingTag))) {
+                    callback.reset();
+
                     for (int i=0; i < xpp.getAttributeCount(); ++i) {
-                        final int pos = interestingAttrsLst.indexOf(xpp.getAttributeName(i));
-                        if (pos != -1) {
-                            obj[pos] = xpp.getAttributeValue(i);
-                        }
+                        callback.parseValue(xpp.getAttributeName(i), xpp.getAttributeValue(i));
                     }
-                    foundObjects.add(obj);
+
+                    foundObjects.add(callback.getParsedObject());
                 }
 
                 eventType = xpp.next();
