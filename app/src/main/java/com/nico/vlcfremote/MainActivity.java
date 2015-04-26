@@ -18,7 +18,6 @@ import android.widget.TextView;
 
 import com.nico.vlcfremote.utils.VlcConnector;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends ActionBarActivity {
@@ -27,6 +26,7 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        requestDirectoryList();
     }
 
     @Override
@@ -45,7 +45,7 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private static class MyUglyAdapter extends ArrayAdapter<VlcConnector.DirListEntry> {
+    private static class DirListEntry_ViewAdapter extends ArrayAdapter<VlcConnector.DirListEntry> {
         private List<VlcConnector.DirListEntry> items;
         private int layoutResourceId;
         private Context context;
@@ -57,7 +57,7 @@ public class MainActivity extends ActionBarActivity {
             ImageButton actionButton;
         }
 
-        public MyUglyAdapter(Context context, int layoutResourceId, List<VlcConnector.DirListEntry> items) {
+        public DirListEntry_ViewAdapter(Context context, int layoutResourceId, List<VlcConnector.DirListEntry> items) {
             super(context, layoutResourceId, items);
             this.layoutResourceId = layoutResourceId;
             this.context = context;
@@ -90,13 +90,13 @@ public class MainActivity extends ActionBarActivity {
 
     String currentPath = "/home/laptus";
 
-    public void refreshDirectoryListing(View view) {
+    private void requestDirectoryList() {
         final MainActivity self = this;
         VlcConnector vlc = new VlcConnector("http://192.168.1.5:8080/", "qwepoi");
         vlc.getDirList(currentPath, new VlcConnector.DirListCallback() {
             @Override
             public void dirContents(String requestedPath, List<VlcConnector.DirListEntry> contents) {
-                final MyUglyAdapter adapt = new MyUglyAdapter(self, R.layout.dir_listing_element, contents);
+                final DirListEntry_ViewAdapter adapt = new DirListEntry_ViewAdapter(self, R.layout.dir_listing_element, contents);
                 final ListView dirList = (ListView) findViewById(R.id.wDirList);
                 dirList.setAdapter(adapt);
                 ((ArrayAdapter) dirList.getAdapter()).notifyDataSetChanged();
@@ -104,30 +104,19 @@ public class MainActivity extends ActionBarActivity {
         });
     }
 
+    public void gotoPlaylist(View view) {
+    }
+
     public void dirListElement_OnClickCallback(View view) {
         VlcConnector.DirListEntry item = (VlcConnector.DirListEntry)view.getTag();
         if (item.isDirectory) {
             currentPath = item.path;
-
-            // TODO
-            final MainActivity self = this;
-            VlcConnector vlc = new VlcConnector("http://192.168.1.5:8080/", "qwepoi");
-            vlc.getDirList(currentPath, new VlcConnector.DirListCallback() {
-                @Override
-                public void dirContents(String requestedPath, List<VlcConnector.DirListEntry> contents) {
-                    final MyUglyAdapter adapt = new MyUglyAdapter(self, R.layout.dir_listing_element, contents);
-                    final ListView dirList = (ListView) findViewById(R.id.wDirList);
-                    dirList.setAdapter(adapt);
-                    ((ArrayAdapter) dirList.getAdapter()).notifyDataSetChanged();
-                }
-            });
+            requestDirectoryList();
         }
     }
 
     public void dirListElement_ActionCallback(View view) {
         VlcConnector.DirListEntry item = (VlcConnector.DirListEntry)view.getTag();
-        Log.i("HOLA", "Adding " + item.isDirectory);
-        Log.i("HOLA", "Adding " + item.name);
         Log.i("HOLA", "Adding " + item.path);
     }
 }
