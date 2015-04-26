@@ -2,6 +2,7 @@ package com.nico.vlcfremote;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -105,6 +106,8 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void gotoPlaylist(View view) {
+        Intent intent = new Intent(this, PlaylistView.class);
+        startActivity(intent);
     }
 
     public void dirListElement_OnClickCallback(View view) {
