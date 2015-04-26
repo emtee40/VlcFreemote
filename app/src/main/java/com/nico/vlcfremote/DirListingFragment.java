@@ -24,9 +24,13 @@ public class DirListingFragment extends Fragment implements View.OnClickListener
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View vw = inflater.inflate(R.layout.fragment_dir_listing, container, false);
+        return inflater.inflate(R.layout.fragment_dir_listing, container, false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         requestDirectoryList();
-        return vw;
     }
 
     private static class DirListEntry_ViewAdapter extends ArrayAdapter<VlcConnector.DirListEntry> {
@@ -59,7 +63,7 @@ public class DirListingFragment extends Fragment implements View.OnClickListener
             holder.values = items.get(position);
 
             holder.dirOrFile = (ImageView)row.findViewById(R.id.wDirListElement_DirOrFile);
-            // holder.dirOrFile.setImageResource();
+            if (!holder.values.isDirectory) holder.dirOrFile.setVisibility(View.INVISIBLE);
 
             holder.fName = (TextView)row.findViewById(R.id.wDirListElement_Name);
             holder.fName.setText(holder.values.name);
@@ -77,10 +81,13 @@ public class DirListingFragment extends Fragment implements View.OnClickListener
     }
 
     String currentPath = "/home/laptus";
+    String currentPath_display = "/home/laptus";
 
     private void requestDirectoryList() {
         final FragmentActivity activity = getActivity();
         final DirListingFragment self = this;
+
+        ((TextView) activity.findViewById(R.id.wDirListing_CurrentPath)).setText(currentPath_display);
 
         VlcConnector vlc = new VlcConnector("http://192.168.1.5:8080/", "qwepoi");
         vlc.getDirList(currentPath, new VlcConnector.DirListCallback() {
@@ -117,13 +124,36 @@ public class DirListingFragment extends Fragment implements View.OnClickListener
         switch (v.getId()) {
             case R.id.wDirListElement_Action:
                 // Assert(item != null) TODO
-                Log.i("HOLA", "Adding " + item.path);
+
+                VlcConnector vlc = new VlcConnector("http://192.168.1.5:8080/", "qwepoi");
+                vlc.addToPlayList(item.path, new VlcConnector.AddToPlayListCallback() {
+                    @Override
+                    public void AddToPlayListCallback_Response(Integer addedMediaId) {
+                        // TODO: Play if not playing
+                    }
+
+                    @Override
+                    public void AddToPlayListCallback_ConnectionFailure() {
+
+                    }
+
+                    @Override
+                    public void AddToPlayListCallback_InternalError(Throwable ex) {
+
+                    }
+
+                    @Override
+                    public void AddToPlayListCallback_InvalidResponseReceived(Throwable ex) {
+
+                    }
+                });
                 break;
 
             case R.id.wDirListElement_Name:
                 // Assert(item != null) TODO
                 if (item.isDirectory) {
                     currentPath = item.path;
+                    currentPath_display = item.human_friendly_path;
                     requestDirectoryList();
                 }
                 break;

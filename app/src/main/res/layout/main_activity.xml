@@ -1,19 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.view.ViewPager
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/wMainMenu"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:orientation="vertical"
+    android:weightSum="100">
 
-
-    <android.support.v4.view.PagerTitleStrip
-        android:id="@+id/wMainMenu_TitleStrip"
+    <android.support.v4.view.ViewPager
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/wMainMenu"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:background="#33b5e5"
-        android:textColor="#fff"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp" />
+        android:layout_height="0dp"
+        android:layout_weight="95">
 
-</android.support.v4.view.ViewPager>
+
+        <android.support.v4.view.PagerTitleStrip
+            android:id="@+id/wMainMenu_TitleStrip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:background="#33b5e5"
+            android:textColor="#fff"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp" />
+
+    </android.support.v4.view.ViewPager>
+
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_weight="5"
+        android:weightSum="100">
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Currently playing..."
+            android:id="@+id/wPlayer_CurrentlyPlaying"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="50" />
+
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_weight="50" >
+
+            <ImageButton
+                android:id="@+id/wPlayer_BtnPrev"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:contentDescription="Play previous"
+                android:src="@android:drawable/ic_media_previous" />
+
+            <ImageButton
+                android:id="@+id/wPlayer_BtnPlay"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:contentDescription="Play"
+                android:src="@android:drawable/ic_media_play" />
+
+            <ImageButton
+                android:id="@+id/wPlayer_BtnNext"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:contentDescription="Play next"
+                android:src="@android:drawable/ic_media_next" />
+
+            <LinearLayout
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:context=".MainActivity"
+                android:orientation="vertical"
+                android:weightSum="1">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:text="Volume"
+                    android:id="@+id/wPlayer_Volume_Label"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_weight="0.1" />
+
+                <SeekBar
+                    android:layout_width="fill_parent"
+                    android:layout_height="0dp"
+                    android:id="@+id/wPlayer_Volume"
+                    android:layout_weight="0.4" />
+
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
+

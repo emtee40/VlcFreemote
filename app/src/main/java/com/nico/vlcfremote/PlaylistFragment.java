@@ -23,10 +23,15 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View vw = inflater.inflate(R.layout.fragment_playlist, container, false);
-        updatePlaylist();
-        return vw;
+        return inflater.inflate(R.layout.fragment_playlist, container, false);
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updatePlaylist();
+    }
+
 
     private static class PlaylistEntry_ViewAdapter extends ArrayAdapter<VlcConnector.PlaylistEntry> {
         private List<VlcConnector.PlaylistEntry> items;
