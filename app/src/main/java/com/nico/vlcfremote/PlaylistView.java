@@ -58,11 +58,27 @@ public class PlaylistView extends ActionBarActivity {
         VlcConnector vlc = new VlcConnector("http://192.168.1.5:8080/", "qwepoi");
         vlc.getPlaylist(new VlcConnector.PlaylistCallback() {
             @Override
-            public void playlistContentsAvailable(List<VlcConnector.PlaylistEntry> contents) {
+            public void fetchPlaylist_Response(List<VlcConnector.PlaylistEntry> contents) {
+
                 final PlaylistEntry_ViewAdapter adapt = new PlaylistEntry_ViewAdapter(self, R.layout.playlist_element, contents);
                 final ListView lst = (ListView) findViewById(R.id.wPlaylistElements);
                 lst.setAdapter(adapt);
                 ((ArrayAdapter) lst.getAdapter()).notifyDataSetChanged();
+            }
+
+            @Override
+            public void fetchPlaylist_ConnectionFailure() {
+
+            }
+
+            @Override
+            public void fetchPlaylist_InvalidResponseReceived(Throwable ex) {
+
+            }
+
+            @Override
+            public void fetchPlaylist_InternalError(Throwable ex) {
+
             }
         });
     }

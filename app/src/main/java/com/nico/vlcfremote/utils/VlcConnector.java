@@ -1,7 +1,6 @@
 package com.nico.vlcfremote.utils;
 
 import android.util.Base64;
-import android.util.Log;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -30,7 +29,10 @@ public class VlcConnector {
     }
 
     public static interface PlaylistCallback {
-        void playlistContentsAvailable(final List<PlaylistEntry> contents);
+        void fetchPlaylist_Response(final List<PlaylistEntry> contents);
+        void fetchPlaylist_ConnectionFailure();
+        void fetchPlaylist_InvalidResponseReceived(Throwable ex);
+        void fetchPlaylist_InternalError(Throwable ex);
     }
 
     public void getPlaylist(final PlaylistCallback callback) {
@@ -39,35 +41,33 @@ public class VlcConnector {
 
         new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
             @Override
-            public void responseReceived(final String msg) {
-                List<PlaylistEntry> lst = HttpUtils.parseXmlList(msg, "leaf", new HttpUtils.XmlMogrifierCallback<PlaylistEntry>() {
-                    private PlaylistEntry object;
+            public void connectionFailure() { callback.fetchPlaylist_ConnectionFailure(); }
 
-                    @Override
-                    public void reset() {
-                        this.object = new PlaylistEntry();
-                    }
-
-                    @Override
-                    public void parseValue(String name, String value) {
-                        switch (name) {
-                            case "uri": object.uri = value; break;
-                            case "name": object.name = value; break;
-                            case "id": object.id = Integer.parseInt(value); break;
-                            case "duration": object.duration = Integer.parseInt(value); break;
+            @Override
+            public void responseReceived(int httpStatusCode, String msg) {
+                try {
+                    final List<PlaylistEntry> lst = HttpUtils.parseXmlList(msg, "leaf", new HttpUtils.XmlMogrifier<PlaylistEntry>(PlaylistEntry.class) {
+                        @Override
+                        void parseValue(PlaylistEntry object, String key, String value) {
+                            switch (key) {
+                                case "uri": object.uri = value; break;
+                                case "name": object.name = value; break;
+                                case "id": object.id = Integer.parseInt(value); break;
+                                case "duration": object.duration = Integer.parseInt(value); break;
+                            }
                         }
-                    }
+                    });
 
-                    @Override
-                    public PlaylistEntry getParsedObject() {
-                        return object;
-                    }
-                });
-
-                callback.playlistContentsAvailable(lst);
+                    callback.fetchPlaylist_Response(lst);
+                } catch (HttpUtils.CantCreateXmlParser cantCreateXmlParser) {
+                    callback.fetchPlaylist_InternalError(cantCreateXmlParser);
+                } catch (HttpUtils.CantParseXmlResponse cantParseXmlResponse) {
+                    callback.fetchPlaylist_InvalidResponseReceived(cantParseXmlResponse);
+                }
             }
         }).execute();
     }
+
 
     public static class DirListEntry {
         public boolean isDirectory;
@@ -76,7 +76,10 @@ public class VlcConnector {
     }
 
     public static interface DirListCallback {
-        void dirContents(final String requestedPath, final List<DirListEntry> contents);
+        void fetchDirList_Response(final String requestedPath, final List<DirListEntry> contents);
+        void fetchDirList_ConnectionFailure();
+        void fetchDirList_InvalidResponseReceived(Throwable ex);
+        void fetchDirList_InternalError(Throwable ex);
     }
 
     public void getDirList(final String path, final DirListCallback callback) {
@@ -85,31 +88,28 @@ public class VlcConnector {
 
         new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
             @Override
-            public void responseReceived(final String msg) {
-                List<DirListEntry> dirList = HttpUtils.parseXmlList(msg, "element", new HttpUtils.XmlMogrifierCallback<DirListEntry>() {
-                    private DirListEntry object;
+            public void connectionFailure() { callback.fetchDirList_ConnectionFailure(); }
 
-                    @Override
-                    public void reset() {
-                        this.object = new DirListEntry();
-                    }
-
-                    @Override
-                    public void parseValue(String name, String value) {
-                        switch (name) {
-                            case "path": object.path = value; break;
-                            case "name": object.name = value; break;
-                            case "type": object.isDirectory = (value.equals("dir")); break;
+            @Override
+            public void responseReceived(int httpStatusCode, String msg) {
+                try {
+                    final List<DirListEntry> lst = HttpUtils.parseXmlList(msg, "element", new HttpUtils.XmlMogrifier<DirListEntry>(DirListEntry.class) {
+                        @Override
+                        void parseValue(DirListEntry object, String key, String value) {
+                            switch (key) {
+                                case "path": object.path = value; break;
+                                case "name": object.name = value; break;
+                                case "type": object.isDirectory = (value.equals("dir")); break;
+                            }
                         }
-                    }
+                    });
 
-                    @Override
-                    public DirListEntry getParsedObject() {
-                        return object;
-                    }
-                });
-
-                callback.dirContents(path, dirList);
+                    callback.fetchDirList_Response(path, lst);
+                } catch (HttpUtils.CantCreateXmlParser cantCreateXmlParser) {
+                    callback.fetchDirList_InternalError(cantCreateXmlParser);
+                } catch (HttpUtils.CantParseXmlResponse cantParseXmlResponse) {
+                    callback.fetchDirList_InvalidResponseReceived(cantParseXmlResponse);
+                }
             }
         }).execute();
     }

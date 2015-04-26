@@ -1,7 +1,6 @@
 package com.nico.vlcfremote.utils;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -18,45 +17,72 @@ import java.util.List;
 
 public class HttpUtils {
 
-    public static interface XmlMogrifierCallback<T> {
-        void reset();
-        void parseValue(final String name, final String value);
-        T getParsedObject();
+    public static abstract class XmlMogrifier<T> {
+        private final Class<T> clazz;
+        T object;
+
+        XmlMogrifier(Class<T> clazz) {
+            this.clazz = clazz;
+        }
+
+        void reset() {
+            try {
+                object = clazz.newInstance();
+            } catch (InstantiationException|IllegalAccessException e) {
+                object = null;
+            }
+        }
+
+        T getParsedObject() { return object; }
+
+        abstract void parseValue(T object, final String key, final String value);
     }
 
-    public static <T> List<T> parseXmlList(final String xmlMsg, final String interestingTag, XmlMogrifierCallback<T> callback) {
+    public static class CantCreateXmlParser extends Throwable {
+        @Override
+        public String getMessage() { return "Can't create an XML parser"; }
+    }
+
+    public static class CantParseXmlResponse extends Throwable {
+        @Override
+        public String getMessage() { return "The XML response was invalid"; }
+    }
+
+    private static XmlPullParserFactory xmlParserFactory = null;
+    public static <T> List<T> parseXmlList(final String xmlMsg, final String interestingTag, XmlMogrifier<T> objDeserializer)
+                throws CantCreateXmlParser, CantParseXmlResponse
+    {
         List<T> foundObjects = new ArrayList<>();
 
         final XmlPullParser xpp;
         try {
-            final XmlPullParserFactory factory = XmlPullParserFactory.newInstance(); // TODO Static'ize?
-            xpp = factory.newPullParser();
+            if (xmlParserFactory == null) xmlParserFactory = XmlPullParserFactory.newInstance();
+
+            xpp = xmlParserFactory.newPullParser();
+            if (xpp == null) throw new CantCreateXmlParser();
+
             xpp.setInput( new StringReader(xmlMsg) );
         } catch (XmlPullParserException e) {
-            Log.e("ASD", "Can't setup XML parser");
-            return foundObjects; // TODO: Notify user, throw something
+            throw new CantCreateXmlParser();
         }
+
         try {
             int eventType = xpp.getEventType();
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 if(eventType == XmlPullParser.START_TAG && (xpp.getName().equals(interestingTag))) {
-                    callback.reset();
+                    objDeserializer.reset();
 
                     for (int i=0; i < xpp.getAttributeCount(); ++i) {
-                        callback.parseValue(xpp.getAttributeName(i), xpp.getAttributeValue(i));
+                        objDeserializer.parseValue(objDeserializer.getParsedObject(), xpp.getAttributeName(i), xpp.getAttributeValue(i));
                     }
 
-                    foundObjects.add(callback.getParsedObject());
+                    foundObjects.add(objDeserializer.getParsedObject());
                 }
 
                 eventType = xpp.next();
             }
-        } catch (XmlPullParserException e) {
-            Log.e("ASD", "Can't read XML");
-            return foundObjects; // TODO: Notify user, throw something
-        } catch (IOException e) {
-            Log.e("ASD", "Can't read XML");
-            return foundObjects; // TODO: Notify user, throw something
+        } catch (XmlPullParserException | IOException e) {
+            throw new CantParseXmlResponse();
         }
 
         return foundObjects;
@@ -64,10 +90,17 @@ public class HttpUtils {
 
 
     public static interface HttpResponseCallback {
-        void responseReceived(final String msg);
+        void responseReceived(int httpStatusCode, final String msg);
+        void connectionFailure();
     }
 
-    public static class AsyncRequester extends AsyncTask<Void, Void, String> {
+    private static class HttpQueryResult {
+        public String message;
+        public int httpStatusCode;
+        public boolean connectionFailure;
+    }
+
+    public static class AsyncRequester extends AsyncTask<Void, Void, HttpQueryResult> {
         private final HttpClient httpClient;
         private final HttpGet op;
         private final HttpResponseCallback callback;
@@ -79,24 +112,33 @@ public class HttpUtils {
         }
 
         @Override
-        protected String doInBackground(Void... params) {
-            String responseString;
+        protected HttpQueryResult doInBackground(Void... params) {
+            HttpQueryResult res = new HttpQueryResult();
             try {
                 HttpResponse resp = httpClient.execute(op);
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                resp.getEntity().writeTo(out);
-                responseString = out.toString();
-                out.close();
-                return responseString;
+                if (resp != null) {
+                    res.httpStatusCode = resp.getStatusLine().getStatusCode();
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    resp.getEntity().writeTo(out);
+                    res.message = out.toString();
+                    out.close();
+                } else {
+                    res.connectionFailure = true;
+                }
             } catch (IOException e) {
-                e.printStackTrace(); // TODO
-                return null;
+                res.connectionFailure = true;
             }
+
+            return res;
         }
 
         @Override
-        protected void onPostExecute(final String response) {
-            callback.responseReceived(response);
+        protected void onPostExecute(final HttpQueryResult res) {
+            if (res.connectionFailure) {
+                callback.connectionFailure();
+            } else {
+                callback.responseReceived(res.httpStatusCode, res.message);
+            }
         }
     }
 }

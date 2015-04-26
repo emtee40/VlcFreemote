@@ -96,11 +96,28 @@ public class MainActivity extends ActionBarActivity {
         VlcConnector vlc = new VlcConnector("http://192.168.1.5:8080/", "qwepoi");
         vlc.getDirList(currentPath, new VlcConnector.DirListCallback() {
             @Override
-            public void dirContents(String requestedPath, List<VlcConnector.DirListEntry> contents) {
+            public void fetchDirList_Response(String requestedPath, List<VlcConnector.DirListEntry> contents) {
+                Log.i("ASD", "CALL CONTENT CB");
                 final DirListEntry_ViewAdapter adapt = new DirListEntry_ViewAdapter(self, R.layout.dir_listing_element, contents);
                 final ListView dirList = (ListView) findViewById(R.id.wDirList);
                 dirList.setAdapter(adapt);
                 ((ArrayAdapter) dirList.getAdapter()).notifyDataSetChanged();
+            }
+
+            @Override
+            public void fetchDirList_ConnectionFailure() {
+                Log.i("ASD", "CALL CONN FAIL CB");
+            }
+
+            @Override
+            public void fetchDirList_InvalidResponseReceived(Throwable ex) {
+                Log.i("ASD", "CALL INV RESPONSE CB");
+
+            }
+
+            @Override
+            public void fetchDirList_InternalError(Throwable ex) {
+                Log.i("ASD", "CALL ERR CB");
             }
         });
     }
