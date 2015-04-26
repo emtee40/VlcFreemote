@@ -4,4 +4,16 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_playlist_view">PlaylistView</string>
+    <string name="main_menu_title_dir_listing">Browse</string>
+    <string name="main_menu_title_playlist">Playlist</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="dir_listing_current_path">Current path...</string>
+    <string name="dir_listing_action_description">Append to playlist</string>
+    <string name="dir_listing_onclick_action">File name - click to browse</string>
+    <string name="dir_listing_file_or_directory_icon">File or directory icon</string>
+    <string name="playlist_element_name_placeholder">File name</string>
+    <string name="playlist_element_duration_placeholder">Duration</string>
+    <string name="playlist_element_remove_from_playlist">Remove from playlist</string>
 </resources>

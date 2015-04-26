@@ -4,28 +4,27 @@
     android:layout_height="fill_parent"
     android:orientation="horizontal" >
 
-
-    <ImageView
+    <TextView
         android:layout_width="40dp"
+        android:layout_weight="9"
         android:layout_height="fill_parent"
-        android:id="@+id/wDirListElement_DirOrFile"
-        android:src="@android:drawable/ic_dialog_info" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/playlist_element_name_placeholder"
+        android:id="@+id/wPlaylistElement_Name" />
 
     <TextView
         android:layout_width="40dp"
         android:layout_weight="9"
         android:layout_height="fill_parent"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="File name"
-        android:onClick="dirListElement_OnClickCallback"
-        android:id="@+id/wDirListElement_Name" />
+        android:text="@string/playlist_element_duration_placeholder"
+        android:id="@+id/wPlaylistElement_Duration" />
 
     <ImageButton
-        android:id="@+id/wDirListElement_Action"
+        android:id="@+id/wPlaylistElement_Remove"
         android:layout_width="40dp"
         android:layout_height="fill_parent"
-        android:contentDescription="HOLA!"
-        android:onClick="dirListElement_ActionCallback"
+        android:contentDescription="@string/playlist_element_remove_from_playlist"
         android:src="@android:drawable/ic_menu_delete" />
 
 </LinearLayout>
