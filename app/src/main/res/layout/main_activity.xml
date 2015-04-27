@@ -45,6 +45,37 @@
             android:layout_gravity="center_horizontal"
             android:layout_weight="50" />
 
+
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_weight="50" >
+
+            <ImageButton
+                android:id="@+id/wPlayer_PlayPosition_JumpBack"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:contentDescription="Jump 25 seconds back"
+                android:onClick="onPlayPosition_JumpBack"
+                android:src="@android:drawable/ic_media_rew" />
+
+            <SeekBar
+                android:layout_width="fill_parent"
+                android:layout_height="30dp"
+                android:id="@+id/wPlayer_PlayPosition" />
+
+            <ImageButton
+                android:id="@+id/wPlayer_PlayPosition_JumpForward"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:contentDescription="Jump 25 seconds forward"
+                android:onClick="onPlayPosition_JumpForward"
+                android:src="@android:drawable/ic_media_ff" />
+
+        </LinearLayout>
+
         <LinearLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
@@ -57,13 +88,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:contentDescription="Play previous"
+                android:onClick="onPlayPreviousClick"
                 android:src="@android:drawable/ic_media_previous" />
 
             <ImageButton
-                android:id="@+id/wPlayer_BtnPlay"
+                android:id="@+id/wPlayer_BtnPlayPause"
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:contentDescription="Play"
+                android:onClick="onPlayPauseClick"
                 android:src="@android:drawable/ic_media_play" />
 
             <ImageButton
@@ -71,6 +104,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:contentDescription="Play next"
+                android:onClick="onPlayNextClick"
                 android:src="@android:drawable/ic_media_next" />
 
             <LinearLayout

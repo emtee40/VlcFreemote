@@ -4,22 +4,21 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.nico.vlcfremote.utils.VlcActionFragment;
 import com.nico.vlcfremote.utils.VlcConnector;
 
 import java.util.List;
 
-public class PlaylistFragment extends Fragment implements View.OnClickListener {
-    public PlaylistFragment() {}
+public class PlaylistFragment extends VlcActionFragment
+                              implements View.OnClickListener {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -32,6 +31,22 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
         updatePlaylist();
     }
 
+    private void updatePlaylist() {
+        vlcConnection.getVlcConnector().getPlaylist(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+
+    }
+
+    @Override
+    public void Vlc_OnPlaylistFetched(List<VlcConnector.PlaylistEntry> contents) {
+        final PlaylistEntry_ViewAdapter adapt = new PlaylistEntry_ViewAdapter(this, getActivity(), contents);
+        final ListView lst = (ListView) getActivity().findViewById(R.id.wPlaylist_List);
+        lst.setAdapter(adapt);
+        ((ArrayAdapter) lst.getAdapter()).notifyDataSetChanged();
+    }
 
     private static class PlaylistEntry_ViewAdapter extends ArrayAdapter<VlcConnector.PlaylistEntry> {
         private List<VlcConnector.PlaylistEntry> items;
@@ -41,7 +56,6 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
 
         public static class Row {
             VlcConnector.PlaylistEntry values;
-            ImageView wPlaylistElement_FileStatus;
             TextView wPlaylistElement_Name;
             TextView wPlaylistElement_Duration;
             ImageButton wPlaylistElement_Remove;
@@ -78,42 +92,5 @@ public class PlaylistFragment extends Fragment implements View.OnClickListener {
 
             return row;
         }
-    }
-
-    void updatePlaylist() {
-        final FragmentActivity activity = getActivity();
-        final PlaylistFragment self = this;
-
-        VlcConnector vlc = new VlcConnector("http://192.168.1.5:8080/", "qwepoi");
-        vlc.getPlaylist(new VlcConnector.PlaylistCallback() {
-            @Override
-            public void fetchPlaylist_Response(List<VlcConnector.PlaylistEntry> contents) {
-
-                final PlaylistEntry_ViewAdapter adapt = new PlaylistEntry_ViewAdapter(self, activity, contents);
-                final ListView lst = (ListView) activity.findViewById(R.id.wPlaylist_List);
-                lst.setAdapter(adapt);
-                ((ArrayAdapter) lst.getAdapter()).notifyDataSetChanged();
-            }
-
-            @Override
-            public void fetchPlaylist_ConnectionFailure() {
-
-            }
-
-            @Override
-            public void fetchPlaylist_InvalidResponseReceived(Throwable ex) {
-
-            }
-
-            @Override
-            public void fetchPlaylist_InternalError(Throwable ex) {
-
-            }
-        });
-    }
-
-    @Override
-    public void onClick(View v) {
-
     }
 }

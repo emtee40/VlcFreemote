@@ -3,9 +3,6 @@ package com.nico.vlcfremote;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,12 +12,12 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.nico.vlcfremote.utils.VlcActionFragment;
 import com.nico.vlcfremote.utils.VlcConnector;
 
 import java.util.List;
 
-public class DirListingFragment extends Fragment implements View.OnClickListener {
-    public DirListingFragment() {}
+public class DirListingFragment extends VlcActionFragment implements View.OnClickListener {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -84,37 +81,19 @@ public class DirListingFragment extends Fragment implements View.OnClickListener
     String currentPath_display = "/home/laptus";
 
     private void requestDirectoryList() {
-        final FragmentActivity activity = getActivity();
-        final DirListingFragment self = this;
+        ((TextView) getActivity().findViewById(R.id.wDirListing_CurrentPath)).setText(currentPath_display);
+        vlcConnection.getVlcConnector().getDirList(currentPath, this);
+    }
 
-        ((TextView) activity.findViewById(R.id.wDirListing_CurrentPath)).setText(currentPath_display);
+    @Override public void Vlc_OnDirListingFetched(String requestedPath, List<VlcConnector.DirListEntry> contents) {
+        final DirListEntry_ViewAdapter adapt = new DirListEntry_ViewAdapter(this, getActivity(), contents);
+        // TODO: Clean & set adapt instead of new?
+        ((ListView) getActivity().findViewById(R.id.wDirListing_List)).setAdapter(adapt);
+        adapt.notifyDataSetChanged();
+    }
 
-        VlcConnector vlc = new VlcConnector("http://192.168.1.5:8080/", "qwepoi");
-        vlc.getDirList(currentPath, new VlcConnector.DirListCallback() {
-            @Override
-            public void fetchDirList_Response(String requestedPath, List<VlcConnector.DirListEntry> contents) {
-                final DirListEntry_ViewAdapter adapt = new DirListEntry_ViewAdapter(self, activity, contents);
-                // TODO: Clean & set adapt instead of new?
-                ((ListView) activity.findViewById(R.id.wDirListing_List)).setAdapter(adapt);
-                adapt.notifyDataSetChanged();
-            }
-
-            @Override
-            public void fetchDirList_ConnectionFailure() {
-                Log.i("ASD", "CALL CONN FAIL CB");
-            }
-
-            @Override
-            public void fetchDirList_InvalidResponseReceived(Throwable ex) {
-                Log.i("ASD", "CALL INV RESPONSE CB");
-
-            }
-
-            @Override
-            public void fetchDirList_InternalError(Throwable ex) {
-                Log.i("ASD", "CALL ERR CB");
-            }
-        });
+    @Override public void Vlc_OnAddedToPlaylistCallback(Integer addedMediaId) {
+        // TODO?
     }
 
     @Override
@@ -124,29 +103,7 @@ public class DirListingFragment extends Fragment implements View.OnClickListener
         switch (v.getId()) {
             case R.id.wDirListElement_Action:
                 // Assert(item != null) TODO
-
-                VlcConnector vlc = new VlcConnector("http://192.168.1.5:8080/", "qwepoi");
-                vlc.addToPlayList(item.path, new VlcConnector.AddToPlayListCallback() {
-                    @Override
-                    public void AddToPlayListCallback_Response(Integer addedMediaId) {
-                        // TODO: Play if not playing
-                    }
-
-                    @Override
-                    public void AddToPlayListCallback_ConnectionFailure() {
-
-                    }
-
-                    @Override
-                    public void AddToPlayListCallback_InternalError(Throwable ex) {
-
-                    }
-
-                    @Override
-                    public void AddToPlayListCallback_InvalidResponseReceived(Throwable ex) {
-
-                    }
-                });
+                vlcConnection.getVlcConnector().addToPlayList(item.path, this);
                 break;
 
             case R.id.wDirListElement_Name:

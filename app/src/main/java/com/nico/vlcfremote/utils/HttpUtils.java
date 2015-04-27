@@ -90,8 +90,8 @@ public class HttpUtils {
 
 
     public static interface HttpResponseCallback {
-        void responseReceived(int httpStatusCode, final String msg);
-        void connectionFailure();
+        void onHttpResponseReceived(int httpStatusCode, final String msg);
+        void onHttpConnectionFailure();
     }
 
     private static class HttpQueryResult {
@@ -135,9 +135,9 @@ public class HttpUtils {
         @Override
         protected void onPostExecute(final HttpQueryResult res) {
             if (res.connectionFailure) {
-                callback.connectionFailure();
+                callback.onHttpConnectionFailure();
             } else {
-                callback.responseReceived(res.httpStatusCode, res.message);
+                callback.onHttpResponseReceived(res.httpStatusCode, res.message);
             }
         }
     }
