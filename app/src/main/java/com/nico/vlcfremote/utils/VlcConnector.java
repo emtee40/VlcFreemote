@@ -145,18 +145,7 @@ public class VlcConnector {
 
 
     public void playPosition_JumpRelative(double jumpTime) {
-        HttpGet getOp = null;
-        try {
-            getOp = new HttpGet(urlBase + ACTION_PLAY_POSITION_JUMP + jumpTime + URLEncoder.encode("%", "UTF-8"));
-            Log.i("ASD", URLEncoder.encode("%", "UTF-8"));
-            Log.i("ASD", URLEncoder.encode("%", "UTF-8"));
-            Log.i("ASD", URLEncoder.encode("%", "UTF-8"));
-            Log.i("ASD", URLEncoder.encode("%", "UTF-8"));
-            Log.i("ASD", URLEncoder.encode("%", "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
+        HttpGet getOp = new HttpGet(urlBase + ACTION_PLAY_POSITION_JUMP + jumpTime + "%25"); // %25 == UrlEncode('%');
         getOp.addHeader("Authorization", authStr);
 
         new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
@@ -166,8 +155,6 @@ public class VlcConnector {
             public void onHttpResponseReceived(int httpStatusCode, String msg) { }
         }).execute();
     }
-
-
 
 
 

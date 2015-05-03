@@ -6,10 +6,13 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import com.nico.vlcfremote.utils.VlcConnector;
 
@@ -21,20 +24,36 @@ public class MainActivity extends ActionBarActivity
                                        VlcConnector.VlcConnectionHandler {
 
     private VlcConnector vlc;
+    private DirListingFragment dirlistView;
+    private PlaylistFragment playlistView;
+    private ServerSelectView serverSelectView;
 
     private class MainMenuNavigation extends FragmentPagerAdapter {
 
-        public MainMenuNavigation(FragmentManager fm) {
+        private final PlaylistFragment playlistView;
+        private final DirListingFragment dirlistView;
+        private final ServerSelectView serverSelectView;
+
+        public MainMenuNavigation(FragmentManager fm, PlaylistFragment playlistView, DirListingFragment dirlistView, ServerSelectView serverSelectView) {
             super(fm);
+            this.playlistView = playlistView;
+            this.dirlistView = dirlistView;
+            this.serverSelectView = serverSelectView;
+        }
+
+        @Override
+        public void finishUpdate(ViewGroup vw) {
+            super.finishUpdate(vw);
+            Log.i("HOLA", "Update playlist NOW");
+            // TODO // playlistView.updatePlaylist();
         }
 
         @Override
         public Fragment getItem(int i) {
             switch (i) {
-                case 0:
-                    return new DirListingFragment();
-                case 1:
-                    return new PlaylistFragment();
+                case 0: return playlistView;
+                case 1: return dirlistView;
+                case 2: return serverSelectView;
             }
             return null;
         }
@@ -42,10 +61,9 @@ public class MainActivity extends ActionBarActivity
         @Override
         public CharSequence getPageTitle(int position) {
             switch (position) {
-                case 0:
-                    return getString(R.string.main_menu_title_dir_listing);
-                case 1:
-                    return getString(R.string.main_menu_title_playlist);
+                case 0: return getString(R.string.main_menu_title_dir_listing);
+                case 1: return getString(R.string.main_menu_title_playlist);
+                case 2: return getString(R.string.main_menu_title_servers);
             }
             return "ASDADS";
         }
@@ -60,9 +78,15 @@ public class MainActivity extends ActionBarActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
-        ((ViewPager) super.findViewById(R.id.wMainMenu)).setAdapter(new MainMenuNavigation(getSupportFragmentManager()));
-        ((SeekBar) findViewById(R.id.wPlayer_Volume)).setOnSeekBarChangeListener(this);
+
         this.vlc = new VlcConnector("http://192.168.1.5:8080/", "qwepoi");
+        this.playlistView = new PlaylistFragment();
+        this.dirlistView = new DirListingFragment();
+        this.serverSelectView = new ServerSelectView();
+
+        MainMenuNavigation tabCtrl = new MainMenuNavigation(getSupportFragmentManager(), playlistView, dirlistView, serverSelectView);
+        ((ViewPager) super.findViewById(R.id.wMainMenu)).setAdapter(tabCtrl);
+        ((SeekBar) findViewById(R.id.wPlayer_Volume)).setOnSeekBarChangeListener(this);
     }
 
     @Override
@@ -121,26 +145,36 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void Vlc_OnLoginIncorrect() {
-
+        CharSequence msg = getResources().getString(R.string.status_vlc_wrong_password);
+        Toast toast = Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG);
+        toast.show();
     }
 
     @Override
     public void Vlc_OnConnectionFail() {
-
+        CharSequence msg = getResources().getString(R.string.status_vlc_cant_connect);
+        Toast toast = Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG);
+        toast.show();
     }
 
     @Override
     public void Vlc_OnInternalError(Throwable ex) {
-
+        CharSequence msg = getResources().getString(R.string.stats_vlc_parser_internal_error);
+        Toast toast = Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG);
+        toast.show();
     }
 
     @Override
     public void Vlc_OnInvalidResponseReceived(Throwable ex) {
-
+        CharSequence msg = getResources().getString(R.string.status_invalid_vlc_response);
+        Toast toast = Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG);
+        toast.show();
     }
 
     @Override
     public void Vlc_OnProgrammingError() {
-
+        CharSequence msg = getResources().getString(R.string.status_assertion_failed);
+        Toast toast = Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG);
+        toast.show();
     }
 }
