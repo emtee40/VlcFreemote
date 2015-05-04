@@ -18,4 +18,15 @@
     <string name="status_vlc_cant_connect">Couldn\'t connect to VLC. Please select the servers tab and reconnect.</string>
     <string name="status_vlc_wrong_password">The supplied password is not valid</string>
     <string name="main_menu_title_servers">Servers</string>
+    <string name="status_no_network_detected">VlcFreemote can\'t detect any networking interfaces configured in this device. Are you sure you are online?</string>
+    <string name="server_select_manual_selection_default_ip">192.168.1.</string>
+    <string name="server_select_manual_selection_default_port">8080</string>
+    <string name="server_select_manual_selection_set">Use this server...</string>
+    <string name="server_select_manual_selection_label">Manually select server:</string>
+    <string name="server_select_auto_selection_label">Use a server from the detected list:</string>
+    <string name="server_select_manual_selection_default_ip_hint">Enter your server\'s IP address</string>
+    <string name="server_select_manual_selection_default_port_hint">Enter your server\'s port</string>
+    <string name="server_select_toggle_scanning_stop">Stop scanning...</string>
+    <string name="server_select_toggle_scanning_start">Start scanning...</string>
+    <string name="server_element_select_server_hint">Use this server</string>
 </resources>

@@ -31,7 +31,7 @@ public class PlaylistFragment extends VlcActionFragment
         updatePlaylist();
     }
 
-    private void updatePlaylist() {
+    public void updatePlaylist() {
         vlcConnection.getVlcConnector().getPlaylist(this);
     }
 

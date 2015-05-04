@@ -27,7 +27,7 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
     @Override
     public void onResume() {
         super.onResume();
-        requestDirectoryList();
+        updateDirectoryList();
     }
 
     private static class DirListEntry_ViewAdapter extends ArrayAdapter<VlcConnector.DirListEntry> {
@@ -80,7 +80,7 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
     String currentPath = "/home/laptus";
     String currentPath_display = "/home/laptus";
 
-    private void requestDirectoryList() {
+    public void updateDirectoryList() {
         ((TextView) getActivity().findViewById(R.id.wDirListing_CurrentPath)).setText(currentPath_display);
         vlcConnection.getVlcConnector().getDirList(currentPath, this);
     }
@@ -111,7 +111,7 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
                 if (item.isDirectory) {
                     currentPath = item.path;
                     currentPath_display = item.human_friendly_path;
-                    requestDirectoryList();
+                    updateDirectoryList();
                 }
                 break;
 

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="fill_parent"
+android:layout_height="fill_parent"
+android:orientation="horizontal" >
+
+    <!-- TODO: Might be nice to put a VLC icon -->
+<ImageView
+    android:layout_width="40dp"
+    android:layout_height="wrap_content"
+    android:id="@+id/wServerSelect_PrettyUselessIcon"
+    android:src="@android:drawable/ic_menu_set_as" />
+
+    <TextView
+    android:layout_width="0dp"
+    android:layout_weight="1"
+    android:layout_height="fill_parent"
+    android:textAppearance="?android:attr/textAppearanceMedium"
+    android:text="@string/playlist_element_name_placeholder"
+    android:id="@+id/wServerSelect_ScannedServerAddress" />
+
+<ImageButton
+    android:id="@+id/wServerSelect_ScannedServerSelect"
+    android:layout_width="40dp"
+    android:layout_height="wrap_content"
+    android:contentDescription="@string/server_element_select_server_hint"
+    android:src="@android:drawable/ic_menu_send" />
+
+</LinearLayout>

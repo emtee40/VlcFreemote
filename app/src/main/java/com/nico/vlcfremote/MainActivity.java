@@ -21,31 +21,33 @@ import java.util.List;
 public class MainActivity extends ActionBarActivity
                             implements SeekBar.OnSeekBarChangeListener,
                                        VlcConnector.VlcConnectionCallback,
-                                       VlcConnector.VlcConnectionHandler {
+                                       VlcConnector.VlcConnectionHandler,
+                                       ServerSelectView.OnServerSelectedCallback {
 
     private VlcConnector vlc;
     private DirListingFragment dirlistView;
     private PlaylistFragment playlistView;
     private ServerSelectView serverSelectView;
+    private MainMenuNavigation mainMenu;
 
-    private class MainMenuNavigation extends FragmentPagerAdapter {
+    private class MainMenuNavigation extends FragmentPagerAdapter implements ViewPager.OnPageChangeListener {
 
         private final PlaylistFragment playlistView;
         private final DirListingFragment dirlistView;
         private final ServerSelectView serverSelectView;
+        private final ViewPager parentView;
 
-        public MainMenuNavigation(FragmentManager fm, PlaylistFragment playlistView, DirListingFragment dirlistView, ServerSelectView serverSelectView) {
+        public MainMenuNavigation(ViewPager view, FragmentManager fm, PlaylistFragment playlistView,
+                                   DirListingFragment dirlistView, ServerSelectView serverSelectView)
+        {
             super(fm);
+            this.parentView = view;
             this.playlistView = playlistView;
             this.dirlistView = dirlistView;
             this.serverSelectView = serverSelectView;
-        }
-
-        @Override
-        public void finishUpdate(ViewGroup vw) {
-            super.finishUpdate(vw);
-            Log.i("HOLA", "Update playlist NOW");
-            // TODO // playlistView.updatePlaylist();
+            
+            parentView.setAdapter(this);
+            parentView.setOnPageChangeListener(this);
         }
 
         @Override
@@ -70,8 +72,37 @@ public class MainActivity extends ActionBarActivity
 
         @Override
         public int getCount() {
-            return 2;
+            return 3;
         }
+
+        @Override public void onPageScrolled(int i, float v, int i2) {}
+        @Override public void onPageScrollStateChanged(int i) {}
+
+        @Override
+        public void onPageSelected(int i) {
+            Log.i("HOLA", "Update playlist NOW");
+            Log.i("HOLA", "Is playlist? " + String.valueOf(i));
+            Log.i("HOLA", "Is Dirlist? " + String.valueOf(i));
+            Log.i("HOLA", "Is serverlist? " + String.valueOf(i));
+            // TODO // playlistView.updatePlaylist();
+        }
+
+        public void jumpToServersPage() {
+            parentView.setCurrentItem(2, true);
+        }
+
+        public void jumpToPlaylistPage() {
+            parentView.setCurrentItem(1, true);
+        }
+    }
+
+    @Override
+    public void onNewServerSelected(String ip, String port, String password) {
+        Log.i("ASD", "Using new server " + "http://" + ip + ":" + port + "/");
+        this.vlc = new VlcConnector("http://" + ip + ":" + port + "/", password);
+        this.playlistView.updatePlaylist();
+        this.dirlistView.updateDirectoryList();
+        this.mainMenu.jumpToPlaylistPage();
     }
 
     @Override
@@ -79,13 +110,14 @@ public class MainActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
 
-        this.vlc = new VlcConnector("http://192.168.1.5:8080/", "qwepoi");
+        this.vlc = new VlcConnector("http://192.168.1.3:8080/", "qwepoi");
         this.playlistView = new PlaylistFragment();
         this.dirlistView = new DirListingFragment();
         this.serverSelectView = new ServerSelectView();
 
-        MainMenuNavigation tabCtrl = new MainMenuNavigation(getSupportFragmentManager(), playlistView, dirlistView, serverSelectView);
-        ((ViewPager) super.findViewById(R.id.wMainMenu)).setAdapter(tabCtrl);
+        this.mainMenu = new MainMenuNavigation(((ViewPager) super.findViewById(R.id.wMainMenu)),
+                                                getSupportFragmentManager(), playlistView, dirlistView, serverSelectView);
+
         ((SeekBar) findViewById(R.id.wPlayer_Volume)).setOnSeekBarChangeListener(this);
     }
 
@@ -148,6 +180,8 @@ public class MainActivity extends ActionBarActivity
         CharSequence msg = getResources().getString(R.string.status_vlc_wrong_password);
         Toast toast = Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG);
         toast.show();
+
+        mainMenu.jumpToServersPage();
     }
 
     @Override
@@ -155,6 +189,8 @@ public class MainActivity extends ActionBarActivity
         CharSequence msg = getResources().getString(R.string.status_vlc_cant_connect);
         Toast toast = Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG);
         toast.show();
+
+        mainMenu.jumpToServersPage();
     }
 
     @Override
