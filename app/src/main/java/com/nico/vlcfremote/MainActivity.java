@@ -134,8 +134,23 @@ public class MainActivity extends ActionBarActivity
         ((SeekBar) findViewById(R.id.wPlayer_Volume)).setOnSeekBarChangeListener(this);
         ((SeekBar) findViewById(R.id.wPlayer_PlayPosition)).setOnSeekBarChangeListener(this);
 
-        // TODO
-        vlc.updateStatus();
+        // Periodically update VLC
+        vlcStatusUpdateTimerHandler.postDelayed(vlcStatusUpdateTimer, 0);
+    }
+
+    android.os.Handler vlcStatusUpdateTimerHandler = new android.os.Handler();
+    Runnable vlcStatusUpdateTimer = new Runnable() {
+        @Override
+        public void run() {
+            vlc.updateStatus();
+            vlcStatusUpdateTimerHandler.postDelayed(this, 2000);
+        }
+    };
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        vlcStatusUpdateTimerHandler.removeCallbacks(vlcStatusUpdateTimer);
     }
 
     @Override
