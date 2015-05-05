@@ -106,7 +106,7 @@ public class MainActivity extends ActionBarActivity
         cfg.putString("VLC_Last_Server_Pass", password);
         cfg.apply();
 
-        this.vlc = new VlcConnector(ip, port, password);
+        this.vlc = new VlcConnector(this, ip, port, password);
         this.playlistView.updatePlaylist();
         this.dirlistView.updateDirectoryList();
         this.mainMenu.jumpToPlaylistPage();
@@ -121,7 +121,7 @@ public class MainActivity extends ActionBarActivity
         final String lastServer_IP = getPreferences(0).getString("VLC_Last_Server_IP", "localhost");
         final String lastServer_Port = getPreferences(0).getString("VLC_Last_Server_Port", "8080");
         final String lastServer_Pass = getPreferences(0).getString("VLC_Last_Server_Pass", "dummy_pass");
-        this.vlc = new VlcConnector(lastServer_IP, lastServer_Port, lastServer_Pass);
+        this.vlc = new VlcConnector(this, lastServer_IP, lastServer_Port, lastServer_Pass);
         Log.i("ASD", String.valueOf(this.vlc));
 
         this.playlistView = new PlaylistFragment();
@@ -134,7 +134,7 @@ public class MainActivity extends ActionBarActivity
         ((SeekBar) findViewById(R.id.wPlayer_Volume)).setOnSeekBarChangeListener(this);
 
         // TODO
-        vlc.getStatus(this);
+        vlc.updateStatus();
     }
 
     @Override
@@ -171,30 +171,45 @@ public class MainActivity extends ActionBarActivity
     }
 
     public void onPlayPosition_JumpBack(View view) {
-        getVlcConnector().playPosition_JumpRelative(-0.5);
+        getVlcConnector().playPosition_JumpRelative("-0.5");
     }
 
     public void onPlayPosition_JumpForward(View view) {
-        getVlcConnector().playPosition_JumpRelative(0.5);
+        getVlcConnector().playPosition_JumpRelative("+0.5");
     }
 
     @Override public void onStartTrackingTouch(SeekBar seekBar) {}
     @Override public void onStopTrackingTouch(SeekBar seekBar) {}
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        Log.i("======================", "Volume bar update: " + String.valueOf(progress));
         getVlcConnector().setVolume(progress);
     }
 
     @Override
-    public void Vlc_OnStatusUpdated(VlcConnector.VlcStatus stat) {
+    public void Vlc_OnStatusUpdated(final VlcConnector.VlcStatus stat) {
+        Log.i("AAAAAAAAAAAAAAA", String.valueOf(stat.volume));
         ((TextView) findViewById(R.id.wPlayer_CurrentlyPlaying)).setText("Current status: " + stat.state);
     }
 
-    // Handle VLC callbacks
-    @Override public void Vlc_OnAddedToPlaylistCallback(Integer addedMediaId) { this.Vlc_OnProgrammingError(); }
-    @Override public void Vlc_OnPlaylistFetched(List<VlcConnector.PlaylistEntry> contents) { this.Vlc_OnProgrammingError(); }
-    @Override public void Vlc_OnDirListingFetched(String requestedPath, List<VlcConnector.DirListEntry> contents) { this.Vlc_OnProgrammingError(); }
-    @Override public void Vlc_OnSelectDirIsInvalid(String requestedPath) { this.Vlc_OnProgrammingError(); }
+    @Override
+    public void Vlc_OnPlaylistFetched(final List<VlcConnector.PlaylistEntry> contents) {
+        this.playlistView.Vlc_OnPlaylistFetched(contents);
+    }
+
+    @Override public void Vlc_OnAddedToPlaylistCallback(final Integer addedMediaId) {
+        // TODO
+    }
+
+    @Override
+    public void Vlc_OnDirListingFetched(final String requestedPath, final List<VlcConnector.DirListEntry> contents) {
+        this.dirlistView.Vlc_OnDirListingFetched(requestedPath, contents);
+    }
+
+    @Override
+    public void Vlc_OnSelectDirIsInvalid(final String requestedPath) {
+        this.dirlistView.Vlc_OnSelectDirIsInvalid(requestedPath);
+    }
 
 
     @Override
@@ -225,13 +240,6 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void Vlc_OnInvalidResponseReceived(Throwable ex) {
         CharSequence msg = getResources().getString(R.string.status_invalid_vlc_response);
-        Toast toast = Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG);
-        toast.show();
-    }
-
-    @Override
-    public void Vlc_OnProgrammingError() {
-        CharSequence msg = getResources().getString(R.string.status_assertion_failed);
         Toast toast = Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG);
         toast.show();
     }

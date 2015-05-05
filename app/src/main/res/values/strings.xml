@@ -12,7 +12,6 @@
     <string name="playlist_element_name_placeholder">File name</string>
     <string name="playlist_element_duration_placeholder">Duration</string>
     <string name="playlist_element_remove_from_playlist">Remove from playlist</string>
-    <string name="status_assertion_failed">A programming error was found with this application, something may not work correctly. Sorry!</string>
     <string name="status_invalid_vlc_response">VLC sent a wrong XML document or a response that otherwise can\'t be understood.</string>
     <string name="stats_vlc_parser_internal_error">An internal error was found when trying to parse VLC\'s response. The application may be out of memory.</string>
     <string name="status_vlc_cant_connect">Couldn\'t connect to VLC. Please select a new server.</string>

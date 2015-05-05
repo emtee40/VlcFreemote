@@ -122,7 +122,8 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:id="@+id/wPlayer_Volume" />
+                    android:id="@+id/wPlayer_Volume"
+                    android:max="320" />
 
             </LinearLayout>
         </LinearLayout>

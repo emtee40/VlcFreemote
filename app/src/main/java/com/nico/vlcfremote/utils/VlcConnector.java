@@ -7,8 +7,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -18,23 +16,25 @@ import java.util.List;
 public class VlcConnector {
     private static final String ACTION_DIR_LIST = "requests/browse.xml?dir=";
     private static final String ACTION_GET_PLAYLIST = "requests/playlist.xml";
-    private static final String ACTION_ADD_TO_PLAYLIST = "requests/playlist.xml?command=in_enqueue&input=";
-    private static final String ACTION_TOGGLE_PLAY = "requests/playlist.xml?command=pl_pause";
-    private static final String ACTION_PLAY_NEXT = "requests/playlist.xml?command=pl_next";
-    private static final String ACTION_PLAY_PREVIOUS = "requests/playlist.xml?command=pl_previous";
-    private static final String ACTION_SET_VOLUME = "requests/playlist.xml?command=volume&val=";
+    private static final String ACTION_ADD_TO_PLAYLIST = "requests/status.xml?command=in_enqueue&input=";
+    private static final String ACTION_TOGGLE_PLAY = "requests/status.xml?command=pl_pause";
+    private static final String ACTION_PLAY_NEXT = "requests/status.xml?command=pl_next";
+    private static final String ACTION_PLAY_PREVIOUS = "requests/status.xml?command=pl_previous";
+    private static final String ACTION_SET_VOLUME = "requests/status.xml?command=volume&val=";
     private static final String ACTION_GET_STATUS = "requests/status.xml";
-    private static final String ACTION_PLAY_POSITION_JUMP = "requests/playlist.xml?command=seek&val=";
+    private static final String ACTION_PLAY_POSITION_JUMP = "requests/status.xml?command=seek&val=";
 
     final String urlBase;
     final String authStr;
     final HttpClient httpClient = new DefaultHttpClient();
+    private final VlcConnectionCallback callback;
 
-    public VlcConnector(final String ip, final String port, final String pass) {
-        this("http://" + ip + ":" + port + "/", pass);
+    public VlcConnector(final VlcConnectionCallback callback, final String ip, final String port, final String pass) {
+        this(callback, "http://" + ip + ":" + port + "/", pass);
     }
 
-    public VlcConnector(final String url, final String pass) {
+    public VlcConnector(final VlcConnectionCallback callback,final String url, final String pass) {
+        this.callback = callback;
         urlBase = url;
         authStr = "Basic " + Base64.encodeToString((":" + pass).getBytes(), Base64.DEFAULT);
     }
@@ -76,7 +76,6 @@ public class VlcConnector {
         void Vlc_OnConnectionFail();
         void Vlc_OnInternalError(final Throwable ex);
         void Vlc_OnInvalidResponseReceived(final Throwable ex);
-        void Vlc_OnProgrammingError();
     }
 
     public static interface VlcConnectionHandler {
@@ -121,15 +120,22 @@ public class VlcConnector {
         }).execute();
     }
 
-    public void setVolume(int progress) {
+    private boolean setVolume_InProgress = false;
+    public synchronized void setVolume(final int progress) {
+        if (setVolume_InProgress) return;
+        setVolume_InProgress = true;
+
         final HttpGet getOp = new HttpGet(urlBase + ACTION_SET_VOLUME + progress);
         getOp.addHeader("Authorization", authStr);
 
         new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
             @Override
-            public void onHttpConnectionFailure() { }
+            public void onHttpConnectionFailure() { setVolume_InProgress = false; }
             @Override
-            public void onHttpResponseReceived(int httpStatusCode, String msg) {            }
+            public void onHttpResponseReceived(int httpStatusCode, String msg) {
+                setVolume_InProgress = false;
+                // TODO: Forward to update state
+            }
         }).execute();
     }
 
@@ -137,7 +143,7 @@ public class VlcConnector {
     public static class VlcStatus {
         public int currentplid;
         public int length;
-        public int position; // TODO What's this?
+        public float position; // TODO What's this?
         public int volume;
         public int time;
         public float rate;
@@ -150,7 +156,7 @@ public class VlcConnector {
         public String state;
     }
 
-    public void getStatus(final VlcConnectionCallback callback) {
+    public void updateStatus() {
         final HttpGet getOp = new HttpGet(urlBase + ACTION_GET_STATUS);
         getOp.addHeader("Authorization", authStr);
 
@@ -159,7 +165,7 @@ public class VlcConnector {
             public void onHttpConnectionFailure() { callback.Vlc_OnConnectionFail(); }
             @Override
             public void onHttpResponseReceived(int httpStatusCode, String msg) {
-                if (!isHttpCodeValid(httpStatusCode, callback)) return;
+                if (!isHttpCodeValid(httpStatusCode)) return;
 
                 try {
                     VlcStatus stat = HttpUtils.parseXmlObjec(msg, new HttpUtils.XmlMogrifier<VlcStatus>(VlcStatus.class) {
@@ -173,7 +179,7 @@ public class VlcConnector {
                                     obj.length = Integer.parseInt(val);
                                     break;
                                 case "position":
-                                    obj.position = Integer.parseInt(val);
+                                    obj.position = Float.parseFloat(val);
                                     break;
                                 case "volume":
                                     obj.volume = Integer.parseInt(val);
@@ -221,8 +227,12 @@ public class VlcConnector {
     }
 
 
-    public void playPosition_JumpRelative(double jumpTime) {
-        HttpGet getOp = new HttpGet(urlBase + ACTION_PLAY_POSITION_JUMP + jumpTime + "%25"); // %25 == UrlEncode('%');
+    /**
+     * VLC time jump
+     * @param jumpPercent Percent to jump, including - or + (5 is not valid, +5 is)
+     */
+    public void playPosition_JumpRelative(final String jumpPercent) {
+        HttpGet getOp = new HttpGet(urlBase + ACTION_PLAY_POSITION_JUMP + jumpPercent + "%25"); // %25 == UrlEncode('%');
         getOp.addHeader("Authorization", authStr);
 
         new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
@@ -236,7 +246,7 @@ public class VlcConnector {
 
 
 
-    public void addToPlayList(final String uri, final VlcConnectionCallback callback) {
+    public void addToPlayList(final String uri) {
         final HttpGet getOp = new HttpGet(urlBase + ACTION_ADD_TO_PLAYLIST + uri);
         getOp.addHeader("Authorization", authStr);
 
@@ -247,7 +257,7 @@ public class VlcConnector {
             @Override
             public void onHttpResponseReceived(int httpStatusCode, String msg) {
                 Log.i("ASD", msg);
-                if (!isHttpCodeValid(httpStatusCode, callback)) return;
+                if (!isHttpCodeValid(httpStatusCode)) return;
 
                 try {
                     final List<PlaylistEntry> lst = parsePlaylistXml(msg);
@@ -271,7 +281,7 @@ public class VlcConnector {
         }).execute();
     }
 
-    public void getPlaylist(final VlcConnectionCallback callback) {
+    public void updatePlaylist() {
         final HttpGet getOp = new HttpGet(urlBase + ACTION_GET_PLAYLIST);
         getOp.addHeader("Authorization", authStr);
 
@@ -281,7 +291,7 @@ public class VlcConnector {
 
             @Override
             public void onHttpResponseReceived(int httpStatusCode, String msg) {
-                if (!isHttpCodeValid(httpStatusCode, callback)) return;
+                if (!isHttpCodeValid(httpStatusCode)) return;
 
                 try {
                     callback.Vlc_OnPlaylistFetched(parsePlaylistXml(msg));
@@ -294,7 +304,7 @@ public class VlcConnector {
         }).execute();
     }
 
-    public void getDirList(final String path, final VlcConnectionCallback callback) {
+    public void getDirList(final String path) {
         final HttpGet getOp = new HttpGet(urlBase + ACTION_DIR_LIST + path);
         getOp.addHeader("Authorization", authStr);
 
@@ -304,7 +314,7 @@ public class VlcConnector {
 
             @Override
             public void onHttpResponseReceived(int httpStatusCode, String msg) {
-                if (!isHttpCodeValid(httpStatusCode, callback)) return;
+                if (!isHttpCodeValid(httpStatusCode)) return;
 
                 try {
                     final List<DirListEntry> lst = HttpUtils.parseXmlList(msg, "element", new HttpUtils.XmlMogrifier<DirListEntry>(DirListEntry.class) {
@@ -348,7 +358,7 @@ public class VlcConnector {
         }).execute();
     }
 
-    private boolean isHttpCodeValid(int httpStatusCode, final VlcConnectionCallback callback){
+    private boolean isHttpCodeValid(int httpStatusCode){
         if (httpStatusCode == 401) {
             callback.Vlc_OnLoginIncorrect();
             return false;

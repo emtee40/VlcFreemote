@@ -82,22 +82,22 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
 
     public void updateDirectoryList() {
         ((TextView) getActivity().findViewById(R.id.wDirListing_CurrentPath)).setText(currentPath_display);
-        vlcConnection.getVlcConnector().getDirList(currentPath, this);
+        vlcConnection.getVlcConnector().getDirList(currentPath);
     }
 
-    @Override public void Vlc_OnDirListingFetched(String requestedPath, List<VlcConnector.DirListEntry> contents) {
+    public void Vlc_OnDirListingFetched(String requestedPath, List<VlcConnector.DirListEntry> contents) {
         final DirListEntry_ViewAdapter adapt = new DirListEntry_ViewAdapter(this, getActivity(), contents);
         // TODO: Clean & set adapt instead of new?
         ((ListView) getActivity().findViewById(R.id.wDirListing_List)).setAdapter(adapt);
         adapt.notifyDataSetChanged();
     }
 
-    @Override public void Vlc_OnSelectDirIsInvalid(String requestedPath) {
+    public void Vlc_OnSelectDirIsInvalid(String requestedPath) {
         currentPath = "~";
         currentPath_display = "Home directory";
     }
 
-    @Override public void Vlc_OnAddedToPlaylistCallback(Integer addedMediaId) {
+    public void Vlc_OnAddedToPlaylistCallback(Integer addedMediaId) {
         // TODO?
     }
 
@@ -108,7 +108,7 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
         switch (v.getId()) {
             case R.id.wDirListElement_Action:
                 if (item == null) throw new RuntimeException(DirListingFragment.class.getName() + " received a menu item with no tag");
-                vlcConnection.getVlcConnector().addToPlayList(item.path, this);
+                vlcConnection.getVlcConnector().addToPlayList(item.path);
                 break;
 
             case R.id.wDirListElement_Name:

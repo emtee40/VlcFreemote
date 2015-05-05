@@ -31,7 +31,7 @@ public class PlaylistFragment extends VlcActionFragment
     }
 
     public void updatePlaylist() {
-        vlcConnection.getVlcConnector().getPlaylist(this);
+        vlcConnection.getVlcConnector().updatePlaylist();
     }
 
     @Override
@@ -39,8 +39,7 @@ public class PlaylistFragment extends VlcActionFragment
 
     }
 
-    @Override
-    public void Vlc_OnPlaylistFetched(List<VlcConnector.PlaylistEntry> contents) {
+    public void Vlc_OnPlaylistFetched(final List<VlcConnector.PlaylistEntry> contents) {
         final PlaylistEntry_ViewAdapter adapt = new PlaylistEntry_ViewAdapter(this, getActivity(), contents);
         final ListView lst = (ListView) getActivity().findViewById(R.id.wPlaylist_List);
         // lst might be null if the user changes tabs at this point
