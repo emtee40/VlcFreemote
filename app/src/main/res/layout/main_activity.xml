@@ -57,12 +57,29 @@
                 android:onClick="onPlayPosition_JumpBack"
                 android:src="@android:drawable/ic_media_rew" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="@string/wPlayer_PlayPosition_CurrentPositionText"
+                android:id="@+id/wPlayer_PlayPosition_CurrentPositionText"
+                android:layout_gravity="center" />
+
             <SeekBar
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_gravity="center"
-                android:id="@+id/wPlayer_PlayPosition" />
+                android:id="@+id/wPlayer_PlayPosition"
+                android:max="100" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="@string/wPlayer_PlayPosition_CurrentPositionText"
+                android:id="@+id/wPlayer_PlayPosition_Length"
+                android:layout_gravity="center" />
 
             <ImageButton
                 android:id="@+id/wPlayer_PlayPosition_JumpForward"

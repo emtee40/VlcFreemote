@@ -182,23 +182,26 @@ public class MainActivity extends ActionBarActivity
     @Override public void onStopTrackingTouch(SeekBar seekBar) {}
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        Log.i("======================", "Volume bar update: " + String.valueOf(progress));
         getVlcConnector().setVolume(progress);
     }
 
     @Override
     public void Vlc_OnStatusUpdated(final VlcConnector.VlcStatus stat) {
-        Log.i("AAAAAAAAAAAAAAA", String.valueOf(stat.volume));
         ((TextView) findViewById(R.id.wPlayer_CurrentlyPlaying)).setText("Current status: " + stat.state);
+
+        ((SeekBar) findViewById(R.id.wPlayer_Volume)).setProgress(stat.volume);
+
+        ((SeekBar) findViewById(R.id.wPlayer_PlayPosition)).setProgress((int) (100*stat.position));
+        ((TextView) findViewById(R.id.wPlayer_PlayPosition_CurrentPositionText))
+                    .setText(String.format("%d:%02d", stat.time/60, stat.time%60));
+        ((TextView) findViewById(R.id.wPlayer_PlayPosition_Length))
+                .setText(String.format("%d:%02d", stat.length/60, stat.length%60));
+
     }
 
     @Override
     public void Vlc_OnPlaylistFetched(final List<VlcConnector.PlaylistEntry> contents) {
         this.playlistView.Vlc_OnPlaylistFetched(contents);
-    }
-
-    @Override public void Vlc_OnAddedToPlaylistCallback(final Integer addedMediaId) {
-        // TODO
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.nico.vlcfremote.utils;
 
 import android.util.Base64;
-import android.util.Log;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -59,14 +58,7 @@ public class VlcConnector {
         @Override public String getMessage() { return msg; }
     }
 
-    public static class InvalidMediaAddResponse extends Throwable {
-        final String msg;
-        public InvalidMediaAddResponse() { msg = "Expected to find added media in playlist, none found."; }
-        @Override public String getMessage() { return msg; }
-    }
-
     public static interface VlcConnectionCallback {
-        void Vlc_OnAddedToPlaylistCallback(Integer addedMediaId);
         void Vlc_OnPlaylistFetched(final List<PlaylistEntry> contents);
         void Vlc_OnDirListingFetched(final String requestedPath, final List<DirListEntry> contents);
         void Vlc_OnSelectDirIsInvalid(String path);
@@ -82,41 +74,46 @@ public class VlcConnector {
         VlcConnector getVlcConnector();
     }
 
-
     public void togglePlay() {
-        final HttpGet getOp = new HttpGet(urlBase + ACTION_TOGGLE_PLAY);
-        getOp.addHeader("Authorization", authStr);
-
-        new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
-            @Override
-            public void onHttpConnectionFailure() { }
-            @Override
-            public void onHttpResponseReceived(int httpStatusCode, String msg) {            }
-        }).execute();
+        doSimpleCommand(ACTION_TOGGLE_PLAY);
     }
 
     public void playNext() {
-        final HttpGet getOp = new HttpGet(urlBase + ACTION_PLAY_NEXT);
-        getOp.addHeader("Authorization", authStr);
-
-        new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
-            @Override
-            public void onHttpConnectionFailure() { }
-            @Override
-            public void onHttpResponseReceived(int httpStatusCode, String msg) {            }
-        }).execute();
+        doSimpleCommand(ACTION_PLAY_NEXT);
     }
 
-
     public void playPrevious() {
-        final HttpGet getOp = new HttpGet(urlBase + ACTION_PLAY_PREVIOUS);
+        doSimpleCommand(ACTION_PLAY_PREVIOUS);
+    }
+
+    /**
+     * VLC time jump
+     * @param jumpPercent Percent to jump, including - or + (5 is not valid, +5 is)
+     */
+    public void playPosition_JumpRelative(final String jumpPercent) {
+        doSimpleCommand(ACTION_PLAY_POSITION_JUMP + jumpPercent + "%25"); // %25 == UrlEncode('%');
+    }
+
+    public void updateStatus() {
+        doSimpleCommand(ACTION_GET_STATUS);
+    }
+
+    public void addToPlayList(final String uri) {
+        doSimpleCommand(ACTION_ADD_TO_PLAYLIST + uri);
+        /* TODO: Is there any point in having this callback? Maybe just update playlist + state
+        void Vlc_OnAddedToPlaylistCallback(Integer addedMediaId);
+        */
+    }
+
+    private void doSimpleCommand(final String action) {
+        final HttpGet getOp = new HttpGet(urlBase + action);
         getOp.addHeader("Authorization", authStr);
 
         new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
             @Override
             public void onHttpConnectionFailure() { }
             @Override
-            public void onHttpResponseReceived(int httpStatusCode, String msg) {            }
+            public void onHttpResponseReceived(int httpStatusCode, String msg) { processVlcStatus(httpStatusCode, msg); }
         }).execute();
     }
 
@@ -134,16 +131,15 @@ public class VlcConnector {
             @Override
             public void onHttpResponseReceived(int httpStatusCode, String msg) {
                 setVolume_InProgress = false;
-                // TODO: Forward to update state
+                processVlcStatus(httpStatusCode, msg);
             }
         }).execute();
     }
 
-
     public static class VlcStatus {
         public int currentplid;
         public int length;
-        public float position; // TODO What's this?
+        public float position; // Progress % of the current file
         public int volume;
         public int time;
         public float rate;
@@ -156,129 +152,65 @@ public class VlcConnector {
         public String state;
     }
 
-    public void updateStatus() {
-        final HttpGet getOp = new HttpGet(urlBase + ACTION_GET_STATUS);
-        getOp.addHeader("Authorization", authStr);
+    private void processVlcStatus(int httpStatusCode, String msg) {
+        if (!isHttpCodeValid(httpStatusCode)) return;
 
-        new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
-            @Override
-            public void onHttpConnectionFailure() { callback.Vlc_OnConnectionFail(); }
-            @Override
-            public void onHttpResponseReceived(int httpStatusCode, String msg) {
-                if (!isHttpCodeValid(httpStatusCode)) return;
-
-                try {
-                    VlcStatus stat = HttpUtils.parseXmlObjec(msg, new HttpUtils.XmlMogrifier<VlcStatus>(VlcStatus.class) {
-                        @Override
-                        void parseValue(VlcStatus obj, String key, String val) {
-                            switch (key) {
-                                case "currentplid":
-                                    obj.currentplid = Integer.parseInt(val);
-                                    break;
-                                case "length":
-                                    obj.length = Integer.parseInt(val);
-                                    break;
-                                case "position":
-                                    obj.position = Float.parseFloat(val);
-                                    break;
-                                case "volume":
-                                    obj.volume = Integer.parseInt(val);
-                                    break;
-                                case "time":
-                                    obj.time = Integer.parseInt(val);
-                                    break;
-                                case "rate":
-                                    obj.rate = Float.parseFloat(val);
-                                    break;
-                                case "audiodelay":
-                                    obj.audiodelay = Float.parseFloat(val);
-                                    break;
-                                case "subtitledelay":
-                                    obj.subtitledelay = Float.parseFloat(val);
-                                    break;
-                                case "repeat":
-                                    obj.repeat = Boolean.parseBoolean(val);
-                                    break;
-                                case "loop":
-                                    obj.loop = Boolean.parseBoolean(val);
-                                    break;
-                                case "random":
-                                    obj.random = Boolean.parseBoolean(val);
-                                    break;
-                                case "fullscreen":
-                                    obj.fullscreen = Boolean.parseBoolean(val);
-                                    break;
-                                case "state":
-                                    obj.state = val;
-                                    break;
-                                default:                /* Do nothing, we don't care about this tag */
-                            }
-                        }
-                    });
-
-                    callback.Vlc_OnStatusUpdated(stat);
-                } catch (HttpUtils.CantCreateXmlParser cantCreateXmlParser) {
-                    callback.Vlc_OnInternalError(cantCreateXmlParser);
-                } catch (HttpUtils.CantParseXmlResponse cantParseXmlResponse) {
-                    callback.Vlc_OnInvalidResponseReceived(cantParseXmlResponse);
-                }
-            }
-        }).execute();
-    }
-
-
-    /**
-     * VLC time jump
-     * @param jumpPercent Percent to jump, including - or + (5 is not valid, +5 is)
-     */
-    public void playPosition_JumpRelative(final String jumpPercent) {
-        HttpGet getOp = new HttpGet(urlBase + ACTION_PLAY_POSITION_JUMP + jumpPercent + "%25"); // %25 == UrlEncode('%');
-        getOp.addHeader("Authorization", authStr);
-
-        new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
-            @Override
-            public void onHttpConnectionFailure() { }
-            @Override
-            public void onHttpResponseReceived(int httpStatusCode, String msg) { }
-        }).execute();
-    }
-
-
-
-
-    public void addToPlayList(final String uri) {
-        final HttpGet getOp = new HttpGet(urlBase + ACTION_ADD_TO_PLAYLIST + uri);
-        getOp.addHeader("Authorization", authStr);
-
-        new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
-            @Override
-            public void onHttpConnectionFailure() { callback.Vlc_OnConnectionFail(); }
-
-            @Override
-            public void onHttpResponseReceived(int httpStatusCode, String msg) {
-                Log.i("ASD", msg);
-                if (!isHttpCodeValid(httpStatusCode)) return;
-
-                try {
-                    final List<PlaylistEntry> lst = parsePlaylistXml(msg);
-
-                    for (PlaylistEntry media : lst) {
-                        if (media.uri.equals(uri)) {
-                            callback.Vlc_OnAddedToPlaylistCallback(media.id);
-                            return;
-                        }
+        try {
+            VlcStatus stat = HttpUtils.parseXmlObjec(msg, new HttpUtils.XmlMogrifier<VlcStatus>(VlcStatus.class) {
+                @Override
+                void parseValue(VlcStatus obj, String key, String val) {
+                    switch (key) {
+                        case "currentplid":
+                            obj.currentplid = Integer.parseInt(val);
+                            break;
+                        case "length":
+                            obj.length = Integer.parseInt(val);
+                            break;
+                        case "position":
+                            obj.position = Float.parseFloat(val);
+                            break;
+                        case "volume":
+                            obj.volume = Integer.parseInt(val);
+                            break;
+                        case "time":
+                            obj.time = Integer.parseInt(val);
+                            break;
+                        case "rate":
+                            obj.rate = Float.parseFloat(val);
+                            break;
+                        case "audiodelay":
+                            obj.audiodelay = Float.parseFloat(val);
+                            break;
+                        case "subtitledelay":
+                            obj.subtitledelay = Float.parseFloat(val);
+                            break;
+                        case "repeat":
+                            obj.repeat = Boolean.parseBoolean(val);
+                            break;
+                        case "loop":
+                            obj.loop = Boolean.parseBoolean(val);
+                            break;
+                        case "random":
+                            obj.random = Boolean.parseBoolean(val);
+                            break;
+                        case "fullscreen":
+                            obj.fullscreen = Boolean.parseBoolean(val);
+                            break;
+                        case "state":
+                            obj.state = val;
+                            break;
+                        default:
+                                    /* Do nothing, we don't care about this tag */
                     }
-
-                    // If no media with eq uri is found, the add command must have somehow failed
-                    callback.Vlc_OnInvalidResponseReceived(new InvalidMediaAddResponse());
-
-                } catch (HttpUtils.CantParseXmlResponse ex) {
-                    callback.Vlc_OnInvalidResponseReceived(ex);
-                } catch (HttpUtils.CantCreateXmlParser ex) {
-                    callback.Vlc_OnInternalError(ex);
                 }
-            }
-        }).execute();
+            });
+
+            callback.Vlc_OnStatusUpdated(stat);
+        } catch (HttpUtils.CantCreateXmlParser cantCreateXmlParser) {
+            callback.Vlc_OnInternalError(cantCreateXmlParser);
+        } catch (HttpUtils.CantParseXmlResponse cantParseXmlResponse) {
+            callback.Vlc_OnInvalidResponseReceived(cantParseXmlResponse);
+        }
     }
 
     public void updatePlaylist() {
