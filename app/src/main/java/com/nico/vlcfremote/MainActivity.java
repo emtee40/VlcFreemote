@@ -132,6 +132,7 @@ public class MainActivity extends ActionBarActivity
                                                 getSupportFragmentManager(), playlistView, dirlistView, serverSelectView);
 
         ((SeekBar) findViewById(R.id.wPlayer_Volume)).setOnSeekBarChangeListener(this);
+        ((SeekBar) findViewById(R.id.wPlayer_PlayPosition)).setOnSeekBarChangeListener(this);
 
         // TODO
         vlc.updateStatus();
@@ -182,7 +183,18 @@ public class MainActivity extends ActionBarActivity
     @Override public void onStopTrackingTouch(SeekBar seekBar) {}
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        getVlcConnector().setVolume(progress);
+        if (!fromUser) return;
+
+        switch (seekBar.getId()) {
+            case R.id.wPlayer_PlayPosition:
+                getVlcConnector().playPosition_JumpToPercent(progress);
+                break;
+            case R.id.wPlayer_Volume:
+                getVlcConnector().setVolume(progress);
+                break;
+            default:
+                throw new RuntimeException(MainMenuNavigation.class.getName() + " received a progress event for a SeekBar which doesn't exist.");
+        }
     }
 
     @Override
@@ -191,11 +203,11 @@ public class MainActivity extends ActionBarActivity
 
         ((SeekBar) findViewById(R.id.wPlayer_Volume)).setProgress(stat.volume);
 
-        ((SeekBar) findViewById(R.id.wPlayer_PlayPosition)).setProgress((int) (100*stat.position));
+        ((SeekBar) findViewById(R.id.wPlayer_PlayPosition)).setProgress((int) (100 * stat.position));
         ((TextView) findViewById(R.id.wPlayer_PlayPosition_CurrentPositionText))
-                    .setText(String.format("%d:%02d", stat.time/60, stat.time%60));
+                    .setText(String.format("%d:%02d", stat.time / 60, stat.time % 60));
         ((TextView) findViewById(R.id.wPlayer_PlayPosition_Length))
-                .setText(String.format("%d:%02d", stat.length/60, stat.length%60));
+                .setText(String.format("%d:%02d", stat.length / 60, stat.length % 60));
 
     }
 

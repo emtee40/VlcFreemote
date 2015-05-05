@@ -1,6 +1,7 @@
 package com.nico.vlcfremote.utils;
 
 import android.util.Base64;
+import android.util.Log;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -22,6 +23,7 @@ public class VlcConnector {
     private static final String ACTION_SET_VOLUME = "requests/status.xml?command=volume&val=";
     private static final String ACTION_GET_STATUS = "requests/status.xml";
     private static final String ACTION_PLAY_POSITION_JUMP = "requests/status.xml?command=seek&val=";
+    private static final String URL_ENCODED_PERCENT = "%25";
 
     final String urlBase;
     final String authStr;
@@ -91,7 +93,33 @@ public class VlcConnector {
      * @param jumpPercent Percent to jump, including - or + (5 is not valid, +5 is)
      */
     public void playPosition_JumpRelative(final String jumpPercent) {
-        doSimpleCommand(ACTION_PLAY_POSITION_JUMP + jumpPercent + "%25"); // %25 == UrlEncode('%');
+        doSimpleCommand(ACTION_PLAY_POSITION_JUMP + jumpPercent + URL_ENCODED_PERCENT);
+    }
+
+    private boolean playPosition_JumpToPercent_InProgress = false;
+    public synchronized void playPosition_JumpToPercent(int position) {
+        if (playPosition_JumpToPercent_InProgress) return;
+        playPosition_JumpToPercent_InProgress = true;
+
+        doSimpleGuardedCommand(ACTION_PLAY_POSITION_JUMP + String.valueOf(position) + URL_ENCODED_PERCENT, new Runnable() {
+            @Override
+            public void run() {
+                playPosition_JumpToPercent_InProgress = false;
+            }
+        });
+    }
+
+    private boolean setVolume_InProgress = false;
+    public synchronized void setVolume(final int progress) {
+        if (setVolume_InProgress) return;
+        setVolume_InProgress = true;
+
+        doSimpleGuardedCommand(ACTION_SET_VOLUME + progress, new Runnable() {
+            @Override
+            public void run() {
+                setVolume_InProgress = false;
+            }
+        });
     }
 
     public void updateStatus() {
@@ -106,33 +134,18 @@ public class VlcConnector {
     }
 
     private void doSimpleCommand(final String action) {
+        doSimpleGuardedCommand(action, new Runnable() { @Override public void run() {}});
+    }
+
+    private void doSimpleGuardedCommand(final String action, final Runnable whenFinished) {
         final HttpGet getOp = new HttpGet(urlBase + action);
         getOp.addHeader("Authorization", authStr);
 
         new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
             @Override
-            public void onHttpConnectionFailure() { }
+            public void onHttpConnectionFailure() { whenFinished.run(); }
             @Override
-            public void onHttpResponseReceived(int httpStatusCode, String msg) { processVlcStatus(httpStatusCode, msg); }
-        }).execute();
-    }
-
-    private boolean setVolume_InProgress = false;
-    public synchronized void setVolume(final int progress) {
-        if (setVolume_InProgress) return;
-        setVolume_InProgress = true;
-
-        final HttpGet getOp = new HttpGet(urlBase + ACTION_SET_VOLUME + progress);
-        getOp.addHeader("Authorization", authStr);
-
-        new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
-            @Override
-            public void onHttpConnectionFailure() { setVolume_InProgress = false; }
-            @Override
-            public void onHttpResponseReceived(int httpStatusCode, String msg) {
-                setVolume_InProgress = false;
-                processVlcStatus(httpStatusCode, msg);
-            }
+            public void onHttpResponseReceived(int httpStatusCode, String msg) { processVlcStatus(httpStatusCode, msg); whenFinished.run(); }
         }).execute();
     }
 
