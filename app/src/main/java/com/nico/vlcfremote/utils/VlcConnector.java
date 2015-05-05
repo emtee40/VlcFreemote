@@ -69,6 +69,7 @@ public class VlcConnector {
         void Vlc_OnAddedToPlaylistCallback(Integer addedMediaId);
         void Vlc_OnPlaylistFetched(final List<PlaylistEntry> contents);
         void Vlc_OnDirListingFetched(final String requestedPath, final List<DirListEntry> contents);
+        void Vlc_OnStatusUpdated(VlcStatus stat);
 
         void Vlc_OnLoginIncorrect();
         void Vlc_OnConnectionFail();
@@ -132,17 +133,62 @@ public class VlcConnector {
     }
 
 
+    public static class VlcStatus {
+        public int currentplid;
+        public int length;
+        public int position; // TODO What's this?
+        public int volume;
+        public int time;
+        public float rate;
+        public float audiodelay;
+        public float subtitledelay;
+        public boolean repeat;
+        public boolean loop;
+        public boolean random;
+        public boolean fullscreen;
+        public String state;
+    }
 
-    public void getStatus() {
+    public void getStatus(final VlcConnectionCallback callback) {
         final HttpGet getOp = new HttpGet(urlBase + ACTION_GET_STATUS);
         getOp.addHeader("Authorization", authStr);
 
         new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
             @Override
-            public void onHttpConnectionFailure() { }
+            public void onHttpConnectionFailure() { callback.Vlc_OnConnectionFail(); }
             @Override
             public void onHttpResponseReceived(int httpStatusCode, String msg) {
-                Log.i("ASD", msg);
+                if (!isHttpCodeValid(httpStatusCode, callback)) return;
+
+                try {
+                    VlcStatus stat = HttpUtils.parseXmlObjec(msg, new HttpUtils.XmlMogrifier<VlcStatus>(VlcStatus.class) {
+                        @Override
+                        void parseValue(VlcStatus obj, String key, String val) {
+                            switch (key) {
+                                case "currentplid":     obj.currentplid = Integer.parseInt(val);        break;
+                                case "length":          obj.length = Integer.parseInt(val);             break;
+                                case "position":        obj.position = Integer.parseInt(val);           break;
+                                case "volume":          obj.volume = Integer.parseInt(val);             break;
+                                case "time":            obj.time = Integer.parseInt(val);               break;
+                                case "rate":            obj.rate = Float.parseFloat(val);               break;
+                                case "audiodelay":      obj.audiodelay = Float.parseFloat(val);         break;
+                                case "subtitledelay":   obj.subtitledelay = Float.parseFloat(val);      break;
+                                case "repeat":          obj.repeat = Boolean.parseBoolean(val);         break;
+                                case "loop":            obj.loop = Boolean.parseBoolean(val);           break;
+                                case "random":          obj.random = Boolean.parseBoolean(val);         break;
+                                case "fullscreen":      obj.fullscreen = Boolean.parseBoolean(val);     break;
+                                case "state":           obj.state = val;                                break;
+                                default:                /* Do nothing, we don't care about this tag */
+                            }
+                        }
+                    });
+
+                    callback.Vlc_OnStatusUpdated(stat);
+                } catch (HttpUtils.CantCreateXmlParser cantCreateXmlParser) {
+                    callback.Vlc_OnInternalError(cantCreateXmlParser);
+                } catch (HttpUtils.CantParseXmlResponse cantParseXmlResponse) {
+                    callback.Vlc_OnInvalidResponseReceived(cantParseXmlResponse);
+                }
             }
         }).execute();
     }

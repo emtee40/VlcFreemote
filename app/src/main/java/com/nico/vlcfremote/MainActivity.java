@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nico.vlcfremote.utils.VlcConnector;
@@ -131,6 +132,9 @@ public class MainActivity extends ActionBarActivity
                                                 getSupportFragmentManager(), playlistView, dirlistView, serverSelectView);
 
         ((SeekBar) findViewById(R.id.wPlayer_Volume)).setOnSeekBarChangeListener(this);
+
+        // TODO
+        vlc.getStatus(this);
     }
 
     @Override
@@ -181,11 +185,16 @@ public class MainActivity extends ActionBarActivity
         getVlcConnector().setVolume(progress);
     }
 
+    @Override
+    public void Vlc_OnStatusUpdated(VlcConnector.VlcStatus stat) {
+        ((TextView) findViewById(R.id.wPlayer_CurrentlyPlaying)).setText("Current status: " + stat.state);
+    }
 
     // Handle VLC callbacks
     @Override public void Vlc_OnAddedToPlaylistCallback(Integer addedMediaId) { this.Vlc_OnProgrammingError(); }
     @Override public void Vlc_OnPlaylistFetched(List<VlcConnector.PlaylistEntry> contents) { this.Vlc_OnProgrammingError(); }
     @Override public void Vlc_OnDirListingFetched(String requestedPath, List<VlcConnector.DirListEntry> contents) { this.Vlc_OnProgrammingError(); }
+
 
     @Override
     public void Vlc_OnLoginIncorrect() {

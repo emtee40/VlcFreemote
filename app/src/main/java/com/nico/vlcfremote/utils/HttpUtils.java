@@ -49,11 +49,7 @@ public class HttpUtils {
     }
 
     private static XmlPullParserFactory xmlParserFactory = null;
-    public static <T> List<T> parseXmlList(final String xmlMsg, final String interestingTag, XmlMogrifier<T> objDeserializer)
-                throws CantCreateXmlParser, CantParseXmlResponse
-    {
-        List<T> foundObjects = new ArrayList<>();
-
+    private static XmlPullParser createXmlParserFor(final String msg) throws CantCreateXmlParser {
         final XmlPullParser xpp;
         try {
             if (xmlParserFactory == null) xmlParserFactory = XmlPullParserFactory.newInstance();
@@ -61,10 +57,19 @@ public class HttpUtils {
             xpp = xmlParserFactory.newPullParser();
             if (xpp == null) throw new CantCreateXmlParser();
 
-            xpp.setInput( new StringReader(xmlMsg) );
+            xpp.setInput( new StringReader(msg) );
+            return xpp;
+
         } catch (XmlPullParserException e) {
             throw new CantCreateXmlParser();
         }
+    }
+
+    public static <T> List<T> parseXmlList(final String xmlMsg, final String interestingTag, XmlMogrifier<T> objDeserializer)
+                throws CantCreateXmlParser, CantParseXmlResponse
+    {
+        List<T> foundObjects = new ArrayList<>();
+        final XmlPullParser xpp = createXmlParserFor(xmlMsg);
 
         try {
             int eventType = xpp.getEventType();
@@ -86,6 +91,41 @@ public class HttpUtils {
         }
 
         return foundObjects;
+    }
+
+    public static <T> T parseXmlObjec(final String xmlMsg, XmlMogrifier<T> objDeserializer)
+            throws CantCreateXmlParser, CantParseXmlResponse
+    {
+        final XmlPullParser xpp = createXmlParserFor(xmlMsg);
+        objDeserializer.reset();
+
+        try {
+            int eventType = xpp.getEventType();
+            String currentTag = null;
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                switch (eventType) {
+                    case XmlPullParser.START_TAG:
+                        currentTag = xpp.getName();
+                        break;
+
+                    case XmlPullParser.TEXT:
+                        if (currentTag != null) {
+                            objDeserializer.parseValue(objDeserializer.getParsedObject(), currentTag, xpp.getText());
+                        }
+                        break;
+
+                    case XmlPullParser.END_TAG:
+                        currentTag = null;
+                        break;
+                }
+
+                eventType = xpp.next();
+            }
+        } catch (XmlPullParserException | IOException e) {
+            throw new CantParseXmlResponse();
+        }
+
+        return objDeserializer.getParsedObject();
     }
 
 

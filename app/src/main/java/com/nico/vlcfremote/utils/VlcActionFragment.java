@@ -39,6 +39,7 @@ public abstract class VlcActionFragment extends Fragment implements VlcConnector
     @Override public void Vlc_OnAddedToPlaylistCallback(Integer addedMediaId) { vlcDefaultCallback.Vlc_OnProgrammingError(); }
     @Override public void Vlc_OnDirListingFetched(String requestedPath, List<VlcConnector.DirListEntry> contents) { vlcDefaultCallback.Vlc_OnProgrammingError(); }
     @Override public void Vlc_OnPlaylistFetched(List<VlcConnector.PlaylistEntry> contents) { vlcDefaultCallback.Vlc_OnProgrammingError(); }
+    @Override public void Vlc_OnStatusUpdated(VlcConnector.VlcStatus stat){ vlcDefaultCallback.Vlc_OnProgrammingError(); }
 
     @Override public void Vlc_OnLoginIncorrect() { vlcDefaultCallback.Vlc_OnLoginIncorrect(); }
     @Override public void Vlc_OnConnectionFail() { vlcDefaultCallback.Vlc_OnConnectionFail(); }
