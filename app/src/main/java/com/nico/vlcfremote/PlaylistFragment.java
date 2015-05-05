@@ -97,7 +97,9 @@ public class PlaylistFragment extends VlcActionFragment
             holder.wPlaylistElement_Name.setOnClickListener(onClickCallback);
 
             holder.wPlaylistElement_Duration = (TextView)row.findViewById(R.id.wPlaylistElement_Duration);
-            holder.wPlaylistElement_Duration.setText(String.valueOf(holder.values.duration));
+            holder.wPlaylistElement_Duration.
+                    setText(String.format("%d:%02d", holder.values.duration / 60, holder.values.duration % 60));
+
             holder.wPlaylistElement_Duration.setTag(holder.values);
             holder.wPlaylistElement_Duration.setOnClickListener(onClickCallback);
 
