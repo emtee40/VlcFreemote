@@ -4,15 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    android:orientation="vertical"
-    android:weightSum="100">
+    android:orientation="vertical">
 
     <android.support.v4.view.ViewPager
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/wMainMenu"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="95">
+        android:layout_weight="1">
 
 
         <android.support.v4.view.PagerTitleStrip
@@ -32,45 +31,44 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_weight="5"
-        android:weightSum="100">
+        android:orientation="vertical">
 
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="Currently playing..."
+            android:text="@string/wPlayer_CurrentlyPlaying"
             android:id="@+id/wPlayer_CurrentlyPlaying"
-            android:layout_gravity="center_horizontal"
-            android:layout_weight="50" />
+            android:layout_gravity="center_horizontal" />
 
 
         <LinearLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_weight="50" >
+            android:orientation="horizontal"  >
 
             <ImageButton
                 android:id="@+id/wPlayer_PlayPosition_JumpBack"
                 android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
-                android:contentDescription="Jump 25 seconds back"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/wPlayer_PlayPosition_JumpBack"
                 android:onClick="onPlayPosition_JumpBack"
                 android:src="@android:drawable/ic_media_rew" />
 
             <SeekBar
-                android:layout_width="fill_parent"
-                android:layout_height="30dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_gravity="center"
                 android:id="@+id/wPlayer_PlayPosition" />
 
             <ImageButton
                 android:id="@+id/wPlayer_PlayPosition_JumpForward"
                 android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
-                android:contentDescription="Jump 25 seconds forward"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/wPlayer_PlayPosition_JumpForward"
                 android:onClick="onPlayPosition_JumpForward"
                 android:src="@android:drawable/ic_media_ff" />
 
@@ -80,14 +78,13 @@
             xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_weight="50" >
+            android:orientation="horizontal" >
 
             <ImageButton
                 android:id="@+id/wPlayer_BtnPrev"
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
-                android:contentDescription="Play previous"
+                android:contentDescription="@string/wPlayer_BtnPrev"
                 android:onClick="onPlayPreviousClick"
                 android:src="@android:drawable/ic_media_previous" />
 
@@ -95,7 +92,7 @@
                 android:id="@+id/wPlayer_BtnPlayPause"
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
-                android:contentDescription="Play"
+                android:contentDescription="@string/wPlayer_BtnPlayPause"
                 android:onClick="onPlayPauseClick"
                 android:src="@android:drawable/ic_media_play" />
 
@@ -103,32 +100,29 @@
                 android:id="@+id/wPlayer_BtnNext"
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
-                android:contentDescription="Play next"
+                android:contentDescription="@string/wPlayer_BtnNext"
                 android:onClick="onPlayNextClick"
                 android:src="@android:drawable/ic_media_next" />
 
             <LinearLayout
                 xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:context=".MainActivity"
-                android:orientation="vertical"
-                android:weightSum="1">
+                android:orientation="vertical">
 
                 <TextView
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="Volume"
+                    android:text="@string/wPlayer_Volume_Label"
                     android:id="@+id/wPlayer_Volume_Label"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_weight="0.1" />
+                    android:layout_gravity="center_horizontal" />
 
                 <SeekBar
                     android:layout_width="fill_parent"
-                    android:layout_height="0dp"
-                    android:id="@+id/wPlayer_Volume"
-                    android:layout_weight="0.4" />
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:id="@+id/wPlayer_Volume" />
 
             </LinearLayout>
         </LinearLayout>

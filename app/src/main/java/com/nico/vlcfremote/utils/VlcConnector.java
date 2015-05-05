@@ -30,6 +30,10 @@ public class VlcConnector {
     final String authStr;
     final HttpClient httpClient = new DefaultHttpClient();
 
+    public VlcConnector(final String ip, final String port, final String pass) {
+        this("http://" + ip + ":" + port + "/", pass);
+    }
+
     public VlcConnector(final String url, final String pass) {
         urlBase = url;
         authStr = "Basic " + Base64.encodeToString((":" + pass).getBytes(), Base64.DEFAULT);
@@ -169,6 +173,7 @@ public class VlcConnector {
 
             @Override
             public void onHttpResponseReceived(int httpStatusCode, String msg) {
+                Log.i("ASD", msg);
                 if (!isHttpCodeValid(httpStatusCode, callback)) return;
 
                 try {

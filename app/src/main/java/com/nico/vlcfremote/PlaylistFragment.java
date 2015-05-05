@@ -3,7 +3,6 @@ package com.nico.vlcfremote;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,8 +43,11 @@ public class PlaylistFragment extends VlcActionFragment
     public void Vlc_OnPlaylistFetched(List<VlcConnector.PlaylistEntry> contents) {
         final PlaylistEntry_ViewAdapter adapt = new PlaylistEntry_ViewAdapter(this, getActivity(), contents);
         final ListView lst = (ListView) getActivity().findViewById(R.id.wPlaylist_List);
-        lst.setAdapter(adapt);
-        ((ArrayAdapter) lst.getAdapter()).notifyDataSetChanged();
+        // lst might be null if the user changes tabs at this point
+        if (lst != null) {
+            lst.setAdapter(adapt);
+            ((ArrayAdapter) lst.getAdapter()).notifyDataSetChanged();
+        }
     }
 
     private static class PlaylistEntry_ViewAdapter extends ArrayAdapter<VlcConnector.PlaylistEntry> {

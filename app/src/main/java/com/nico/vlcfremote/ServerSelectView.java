@@ -1,30 +1,33 @@
 package com.nico.vlcfremote;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nico.vlcfremote.utils.NetworkingUtils;
-import com.nico.vlcfremote.utils.VlcConnector;
 
 import java.util.List;
 
 public class ServerSelectView extends Fragment implements View.OnClickListener {
+
+    private static final int DEFAULT_SERVER_SCAN_PORT = 8080;
 
     public interface OnServerSelectedCallback {
         void onNewServerSelected(final String ip, final String port, final String password);
@@ -35,9 +38,7 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View vw = inflater.inflate(R.layout.fragment_server_select, container, false);
-        vw.setOnClickListener(this);
-        return vw;
+        return inflater.inflate(R.layout.fragment_server_select, container, false);
     }
 
     @Override
@@ -61,8 +62,8 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
     public void onResume() {
         super.onResume();
 
-        ((Button)getActivity().findViewById(R.id.wServerSelect_ToggleServerScanning)).setOnClickListener(this);
-        ((Button)getActivity().findViewById(R.id.wServerSelect_CustomServerSet)).setOnClickListener(this);
+        getActivity().findViewById(R.id.wServerSelect_ToggleServerScanning).setOnClickListener(this);
+        getActivity().findViewById(R.id.wServerSelect_CustomServerSet).setOnClickListener(this);
 
         scanServers();
     }
@@ -94,30 +95,64 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
         }
 
         final ServerSelectView self = this;
-        this.scannerService = new NetworkingUtils.ServerScanner(interfaces, 8080, new NetworkingUtils.ServerScanner.Callback() {
+        this.scannerService = new NetworkingUtils.ServerScanner(interfaces, DEFAULT_SERVER_SCAN_PORT, new NetworkingUtils.ServerScanner.Callback() {
             @Override
             public void onServerDiscovered(List<String> ips) {
-                // TODO: assert(ips not null)
+                assert ips != null;
                 final Servers_ViewAdapter adapt = new Servers_ViewAdapter(self, getActivity(), ips);
                 final ListView lst = (ListView) getActivity().findViewById(R.id.wServerSelect_ScannedServersList);
-                lst.setAdapter(adapt);
-                ((ArrayAdapter) lst.getAdapter()).notifyDataSetChanged();
+                if (lst != null) {
+                    lst.setAdapter(adapt);
+                    ((ArrayAdapter) lst.getAdapter()).notifyDataSetChanged();
 
-                getActivity().findViewById(R.id.wServerSelect_ScanningServersIndicator).setVisibility(View.GONE);
-                getActivity().findViewById(R.id.wServerSelect_ScannedServersList).setVisibility(View.VISIBLE);
-                ((Button)getActivity().findViewById(R.id.wServerSelect_ToggleServerScanning)).setText(R.string.server_select_toggle_scanning_start);
+                    getActivity().findViewById(R.id.wServerSelect_ScanningServersIndicator).setVisibility(View.GONE);
+                    getActivity().findViewById(R.id.wServerSelect_ScannedServersList).setVisibility(View.VISIBLE);
+                    ((Button) getActivity().findViewById(R.id.wServerSelect_ToggleServerScanning)).setText(R.string.server_select_toggle_scanning_start);
+                }
             }
         });
         this.scannerService.execute();
     }
 
-    private void useCustomServer() {
-        // TODO
+    private void setNewServer(final String ip, final String port) {
+        final String savedPwd = getActivity().getPreferences(0).getString("VLC_" + ip + ":" + String.valueOf(port), "");
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(getString(R.string.server_select_request_password_dialog_title));
+        final EditText input = new EditText(getActivity());
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        input.setText(savedPwd);
+        builder.setView(input);
+
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                final String password = input.getText().toString();
+                SharedPreferences.Editor cfg = getActivity().getPreferences(0).edit();
+                cfg.putString("VLC_" + ip + ":" + String.valueOf(port), password);
+                cfg.apply();
+                onServerSelectCallback.onNewServerSelected(ip, port, password);
+            }
+        });
+
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
     }
 
-    private void useScannedServer(String ip) {
-        // TODO: Ask for PWD
-        onServerSelectCallback.onNewServerSelected(ip, "8080", "qwepoi");
+    private void useCustomServer() {
+        final String ip = ((EditText)getActivity().findViewById(R.id.wServerSelect_CustomServerIp)).getText().toString();
+        final String port = ((EditText)getActivity().findViewById(R.id.wServerSelect_CustomServerPort)).getText().toString();
+        setNewServer(ip, port);
+    }
+
+    private void useScannedServer(final String ip) {
+        setNewServer(ip, String.valueOf(DEFAULT_SERVER_SCAN_PORT));
     }
 
     @Override
@@ -129,11 +164,12 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
             case R.id.wServerSelect_ToggleServerScanning:
                 toggleServerScanning();
                 break;
+            case R.id.wServerSelect_ScannedServerAddress:
             case R.id.wServerSelect_ScannedServerSelect:
                 useScannedServer((String) v.getTag());
                 break;
             default:
-                // TODO: Assert
+                throw new RuntimeException(ServerSelectView.class.getName() + " received an event it doesn't know how to handle.");
         }
     }
 

@@ -1,5 +1,6 @@
 package com.nico.vlcfremote;
 
+import android.content.SharedPreferences;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -10,7 +11,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -56,18 +56,18 @@ public class MainActivity extends ActionBarActivity
                 case 0: return playlistView;
                 case 1: return dirlistView;
                 case 2: return serverSelectView;
+                default: throw new RuntimeException(MainMenuNavigation.class.getName() + " tried to select a page item which doesn't exist.");
             }
-            return null;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
             switch (position) {
-                case 0: return getString(R.string.main_menu_title_dir_listing);
-                case 1: return getString(R.string.main_menu_title_playlist);
+                case 0: return getString(R.string.main_menu_title_playlist);
+                case 1: return getString(R.string.main_menu_title_dir_listing);
                 case 2: return getString(R.string.main_menu_title_servers);
+                default: throw new RuntimeException(MainMenuNavigation.class.getName() + " tried to get a title for a page which doesn't exist.");
             }
-            return "ASDADS";
         }
 
         @Override
@@ -80,11 +80,12 @@ public class MainActivity extends ActionBarActivity
 
         @Override
         public void onPageSelected(int i) {
-            Log.i("HOLA", "Update playlist NOW");
-            Log.i("HOLA", "Is playlist? " + String.valueOf(i));
-            Log.i("HOLA", "Is Dirlist? " + String.valueOf(i));
-            Log.i("HOLA", "Is serverlist? " + String.valueOf(i));
-            // TODO // playlistView.updatePlaylist();
+            switch (i) {
+                case 0: playlistView.updatePlaylist(); return;
+                case 1: dirlistView.updateDirectoryList(); return;
+                case 2: serverSelectView.scanServers(); return;
+                default: throw new RuntimeException(MainMenuNavigation.class.getName() + " selected a page which doesn't exist.");
+            }
         }
 
         public void jumpToServersPage() {
@@ -92,14 +93,19 @@ public class MainActivity extends ActionBarActivity
         }
 
         public void jumpToPlaylistPage() {
-            parentView.setCurrentItem(1, true);
+            parentView.setCurrentItem(0, true);
         }
     }
 
     @Override
     public void onNewServerSelected(String ip, String port, String password) {
-        Log.i("ASD", "Using new server " + "http://" + ip + ":" + port + "/");
-        this.vlc = new VlcConnector("http://" + ip + ":" + port + "/", password);
+        SharedPreferences.Editor cfg = getPreferences(0).edit();
+        cfg.putString("VLC_Last_Server_IP", ip);
+        cfg.putString("VLC_Last_Server_Port", port);
+        cfg.putString("VLC_Last_Server_Pass", password);
+        cfg.apply();
+
+        this.vlc = new VlcConnector(ip, port, password);
         this.playlistView.updatePlaylist();
         this.dirlistView.updateDirectoryList();
         this.mainMenu.jumpToPlaylistPage();
@@ -110,7 +116,13 @@ public class MainActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
 
-        this.vlc = new VlcConnector("http://192.168.1.3:8080/", "qwepoi");
+        // Will connect to a dummy server first time and jump directly to the servers page
+        final String lastServer_IP = getPreferences(0).getString("VLC_Last_Server_IP", "localhost");
+        final String lastServer_Port = getPreferences(0).getString("VLC_Last_Server_Port", "8080");
+        final String lastServer_Pass = getPreferences(0).getString("VLC_Last_Server_Pass", "dummy_pass");
+        this.vlc = new VlcConnector(lastServer_IP, lastServer_Port, lastServer_Pass);
+        Log.i("ASD", String.valueOf(this.vlc));
+
         this.playlistView = new PlaylistFragment();
         this.dirlistView = new DirListingFragment();
         this.serverSelectView = new ServerSelectView();
