@@ -3,6 +3,7 @@ package com.nico.vlcfremote;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ public class PlaylistFragment extends VlcActionFragment
     @Override
     public void onResume() {
         super.onResume();
+        getActivity().findViewById(R.id.wPlaylist_Clear).setOnClickListener(this);
         updatePlaylist();
     }
 
@@ -36,6 +38,12 @@ public class PlaylistFragment extends VlcActionFragment
 
     @Override
     public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.wPlaylist_Clear:
+                vlcConnection.getVlcConnector().clearPlaylist();
+                return;
+        }
+
         VlcConnector.PlaylistEntry item = (VlcConnector.PlaylistEntry) v.getTag();
         if (item == null)
             throw new RuntimeException(PlaylistFragment.class.getName() + " received a click event for a view with no playlist item.");
@@ -54,8 +62,12 @@ public class PlaylistFragment extends VlcActionFragment
     }
 
     public void Vlc_OnPlaylistFetched(final List<VlcConnector.PlaylistEntry> contents) {
-        final PlaylistEntry_ViewAdapter adapt = new PlaylistEntry_ViewAdapter(this, getActivity(), contents);
-        final ListView lst = (ListView) getActivity().findViewById(R.id.wPlaylist_List);
+        // If there's no activity we're not being displayed, so it's better not to update the UI
+        final FragmentActivity activity = getActivity();
+        if (activity == null) return;
+
+        final PlaylistEntry_ViewAdapter adapt = new PlaylistEntry_ViewAdapter(this, activity, contents);
+        final ListView lst = (ListView) activity.findViewById(R.id.wPlaylist_List);
         // lst might be null if the user changes tabs at this point
         if (lst != null) {
             lst.setAdapter(adapt);

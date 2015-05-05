@@ -23,6 +23,7 @@ public class VlcConnector {
     private static final String ACTION_PLAY_PREVIOUS = "requests/status.xml?command=pl_previous";
     private static final String ACTION_SET_VOLUME = "requests/status.xml?command=volume&val=";
     private static final String ACTION_DELETE_FROM_PLAYLIST = "requests/status.xml?command=pl_delete&id=";
+    private static final String ACTION_CLEAR_PLAYLIST = "requests/status.xml?command=pl_empty";
     private static final String ACTION_GET_STATUS = "requests/status.xml";
     private static final String ACTION_PLAY_POSITION_JUMP = "requests/status.xml?command=seek&val=";
     private static final String URL_ENCODED_PERCENT = "%25";
@@ -96,6 +97,12 @@ public class VlcConnector {
 
     public void removeFromPlaylist(Integer id) {
         doSimpleCommand(ACTION_DELETE_FROM_PLAYLIST + String.valueOf(id));
+        updatePlaylist();
+    }
+
+    public void clearPlaylist() {
+        doSimpleCommand(ACTION_CLEAR_PLAYLIST);
+        updatePlaylist();
     }
 
     /**
@@ -138,10 +145,7 @@ public class VlcConnector {
 
     public void addToPlayList(final String uri) {
         doSimpleCommand(ACTION_ADD_TO_PLAYLIST + uri);
-        /* TODO: Is there any point in having this callback? Maybe just update playlist + state
-        to know if there are no playing media, then start playing
-        void Vlc_OnAddedToPlaylistCallback(Integer addedMediaId);
-        */
+        updatePlaylist();
     }
 
     private void doSimpleCommand(final String action) {

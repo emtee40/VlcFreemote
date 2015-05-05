@@ -3,6 +3,7 @@ package com.nico.vlcfremote;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,12 +35,12 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
         private static final int layoutResourceId = R.layout.fragment_dir_listing_list_element;
 
         final private List<VlcConnector.DirListEntry> items;
-        final private Context context;
+        final private LayoutInflater inflater;
         final private View.OnClickListener onClickCallback;
 
         public DirListEntry_ViewAdapter(View.OnClickListener onClickCallback, Context context, List<VlcConnector.DirListEntry> items) {
             super(context, layoutResourceId, items);
-            this.context = context;
+            this.inflater = ((Activity) context).getLayoutInflater();
             this.items = items;
             this.onClickCallback = onClickCallback;
         }
@@ -53,7 +54,6 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            LayoutInflater inflater = ((Activity) context).getLayoutInflater();
             View row = inflater.inflate(layoutResourceId, parent, false);
 
             Row holder = new Row();
@@ -81,14 +81,22 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
     String currentPath_display = "Home directory";
 
     public void updateDirectoryList() {
-        ((TextView) getActivity().findViewById(R.id.wDirListing_CurrentPath)).setText(currentPath_display);
+        // If there's no activity we're not being displayed, so it's better not to update the UI
+        final FragmentActivity activity = getActivity();
+        if (activity == null) return;
+
+        ((TextView) activity.findViewById(R.id.wDirListing_CurrentPath)).setText(currentPath_display);
         vlcConnection.getVlcConnector().getDirList(currentPath);
     }
 
     public void Vlc_OnDirListingFetched(String requestedPath, List<VlcConnector.DirListEntry> contents) {
-        final DirListEntry_ViewAdapter adapt = new DirListEntry_ViewAdapter(this, getActivity(), contents);
+        // If there's no activity we're not being displayed, so it's better not to update the UI
+        final FragmentActivity activity = getActivity();
+        if (activity == null) return;
+
+        final DirListEntry_ViewAdapter adapt = new DirListEntry_ViewAdapter(this, activity, contents);
         // TODO: Clean & set adapt instead of new?
-        ((ListView) getActivity().findViewById(R.id.wDirListing_List)).setAdapter(adapt);
+        ((ListView) activity.findViewById(R.id.wDirListing_List)).setAdapter(adapt);
         adapt.notifyDataSetChanged();
     }
 
