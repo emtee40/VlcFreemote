@@ -36,7 +36,21 @@ public class PlaylistFragment extends VlcActionFragment
 
     @Override
     public void onClick(View v) {
+        VlcConnector.PlaylistEntry item = (VlcConnector.PlaylistEntry) v.getTag();
+        if (item == null)
+            throw new RuntimeException(PlaylistFragment.class.getName() + " received a click event for a view with no playlist item.");
 
+        switch (v.getId()) {
+            case R.id.wPlaylistElement_Duration:
+            case R.id.wPlaylistElement_Name:
+                vlcConnection.getVlcConnector().startPlaying(item.id);
+                break;
+            case R.id.wPlaylistElement_Remove:
+                vlcConnection.getVlcConnector().removeFromPlaylist(item.id);
+                break;
+            default:
+                throw new RuntimeException(PlaylistFragment.class.getName() + " received a click event for a view which doesn't exist.");
+        }
     }
 
     public void Vlc_OnPlaylistFetched(final List<VlcConnector.PlaylistEntry> contents) {
@@ -80,13 +94,15 @@ public class PlaylistFragment extends VlcActionFragment
             holder.wPlaylistElement_Name = (TextView)row.findViewById(R.id.wPlaylistElement_Name);
             holder.wPlaylistElement_Name.setText(holder.values.name);
             holder.wPlaylistElement_Name.setTag(holder.values);
+            holder.wPlaylistElement_Name.setOnClickListener(onClickCallback);
 
             holder.wPlaylistElement_Duration = (TextView)row.findViewById(R.id.wPlaylistElement_Duration);
             holder.wPlaylistElement_Duration.setText(String.valueOf(holder.values.duration));
             holder.wPlaylistElement_Duration.setTag(holder.values);
+            holder.wPlaylistElement_Duration.setOnClickListener(onClickCallback);
 
             holder.wPlaylistElement_Remove = (ImageButton)row.findViewById(R.id.wPlaylistElement_Remove);
-            holder.wPlaylistElement_Remove.setTag(String.valueOf(holder.values));
+            holder.wPlaylistElement_Remove.setTag(holder.values);
             holder.wPlaylistElement_Remove.setOnClickListener(onClickCallback);
 
             row.setTag(holder);

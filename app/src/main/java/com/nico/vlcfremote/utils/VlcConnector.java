@@ -18,9 +18,11 @@ public class VlcConnector {
     private static final String ACTION_GET_PLAYLIST = "requests/playlist.xml";
     private static final String ACTION_ADD_TO_PLAYLIST = "requests/status.xml?command=in_enqueue&input=";
     private static final String ACTION_TOGGLE_PLAY = "requests/status.xml?command=pl_pause";
+    private static final String ACTION_START_PLAYING = "requests/status.xml?command=pl_play&id=";
     private static final String ACTION_PLAY_NEXT = "requests/status.xml?command=pl_next";
     private static final String ACTION_PLAY_PREVIOUS = "requests/status.xml?command=pl_previous";
     private static final String ACTION_SET_VOLUME = "requests/status.xml?command=volume&val=";
+    private static final String ACTION_DELETE_FROM_PLAYLIST = "requests/status.xml?command=pl_delete&id=";
     private static final String ACTION_GET_STATUS = "requests/status.xml";
     private static final String ACTION_PLAY_POSITION_JUMP = "requests/status.xml?command=seek&val=";
     private static final String URL_ENCODED_PERCENT = "%25";
@@ -88,6 +90,14 @@ public class VlcConnector {
         doSimpleCommand(ACTION_PLAY_PREVIOUS);
     }
 
+    public void startPlaying(Integer id) {
+        doSimpleCommand(ACTION_START_PLAYING + String.valueOf(id));
+    }
+
+    public void removeFromPlaylist(Integer id) {
+        doSimpleCommand(ACTION_DELETE_FROM_PLAYLIST + String.valueOf(id));
+    }
+
     /**
      * VLC time jump
      * @param jumpPercent Percent to jump, including - or + (5 is not valid, +5 is)
@@ -129,6 +139,7 @@ public class VlcConnector {
     public void addToPlayList(final String uri) {
         doSimpleCommand(ACTION_ADD_TO_PLAYLIST + uri);
         /* TODO: Is there any point in having this callback? Maybe just update playlist + state
+        to know if there are no playing media, then start playing
         void Vlc_OnAddedToPlaylistCallback(Integer addedMediaId);
         */
     }
