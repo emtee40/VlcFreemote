@@ -77,8 +77,8 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
         }
     }
 
-    String currentPath = "/home/laptus";
-    String currentPath_display = "/home/laptus";
+    String currentPath = "~";
+    String currentPath_display = "Home directory";
 
     public void updateDirectoryList() {
         ((TextView) getActivity().findViewById(R.id.wDirListing_CurrentPath)).setText(currentPath_display);
@@ -92,6 +92,11 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
         adapt.notifyDataSetChanged();
     }
 
+    @Override public void Vlc_OnSelectDirIsInvalid(String requestedPath) {
+        currentPath = "~";
+        currentPath_display = "Home directory";
+    }
+
     @Override public void Vlc_OnAddedToPlaylistCallback(Integer addedMediaId) {
         // TODO?
     }
@@ -102,12 +107,12 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
 
         switch (v.getId()) {
             case R.id.wDirListElement_Action:
-                // Assert(item != null) TODO
+                if (item == null) throw new RuntimeException(DirListingFragment.class.getName() + " received a menu item with no tag");
                 vlcConnection.getVlcConnector().addToPlayList(item.path, this);
                 break;
 
             case R.id.wDirListElement_Name:
-                // Assert(item != null) TODO
+                if (item == null) throw new RuntimeException(DirListingFragment.class.getName() + " received a menu item with no tag");
                 if (item.isDirectory) {
                     currentPath = item.path;
                     currentPath_display = item.human_friendly_path;
@@ -116,7 +121,7 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
                 break;
 
             default:
-                // Assert(WTF) // TODO
+                throw new RuntimeException(DirListingFragment.class.getName() + " received a click event it can't handle.");
         }
     }
 }

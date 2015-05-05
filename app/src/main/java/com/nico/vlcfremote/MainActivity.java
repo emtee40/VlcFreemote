@@ -194,6 +194,7 @@ public class MainActivity extends ActionBarActivity
     @Override public void Vlc_OnAddedToPlaylistCallback(Integer addedMediaId) { this.Vlc_OnProgrammingError(); }
     @Override public void Vlc_OnPlaylistFetched(List<VlcConnector.PlaylistEntry> contents) { this.Vlc_OnProgrammingError(); }
     @Override public void Vlc_OnDirListingFetched(String requestedPath, List<VlcConnector.DirListEntry> contents) { this.Vlc_OnProgrammingError(); }
+    @Override public void Vlc_OnSelectDirIsInvalid(String requestedPath) { this.Vlc_OnProgrammingError(); }
 
 
     @Override
