@@ -113,6 +113,14 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        getSupportFragmentManager().putFragment(outState, PlaylistFragment.class.getName(), playlistView);
+        getSupportFragmentManager().putFragment(outState, DirListingFragment.class.getName(), dirlistView);
+        getSupportFragmentManager().putFragment(outState, ServerSelectView.class.getName(), serverSelectView);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
@@ -122,11 +130,18 @@ public class MainActivity extends ActionBarActivity
         final String lastServer_Port = getPreferences(0).getString("VLC_Last_Server_Port", "8080");
         final String lastServer_Pass = getPreferences(0).getString("VLC_Last_Server_Pass", "dummy_pass");
         this.vlc = new VlcConnector(this, lastServer_IP, lastServer_Port, lastServer_Pass);
-        Log.i("ASD", String.valueOf(this.vlc));
 
-        this.playlistView = new PlaylistFragment();
-        this.dirlistView = new DirListingFragment();
-        this.serverSelectView = new ServerSelectView();
+        // Create or restore all views
+        if (savedInstanceState != null) {
+            playlistView = (PlaylistFragment) getSupportFragmentManager().getFragment(savedInstanceState, PlaylistFragment.class.getName());
+            dirlistView = (DirListingFragment) getSupportFragmentManager().getFragment(savedInstanceState, DirListingFragment.class.getName());
+            serverSelectView = (ServerSelectView) getSupportFragmentManager().getFragment(savedInstanceState, ServerSelectView.class.getName());
+        }
+
+        if (this.playlistView == null) this.playlistView = new PlaylistFragment();
+        if (this.dirlistView == null) this.dirlistView = new DirListingFragment();
+        if (this.serverSelectView == null) this.serverSelectView = new ServerSelectView();
+
 
         this.mainMenu = new MainMenuNavigation(((ViewPager) super.findViewById(R.id.wMainMenu)),
                                                 getSupportFragmentManager(), playlistView, dirlistView, serverSelectView);
@@ -150,7 +165,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onPause() {
         super.onPause();
-        vlcStatusUpdateTimerHandler.removeCallbacks(vlcStatusUpdateTimer);
+        vlcStatusUpdateTimerHandler.removeCallbacks(vlcStatusUpdateTimer    );
     }
 
     @Override
