@@ -26,6 +26,40 @@
 
     </android.support.v4.view.ViewPager>
 
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+        android:id="@+id/wPlayer_ExtraOptions"
+        android:visibility="gone"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/wPlayer_ToggleFullscreen"
+            android:id="@+id/wPlayer_ToggleFullscreen"
+            android:onClick="onPlayer_ToggleFullscreen"
+            android:layout_gravity="center_horizontal" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/wPlayer_CycleAudioTrack"
+            android:id="@+id/wPlayer_CycleAudioTrack"
+            android:onClick="onPlayer_CycleAudioTrack"
+            android:layout_gravity="center_horizontal" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/wPlayer_CycleSubtitleTrack"
+            android:id="@+id/wPlayer_CycleSubtitleTrack"
+            android:onClick="onPlayer_CycleSubtitleTrack"
+            android:layout_gravity="center_horizontal" />
+
+     </LinearLayout>
+
 
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -88,6 +122,14 @@
                 android:contentDescription="@string/wPlayer_PlayPosition_JumpForward"
                 android:onClick="onPlayPosition_JumpForward"
                 android:src="@android:drawable/ic_media_ff" />
+
+            <ImageButton
+                android:id="@+id/wPlayer_ToggleMoreOptions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/wPlayer_ToggleMoreOptions"
+                android:onClick="wPlayer_ToggleMoreOptions"
+                android:src="@android:drawable/arrow_up_float" />
 
         </LinearLayout>
 

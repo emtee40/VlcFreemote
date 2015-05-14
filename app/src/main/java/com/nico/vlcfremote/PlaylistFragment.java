@@ -29,6 +29,7 @@ public class PlaylistFragment extends VlcActionFragment
     public void onResume() {
         super.onResume();
         getActivity().findViewById(R.id.wPlaylist_Clear).setOnClickListener(this);
+        getActivity().findViewById(R.id.wPlaylist_Refresh).setOnClickListener(this);
         updatePlaylist();
     }
 
@@ -41,6 +42,9 @@ public class PlaylistFragment extends VlcActionFragment
         switch (v.getId()) {
             case R.id.wPlaylist_Clear:
                 vlcConnection.getVlcConnector().clearPlaylist();
+                return;
+            case R.id.wPlaylist_Refresh:
+                vlcConnection.getVlcConnector().updatePlaylist();
                 return;
         }
 
@@ -109,8 +113,12 @@ public class PlaylistFragment extends VlcActionFragment
             holder.wPlaylistElement_Name.setOnClickListener(onClickCallback);
 
             holder.wPlaylistElement_Duration = (TextView)row.findViewById(R.id.wPlaylistElement_Duration);
-            holder.wPlaylistElement_Duration.
-                    setText(String.format("%d:%02d", holder.values.duration / 60, holder.values.duration % 60));
+            if (holder.values.duration >= 0) {
+                holder.wPlaylistElement_Duration.
+                        setText(String.format("%d:%02d", holder.values.duration / 60, holder.values.duration % 60));
+            } else {
+                holder.wPlaylistElement_Duration.setText(context.getString(R.string.playlist_item_duration_unknown));
+            }
 
             holder.wPlaylistElement_Duration.setTag(holder.values);
             holder.wPlaylistElement_Duration.setOnClickListener(onClickCallback);

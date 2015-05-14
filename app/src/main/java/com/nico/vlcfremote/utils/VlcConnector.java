@@ -12,7 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 
 // TODO
-// /usr/share$ vim doc/vlc/lua/http/requests/README.txt.gz
+// $ vim /usr/share/doc/vlc/lua/http/requests/README.txt.gz
 public class VlcConnector {
     private static final String ACTION_DIR_LIST = "requests/browse.xml?dir=";
     private static final String ACTION_GET_PLAYLIST = "requests/playlist.xml";
@@ -26,6 +26,7 @@ public class VlcConnector {
     private static final String ACTION_CLEAR_PLAYLIST = "requests/status.xml?command=pl_empty";
     private static final String ACTION_GET_STATUS = "requests/status.xml";
     private static final String ACTION_PLAY_POSITION_JUMP = "requests/status.xml?command=seek&val=";
+    private static final String ACTION_TOGGLE_FULLSCREEN = "requests/status.xml?command=fullscreen";
     private static final String URL_ENCODED_PERCENT = "%25";
 
     final String urlBase;
@@ -89,6 +90,10 @@ public class VlcConnector {
 
     public void playPrevious() {
         doSimpleCommand(ACTION_PLAY_PREVIOUS);
+    }
+
+    public void toggleFullscreen() {
+        doSimpleCommand(ACTION_TOGGLE_FULLSCREEN);
     }
 
     public void startPlaying(Integer id) {

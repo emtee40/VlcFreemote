@@ -184,6 +184,27 @@ public class MainActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
+    public void wPlayer_ToggleMoreOptions(View view) {
+        if (findViewById(R.id.wPlayer_ExtraOptions).getVisibility() == View.GONE) {
+            // TODO: Set image
+            findViewById(R.id.wPlayer_ExtraOptions).setVisibility(View.VISIBLE);
+        } else {
+            // TODO: Set image
+            findViewById(R.id.wPlayer_ExtraOptions).setVisibility(View.GONE);
+        }
+    }
+
+    public void onPlayer_ToggleFullscreen(View view) {
+        vlc.toggleFullscreen();
+    }
+
+    public void onPlayer_CycleAudioTrack(View view) {
+    }
+
+    public void onPlayer_CycleSubtitleTrack(View view) {
+    }
+
+
     @Override
     public VlcConnector getVlcConnector() {
         return vlc;
