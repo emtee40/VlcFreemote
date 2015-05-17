@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,9 +23,17 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import com.nico.vlcfremote.utils.NetworkingUtils;
 
+import java.io.IOException;
+import java.net.NetworkInterface;
 import java.util.List;
+import java.util.Properties;
+
 
 public class ServerSelectView extends Fragment implements View.OnClickListener {
 
@@ -98,7 +107,7 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
         activity.findViewById(R.id.wServerSelect_ScannedServersList).setVisibility(View.GONE);
         ((Button)activity.findViewById(R.id.wServerSelect_ToggleServerScanning)).setText(R.string.server_select_toggle_scanning_stop);
 
-        final List<String> interfaces = NetworkingUtils.getAddresses();
+        final List<String> interfaces = NetworkingUtils.getLocalIPAddresses();
         if (interfaces.size() == 0) {
             CharSequence msg = getResources().getString(R.string.status_no_network_detected);
             Toast toast = Toast.makeText(activity.getApplicationContext(), msg, Toast.LENGTH_LONG);
@@ -171,6 +180,32 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
     }
 
     private void useCustomServer() {
+        NetworkingUtils.SendSSHCommand cmd = new NetworkingUtils.SendSSHCommand("192.168.1.11", "laptus", "123", 22,
+                new NetworkingUtils.SendSSHCommand.Callback() {
+            @Override
+            public void onResponseReceived(String response) {
+                Log.i("Funciono!", response);
+            }
+
+            @Override
+            public void onConnectionFailure(JSchException e) {
+                Log.i("Connect fail", e.getCause() + "/" + e.getMessage());
+            }
+
+            @Override
+            public void onIOFailure(IOException e) {
+                Log.i("IO Fail", e.getMessage());
+            }
+
+            @Override
+            public void onExecFail(JSchException e) {
+                Log.i("Exec fail", e.getCause() + "/" + e.getMessage());
+            }
+        });
+        cmd.execute();
+
+
+        /*
         // If there's no activity we're not being displayed, so it's better not to update the UI
         final FragmentActivity activity = getActivity();
         if (activity == null) return;
@@ -178,6 +213,7 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
         final String ip = ((EditText)activity.findViewById(R.id.wServerSelect_CustomServerIp)).getText().toString();
         final String port = ((EditText)activity.findViewById(R.id.wServerSelect_CustomServerPort)).getText().toString();
         setNewServer(ip, port);
+        */
     }
 
     private void useScannedServer(final String ip) {
