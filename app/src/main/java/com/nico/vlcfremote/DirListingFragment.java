@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,7 +54,12 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            View row = inflater.inflate(layoutResourceId, parent, false);
+            final View row;
+            if (convertView == null) {
+                row = inflater.inflate(layoutResourceId, parent, false);
+            } else {
+                row = convertView;
+            }
 
             Row holder = new Row();
             holder.values = items.get(position);
@@ -93,7 +97,7 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
         activity.findViewById(R.id.wDirListing_LoadingIndicator).setVisibility(View.VISIBLE);
     }
 
-    public void Vlc_OnDirListingFetched(String requestedPath, List<VlcConnector.DirListEntry> contents) {
+    public void Vlc_OnDirListingFetched(List<VlcConnector.DirListEntry> contents) {
         // If there's no activity we're not being displayed, so it's better not to update the UI
         final FragmentActivity activity = getActivity();
         if (activity == null) return;
@@ -107,7 +111,7 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
         adapt.notifyDataSetChanged();
     }
 
-    public void Vlc_OnSelectDirIsInvalid(String requestedPath) {
+    public void Vlc_OnSelectDirIsInvalid() {
         currentPath = "~";
         currentPath_display = "Home directory";
     }

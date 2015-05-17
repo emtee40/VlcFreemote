@@ -103,8 +103,14 @@ public class PlaylistFragment extends VlcActionFragment
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            LayoutInflater inflater = ((Activity) context).getLayoutInflater();
-            View row = inflater.inflate(layoutResourceId, parent, false);
+
+            final View row;
+            if (convertView == null) {
+                LayoutInflater inflater = ((Activity) context).getLayoutInflater();
+                row = inflater.inflate(layoutResourceId, parent, false);
+            } else {
+                row = convertView;
+            }
 
             Row holder = new Row();
             holder.values = items.get(position);

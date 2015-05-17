@@ -78,7 +78,7 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
         if (activity == null) return;
 
         if (activity.findViewById(R.id.wServerSelect_ScanningServersIndicator).getVisibility() == View.GONE) {
-            // No scanning ongoing, stat one
+            // No scanning ongoing, start one
             scanServers();
         } else {
             // Currently scanning, we should cancel
@@ -224,8 +224,14 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            LayoutInflater inflater = ((Activity) context).getLayoutInflater();
-            View row = inflater.inflate(layoutResourceId, parent, false);
+
+            final View row;
+            if (convertView == null) {
+                LayoutInflater inflater = ((Activity) context).getLayoutInflater();
+                row = inflater.inflate(layoutResourceId, parent, false);
+            } else {
+                row = convertView;
+            }
 
             Row holder = new Row();
             holder.value = items.get(position);

@@ -1,15 +1,12 @@
 package com.nico.vlcfremote;
 
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -271,12 +268,12 @@ public class MainActivity extends FragmentActivity
 
     @Override
     public void Vlc_OnDirListingFetched(final String requestedPath, final List<VlcConnector.DirListEntry> contents) {
-        this.dirlistView.Vlc_OnDirListingFetched(requestedPath, contents);
+        this.dirlistView.Vlc_OnDirListingFetched(contents);
     }
 
     @Override
     public void Vlc_OnSelectDirIsInvalid(final String requestedPath) {
-        this.dirlistView.Vlc_OnSelectDirIsInvalid(requestedPath);
+        this.dirlistView.Vlc_OnSelectDirIsInvalid();
     }
 
 
