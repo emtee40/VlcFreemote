@@ -1,7 +1,9 @@
 package com.nico.vlcfremote;
 
+import android.app.Activity;
 import android.content.SharedPreferences;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -19,7 +21,7 @@ import com.nico.vlcfremote.utils.VlcConnector;
 
 import java.util.List;
 
-public class MainActivity extends ActionBarActivity
+public class MainActivity extends FragmentActivity
                             implements SeekBar.OnSeekBarChangeListener,
                                        VlcConnector.VlcConnectionCallback,
                                        VlcConnector.VlcConnectionHandler,
