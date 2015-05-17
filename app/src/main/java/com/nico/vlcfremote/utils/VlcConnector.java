@@ -33,6 +33,11 @@ public class VlcConnector {
     final String authStr;
     final HttpClient httpClient = new DefaultHttpClient();
     private final VlcConnectionCallback callback;
+    private VlcStatus lastKnownStatus;
+
+    public VlcStatus getLastKnownStatus() {
+        return lastKnownStatus;
+    }
 
     public VlcConnector(final VlcConnectionCallback callback, final String ip, final String port, final String pass) {
         this(callback, "http://" + ip + ":" + port + "/", pass);
@@ -183,6 +188,8 @@ public class VlcConnector {
         public boolean random;
         public boolean fullscreen;
         public String state;
+
+        public boolean isCurrentlyPlayingSomething() { return state.equalsIgnoreCase("playing"); }
     }
 
     private void processVlcStatus(int httpStatusCode, String msg) {
@@ -238,6 +245,7 @@ public class VlcConnector {
                 }
             });
 
+            this.lastKnownStatus = stat;
             callback.Vlc_OnStatusUpdated(stat);
         } catch (HttpUtils.CantCreateXmlParser cantCreateXmlParser) {
             callback.Vlc_OnInternalError(cantCreateXmlParser);

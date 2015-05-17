@@ -42,6 +42,7 @@ public class PlaylistFragment extends VlcActionFragment
         switch (v.getId()) {
             case R.id.wPlaylist_Clear:
                 vlcConnection.getVlcConnector().clearPlaylist();
+                vlcConnection.getVlcConnector().updatePlaylist();
                 return;
             case R.id.wPlaylist_Refresh:
                 vlcConnection.getVlcConnector().updatePlaylist();
@@ -59,6 +60,7 @@ public class PlaylistFragment extends VlcActionFragment
                 break;
             case R.id.wPlaylistElement_Remove:
                 vlcConnection.getVlcConnector().removeFromPlaylist(item.id);
+                vlcConnection.getVlcConnector().updatePlaylist();
                 break;
             default:
                 throw new RuntimeException(PlaylistFragment.class.getName() + " received a click event for a view which doesn't exist.");

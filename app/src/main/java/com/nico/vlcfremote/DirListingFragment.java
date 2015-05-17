@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -85,14 +86,20 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
         final FragmentActivity activity = getActivity();
         if (activity == null) return;
 
-        ((TextView) activity.findViewById(R.id.wDirListing_CurrentPath)).setText(currentPath_display);
         vlcConnection.getVlcConnector().getDirList(currentPath);
+        ((TextView) activity.findViewById(R.id.wDirListing_CurrentPath)).setText(currentPath_display);
+
+        activity.findViewById(R.id.wDirListing_List).setEnabled(false);
+        activity.findViewById(R.id.wDirListing_LoadingIndicator).setVisibility(View.VISIBLE);
     }
 
     public void Vlc_OnDirListingFetched(String requestedPath, List<VlcConnector.DirListEntry> contents) {
         // If there's no activity we're not being displayed, so it's better not to update the UI
         final FragmentActivity activity = getActivity();
         if (activity == null) return;
+
+        activity.findViewById(R.id.wDirListing_List).setEnabled(true);
+        activity.findViewById(R.id.wDirListing_LoadingIndicator).setVisibility(View.GONE);
 
         final DirListEntry_ViewAdapter adapt = new DirListEntry_ViewAdapter(this, activity, contents);
         // TODO: Clean & set adapt instead of new?
@@ -105,8 +112,12 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
         currentPath_display = "Home directory";
     }
 
-    public void Vlc_OnAddedToPlaylistCallback(Integer addedMediaId) {
-        // TODO?
+    private void addPathToPlaylist(final String path) {
+        vlcConnection.getVlcConnector().addToPlayList(path);
+        if (!vlcConnection.getVlcConnector().getLastKnownStatus().isCurrentlyPlayingSomething()) {
+            vlcConnection.getVlcConnector().togglePlay();
+        }
+        vlcConnection.getVlcConnector().updatePlaylist();
     }
 
     @Override
@@ -116,7 +127,7 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
         switch (v.getId()) {
             case R.id.wDirListElement_Action:
                 if (item == null) throw new RuntimeException(DirListingFragment.class.getName() + " received a menu item with no tag");
-                vlcConnection.getVlcConnector().addToPlayList(item.path);
+                addPathToPlaylist(item.path);
                 break;
 
             case R.id.wDirListElement_Name:
@@ -125,7 +136,10 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
                     currentPath = item.path;
                     currentPath_display = item.human_friendly_path;
                     updateDirectoryList();
+                } else {
+                    addPathToPlaylist(item.path);
                 }
+
                 break;
 
             default:
