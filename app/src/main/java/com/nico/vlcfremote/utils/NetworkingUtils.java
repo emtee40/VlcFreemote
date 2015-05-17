@@ -46,14 +46,22 @@ public class NetworkingUtils {
         return addresses;
     }
 
-    public static class ServerScanner extends AsyncTask<Void, Void, List<String>> {
+    static public class ScannedServer {
+        public String ip;
+        public Integer sshPort;
+        public Integer vlcPort;
+    }
+
+    public static class ServerScanner extends AsyncTask<Void, ScannedServer , List<ScannedServer>> {
         public interface Callback {
-            void onServerDiscovered(final List<String> ip);
+            void onServerDiscovered(final ScannedServer srv);
+            void onScanFinished(final List<ScannedServer> ip);
         }
 
         private final Callback callback;
         private final List<String> localIps;
-        private final int serverPort;
+        private final int vlcPort;
+        private final int sshPort;
 
         // A small scan timeout should be enough for LANs
         private static final int SERVER_SCAN_TIMEOUT = 10;
@@ -66,16 +74,51 @@ public class NetworkingUtils {
                         "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
 
 
-        public ServerScanner(List<String> localIps, int serverPort, Callback callback) {
+        public ServerScanner(List<String> localIps, int vlcPort, int sshPort, Callback callback) {
             this.callback = callback;
             this.localIps = localIps;
-            this.serverPort = serverPort;
+            this.vlcPort = vlcPort;
+            this.sshPort = sshPort;
             this.ip_pattern = Pattern.compile(IPADDRESS_PATTERN);
         }
 
+        private ScannedServer scanSshIpPort(final String ip, int sshPort) {
+            final SocketAddress address = new InetSocketAddress(ip, sshPort);
+            final Socket serverConn = new Socket();
+            try {
+                serverConn.connect(address, SERVER_SCAN_TIMEOUT);
+            } catch (IOException e) {
+                return null;
+            }
+
+            Log.d(ServerScanner.class.getName(), "There is an SSH server @ "  + ip + ":" + String.valueOf(sshPort));
+            ScannedServer srv = new ScannedServer();
+            srv.ip = ip;
+            srv.sshPort = sshPort;
+            srv.vlcPort = null;
+            return srv;
+        }
+
+        private ScannedServer scanIpPort(final String ip, int sshPort, int vlcPort) {
+            final SocketAddress address = new InetSocketAddress(ip, vlcPort);
+            final Socket serverConn = new Socket();
+            try {
+                serverConn.connect(address, SERVER_SCAN_TIMEOUT );
+            } catch (IOException e) {
+                return scanSshIpPort(ip, sshPort);
+            }
+
+            Log.d(ServerScanner.class.getName(), "There is a VLC server @ "  + ip + ":" + String.valueOf(vlcPort));
+            ScannedServer srv = new ScannedServer();
+            srv.ip = ip;
+            srv.vlcPort = vlcPort;
+            srv.sshPort = null;
+            return srv;
+        }
+
         @Override
-        protected List<String> doInBackground(Void... params) {
-            List<String> servers = new ArrayList<>();
+        protected List<ScannedServer> doInBackground(Void... params) {
+            List<ScannedServer> servers = new ArrayList<>();
 
             for (final String localIp : localIps) {
                 if (!ip_pattern.matcher(localIp).matches()) {
@@ -91,18 +134,11 @@ public class NetworkingUtils {
                     if (isCancelled()) break;
 
                     final String serverIp = subnet + String.valueOf(i);
-
-                    final SocketAddress address = new InetSocketAddress(serverIp, serverPort);
-                    final Socket serverConn = new Socket();
-                    try {
-                        serverConn.connect(address, SERVER_SCAN_TIMEOUT);
-                    } catch (IOException e) {
-                        // Log.d(ServerScanner.class.getName(), "No servers running @ "  + serverIp);
-                        continue;
+                    ScannedServer srv = scanIpPort(serverIp, sshPort, vlcPort);
+                    if (srv != null) {
+                        servers.add(srv);
+                        publishProgress(srv);
                     }
-
-                    Log.d(ServerScanner.class.getName(), "There is a server @ "  + serverIp);
-                    servers.add(serverIp);
                 }
             }
 
@@ -110,8 +146,16 @@ public class NetworkingUtils {
         }
 
         @Override
-        protected void onPostExecute(final List<String> discoveredServers) {
-            callback.onServerDiscovered(discoveredServers);
+        protected void onPostExecute(final List<ScannedServer> discoveredServers) {
+            callback.onScanFinished(discoveredServers);
+        }
+
+        @Override
+        protected void onProgressUpdate(ScannedServer... srvLst) {
+            for (ScannedServer srv : srvLst) {
+                if (srv == null) throw new RuntimeException("Bad programmer error: Found a null server, this shouldn't happen.");
+                callback.onServerDiscovered(srv);
+            }
         }
     }
 
@@ -127,11 +171,13 @@ public class NetworkingUtils {
 
         private final Callback callback;
         private Session session;
+        private final String cmd;
 
-        public SendSSHCommand(final String server, final String user,
+        public SendSSHCommand(final String cmd, final String server, final String user,
                              final String password, int serverPort, Callback callback)
         {
             this.callback = callback;
+            this.cmd = cmd;
 
             try {
                 session = (new JSch()).getSession(user, server, serverPort);
@@ -163,52 +209,51 @@ public class NetworkingUtils {
                 channel = session.openChannel("exec");
             } catch (JSchException e) {
                 callback.onConnectionFailure(e);
+                session.disconnect();
                 return null;
             }
 
-            ((ChannelExec)channel).setCommand("ls");
+            ((ChannelExec)channel).setCommand(cmd);
             channel.setInputStream(null);
-
-            final InputStream in;
-            try {
-                in = channel.getInputStream();
-            } catch (IOException e) {
-                callback.onIOFailure(e);
-                return null;
-            }
 
             try {
                 channel.connect();
             } catch (JSchException e) {
                 callback.onExecFail(e);
+                session.disconnect();
                 return null;
             }
 
+            String msg = "";
             try {
+                final InputStream in = channel.getInputStream();
                 byte[] tmp=new byte[1024];
+
                 while(true){
                     while(in.available()>0){
                         int i=in.read(tmp, 0, 1024);
                         if(i<0)break;
-                        Log.i("SSHTEST", "RECV: " + new String(tmp, 0, i));
+                        msg += new String(tmp, 0, i);
                     }
 
                     if(channel.isClosed()){
                         if(in.available()>0) continue;
-                        Log.i("SSHTEST", "FIN, retval = " + String.valueOf(channel.getExitStatus()));
+                        // Log.i("SSHTEST", "FIN, retval = " + String.valueOf(channel.getExitStatus()));
                         break;
                     }
-                    try{Thread.sleep(1000);}catch(Exception ee){}
                 }
 
             } catch (IOException e) {
-                Log.e("SSHTEST", "IO No pude leer resp: " + e.getMessage());
+                callback.onIOFailure(e);
+                channel.disconnect();
+                session.disconnect();
+                return null;
             }
 
             channel.disconnect();
             session.disconnect();
 
-            return "HOLA";
+            return msg;
         }
 
         @Override

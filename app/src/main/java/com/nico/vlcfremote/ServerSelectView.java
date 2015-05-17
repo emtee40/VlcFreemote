@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -23,27 +22,20 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
 import com.nico.vlcfremote.utils.NetworkingUtils;
-
-import java.io.IOException;
-import java.net.NetworkInterface;
 import java.util.List;
-import java.util.Properties;
 
 
 public class ServerSelectView extends Fragment implements View.OnClickListener {
 
-    private static final int DEFAULT_SERVER_SCAN_PORT = 8080;
+    private static final int DEFAULT_VLC_SERVER_SCAN_PORT = 8080;
+    private static final int DEFAULT_SSH_SERVER_SCAN_PORT = 22;
 
     public interface OnServerSelectedCallback {
         void onNewServerSelected(final String ip, final String port, final String password);
     }
 
-    private AsyncTask<Void, Void, List<String>> scannerService;
+    private NetworkingUtils.ServerScanner scannerService;
     private OnServerSelectedCallback onServerSelectCallback;
 
     @Override
@@ -116,10 +108,11 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
         }
 
         final ServerSelectView self = this;
-        this.scannerService = new NetworkingUtils.ServerScanner(interfaces, DEFAULT_SERVER_SCAN_PORT, new NetworkingUtils.ServerScanner.Callback() {
+        this.scannerService = new NetworkingUtils.ServerScanner(interfaces, DEFAULT_VLC_SERVER_SCAN_PORT, DEFAULT_SSH_SERVER_SCAN_PORT,
+                new NetworkingUtils.ServerScanner.Callback() {
             @Override
-            public void onServerDiscovered(List<String> ips) {
-                if (ips == null) throw new RuntimeException(ServerSelectView.class.getName() + " got null list of IPs.");
+            public void onScanFinished(List<NetworkingUtils.ScannedServer> ips) {
+                if (ips == null) throw new RuntimeException(ServerSelectView.class.getName() + " got null list of servers.");
 
                 // If there's no activity we're not being displayed, so it's better not to update the UI
                 final FragmentActivity activity = getActivity();
@@ -134,6 +127,16 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
                     activity.findViewById(R.id.wServerSelect_ScanningServersIndicator).setVisibility(View.GONE);
                     activity.findViewById(R.id.wServerSelect_ScannedServersList).setVisibility(View.VISIBLE);
                     ((Button) activity.findViewById(R.id.wServerSelect_ToggleServerScanning)).setText(R.string.server_select_toggle_scanning_start);
+                }
+            }
+
+            @Override
+            public void onServerDiscovered(NetworkingUtils.ScannedServer srv) {
+                // TODO: Add server in here instead of waiting for full list
+                if (srv.sshPort != null) {
+                    Log.i("ASDASDASD", "Found SSH server " + srv.ip);
+                } else {
+                    Log.i("ASDASDASD", "Found VLC server " + srv.ip);
                 }
             }
         });
@@ -180,32 +183,6 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
     }
 
     private void useCustomServer() {
-        NetworkingUtils.SendSSHCommand cmd = new NetworkingUtils.SendSSHCommand("192.168.1.11", "laptus", "123", 22,
-                new NetworkingUtils.SendSSHCommand.Callback() {
-            @Override
-            public void onResponseReceived(String response) {
-                Log.i("Funciono!", response);
-            }
-
-            @Override
-            public void onConnectionFailure(JSchException e) {
-                Log.i("Connect fail", e.getCause() + "/" + e.getMessage());
-            }
-
-            @Override
-            public void onIOFailure(IOException e) {
-                Log.i("IO Fail", e.getMessage());
-            }
-
-            @Override
-            public void onExecFail(JSchException e) {
-                Log.i("Exec fail", e.getCause() + "/" + e.getMessage());
-            }
-        });
-        cmd.execute();
-
-
-        /*
         // If there's no activity we're not being displayed, so it's better not to update the UI
         final FragmentActivity activity = getActivity();
         if (activity == null) return;
@@ -213,11 +190,42 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
         final String ip = ((EditText)activity.findViewById(R.id.wServerSelect_CustomServerIp)).getText().toString();
         final String port = ((EditText)activity.findViewById(R.id.wServerSelect_CustomServerPort)).getText().toString();
         setNewServer(ip, port);
-        */
     }
 
-    private void useScannedServer(final String ip) {
-        setNewServer(ip, String.valueOf(DEFAULT_SERVER_SCAN_PORT));
+    private void useScannedServer(final NetworkingUtils.ScannedServer srv) {
+        if (srv.vlcPort != null) {
+            setNewServer(srv.ip, String.valueOf(srv.vlcPort));
+        } else {
+            // TODO
+            Log.e("TAG", "Starting SSH servers not yet supported");
+            /*
+            final String START_VLC = "export DISPLAY=:0; vlc -f &";
+
+            NetworkingUtils.SendSSHCommand cmd = new NetworkingUtils.SendSSHCommand(START_VLC, "192.168.1.11", "laptus", "qwepoi", 22,
+                    new NetworkingUtils.SendSSHCommand.Callback() {
+                        @Override
+                        public void onResponseReceived(String response) {
+                            Log.i("Funciono!", response);
+                        }
+
+                        @Override
+                        public void onConnectionFailure(JSchException e) {
+                            Log.i("Connect fail", e.getCause() + "/" + e.getMessage());
+                        }
+
+                        @Override
+                        public void onIOFailure(IOException e) {
+                            Log.i("IO Fail", e.getMessage());
+                        }
+
+                        @Override
+                        public void onExecFail(JSchException e) {
+                            Log.i("Exec fail", e.getCause() + "/" + e.getMessage());
+                        }
+                    });
+            cmd.execute();
+            */
+        }
     }
 
     @Override
@@ -231,27 +239,27 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
                 break;
             case R.id.wServerSelect_ScannedServerAddress:
             case R.id.wServerSelect_ScannedServerSelect:
-                useScannedServer((String) v.getTag());
+                useScannedServer((NetworkingUtils.ScannedServer) v.getTag());
                 break;
             default:
                 throw new RuntimeException(ServerSelectView.class.getName() + " received an event it doesn't know how to handle.");
         }
     }
 
-    private static class Servers_ViewAdapter extends ArrayAdapter<String> {
-        private final List<String> items;
+    private static class Servers_ViewAdapter extends ArrayAdapter<NetworkingUtils.ScannedServer> {
+        private final List<NetworkingUtils.ScannedServer> items;
         private static final int layoutResourceId = R.layout.fragment_server_select_element;
         private final Context context;
         private final View.OnClickListener onClickCallback;
 
         public static class Row {
-            String value;
-            ImageView wServerSelect_PrettyUselessIcon;
+            NetworkingUtils.ScannedServer value;
+            ImageView wServerSelect_ServerTypeIcon;
             TextView wServerSelect_ScannedServerAddress;
             ImageButton wServerSelect_ScannedServerSelect;
         }
 
-        public Servers_ViewAdapter(View.OnClickListener onClickCallback, Context context, List<String> items) {
+        public Servers_ViewAdapter(View.OnClickListener onClickCallback, Context context, List<NetworkingUtils.ScannedServer> items) {
             super(context, layoutResourceId, items);
             this.context = context;
             this.items = items;
@@ -272,17 +280,21 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
             Row holder = new Row();
             holder.value = items.get(position);
 
-            holder.wServerSelect_PrettyUselessIcon = (ImageView)row.findViewById(R.id.wServerSelect_PrettyUselessIcon);
-            holder.wServerSelect_PrettyUselessIcon.setOnClickListener(onClickCallback);
-
+            holder.wServerSelect_ServerTypeIcon = (ImageView)row.findViewById(R.id.wServerSelect_ServerTypeIcon);
+            holder.wServerSelect_ServerTypeIcon.setOnClickListener(onClickCallback);
+            if (holder.value.vlcPort != null) {
+                holder.wServerSelect_ServerTypeIcon.setImageResource(R.mipmap.ic_vlc_icon);
+            } else {
+                holder.wServerSelect_ServerTypeIcon.setImageResource(R.mipmap.ic_tux_icon);
+            }
 
             holder.wServerSelect_ScannedServerAddress = (TextView)row.findViewById(R.id.wServerSelect_ScannedServerAddress);
-            holder.wServerSelect_ScannedServerAddress.setText(String.valueOf(holder.value));
+            holder.wServerSelect_ScannedServerAddress.setText(String.valueOf(holder.value.ip));
             holder.wServerSelect_ScannedServerAddress.setTag(holder.value);
             holder.wServerSelect_ScannedServerAddress.setOnClickListener(onClickCallback);
 
             holder.wServerSelect_ScannedServerSelect = (ImageButton)row.findViewById(R.id.wServerSelect_ScannedServerSelect);
-            holder.wServerSelect_ScannedServerSelect.setTag(String.valueOf(holder.value));
+            holder.wServerSelect_ScannedServerSelect.setTag(holder.value);
             holder.wServerSelect_ScannedServerSelect.setOnClickListener(onClickCallback);
 
             row.setTag(holder);
