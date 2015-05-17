@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
     android:orientation="vertical">
@@ -67,13 +68,34 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
+
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="@string/wPlayer_CurrentlyPlaying"
-            android:id="@+id/wPlayer_CurrentlyPlaying"
-            android:layout_gravity="center_horizontal" />
+            android:orientation="horizontal"  >
+
+            <ImageButton
+                android:id="@+id/wPlayer_ToggleMoreOptions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/wPlayer_ToggleMoreOptions"
+                android:onClick="wPlayer_ToggleMoreOptions"
+                android:src="@android:drawable/arrow_up_float"
+                android:layout_gravity="center"
+                android:background="?android:selectableItemBackground"
+                android:tint="@android:color/holo_blue_light" />
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="@string/wPlayer_CurrentlyPlaying"
+                android:id="@+id/wPlayer_CurrentlyPlaying"
+                android:layout_gravity="center_horizontal" />
+
+        </LinearLayout>
 
 
         <LinearLayout
@@ -89,7 +111,10 @@
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/wPlayer_PlayPosition_JumpBack"
                 android:onClick="onPlayPosition_JumpBack"
-                android:src="@android:drawable/ic_media_rew" />
+                android:src="@android:drawable/ic_media_rew"
+                android:layout_gravity="center"
+                android:background="?android:selectableItemBackground"
+                android:tint="@android:color/holo_blue_light" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -121,15 +146,10 @@
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/wPlayer_PlayPosition_JumpForward"
                 android:onClick="onPlayPosition_JumpForward"
-                android:src="@android:drawable/ic_media_ff" />
-
-            <ImageButton
-                android:id="@+id/wPlayer_ToggleMoreOptions"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/wPlayer_ToggleMoreOptions"
-                android:onClick="wPlayer_ToggleMoreOptions"
-                android:src="@android:drawable/arrow_up_float" />
+                android:src="@android:drawable/ic_media_ff"
+                android:layout_gravity="center"
+                android:background="?android:selectableItemBackground"
+                android:tint="@android:color/holo_blue_light" />
 
         </LinearLayout>
 
@@ -145,7 +165,10 @@
                 android:layout_height="fill_parent"
                 android:contentDescription="@string/wPlayer_BtnPrev"
                 android:onClick="onPlayPreviousClick"
-                android:src="@android:drawable/ic_media_previous" />
+                android:src="@android:drawable/ic_media_previous"
+                android:layout_gravity="center"
+                android:background="?android:selectableItemBackground"
+                android:tint="@android:color/holo_blue_light" />
 
             <ImageButton
                 android:id="@+id/wPlayer_BtnPlayPause"
@@ -153,7 +176,10 @@
                 android:layout_height="fill_parent"
                 android:contentDescription="@string/wPlayer_BtnPlayPause"
                 android:onClick="onPlayPauseClick"
-                android:src="@android:drawable/ic_media_play" />
+                android:src="@android:drawable/ic_media_play"
+                android:layout_gravity="center"
+                android:background="?android:selectableItemBackground"
+                android:tint="@android:color/holo_blue_light" />
 
             <ImageButton
                 android:id="@+id/wPlayer_BtnNext"
@@ -161,7 +187,10 @@
                 android:layout_height="fill_parent"
                 android:contentDescription="@string/wPlayer_BtnNext"
                 android:onClick="onPlayNextClick"
-                android:src="@android:drawable/ic_media_next" />
+                android:src="@android:drawable/ic_media_next"
+                android:layout_gravity="center"
+                android:background="?android:selectableItemBackground"
+                android:tint="@android:color/holo_blue_light"/>
 
             <LinearLayout
                 xmlns:android="http://schemas.android.com/apk/res/android"

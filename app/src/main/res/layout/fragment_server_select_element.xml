@@ -9,9 +9,9 @@ android:orientation="horizontal" >
     android:layout_width="40dp"
     android:layout_height="wrap_content"
     android:id="@+id/wServerSelect_PrettyUselessIcon"
-    android:src="@android:drawable/ic_menu_set_as" />
+    android:src="@mipmap/ic_vlc_icon" />
 
-    <TextView
+<TextView
     android:layout_width="0dp"
     android:layout_weight="1"
     android:layout_height="fill_parent"
@@ -24,6 +24,8 @@ android:orientation="horizontal" >
     android:layout_width="40dp"
     android:layout_height="wrap_content"
     android:contentDescription="@string/server_element_select_server_hint"
+    android:background="?android:selectableItemBackground"
+    android:tint="@android:color/holo_blue_light"
     android:src="@android:drawable/ic_menu_send" />
 
 </LinearLayout>

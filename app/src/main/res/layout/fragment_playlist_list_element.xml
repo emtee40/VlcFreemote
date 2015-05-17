@@ -28,6 +28,7 @@
         android:layout_height="fill_parent"
         android:contentDescription="@string/playlist_element_remove_from_playlist"
         android:src="@android:drawable/ic_menu_delete"
-        android:tint="#c80069ff" />
+        android:background="?android:selectableItemBackground"
+        android:tint="@android:color/holo_blue_light" />
 
 </LinearLayout>
