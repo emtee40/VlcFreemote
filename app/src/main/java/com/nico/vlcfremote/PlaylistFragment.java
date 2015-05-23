@@ -3,7 +3,6 @@ package com.nico.vlcfremote;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,10 +14,13 @@ import android.widget.TextView;
 import com.nico.vlcfremote.utils.VlcActionFragment;
 import com.nico.vlcfremote.utils.VlcConnector;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PlaylistFragment extends VlcActionFragment
                               implements View.OnClickListener {
+
+    private PlaylistEntry_ViewAdapter playlistViewAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -26,15 +28,30 @@ public class PlaylistFragment extends VlcActionFragment
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
         getActivity().findViewById(R.id.wPlaylist_Clear).setOnClickListener(this);
         getActivity().findViewById(R.id.wPlaylist_Refresh).setOnClickListener(this);
-        updatePlaylist();
+
+        playlistViewAdapter = new PlaylistEntry_ViewAdapter(this, getActivity());
+        ((ListView) getActivity().findViewById(R.id.wPlaylist_List)).setAdapter(playlistViewAdapter);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (getUserVisibleHint() && isAdded()) updatePlaylist();
     }
 
     public void updatePlaylist() {
+        playlistViewAdapter.clear();
         vlcConnection.getVlcConnector().updatePlaylist();
+    }
+
+    public void updateCurrentlyPlayingMedia(int currentplid) {
+        // TODO
     }
 
     @Override
@@ -68,21 +85,10 @@ public class PlaylistFragment extends VlcActionFragment
     }
 
     public void Vlc_OnPlaylistFetched(final List<VlcConnector.PlaylistEntry> contents) {
-        // If there's no activity we're not being displayed, so it's better not to update the UI
-        final FragmentActivity activity = getActivity();
-        if (activity == null) return;
-
-        final PlaylistEntry_ViewAdapter adapt = new PlaylistEntry_ViewAdapter(this, activity, contents);
-        final ListView lst = (ListView) activity.findViewById(R.id.wPlaylist_List);
-        // lst might be null if the user changes tabs at this point
-        if (lst != null) {
-            lst.setAdapter(adapt);
-            ((ArrayAdapter) lst.getAdapter()).notifyDataSetChanged();
-        }
+        playlistViewAdapter.addAll(contents);
     }
 
     private static class PlaylistEntry_ViewAdapter extends ArrayAdapter<VlcConnector.PlaylistEntry> {
-        private List<VlcConnector.PlaylistEntry> items;
         private static final int layoutResourceId = R.layout.fragment_playlist_list_element;
         private Context context;
         private final View.OnClickListener onClickCallback;
@@ -94,10 +100,9 @@ public class PlaylistFragment extends VlcActionFragment
             ImageButton wPlaylistElement_Remove;
         }
 
-        public PlaylistEntry_ViewAdapter(View.OnClickListener onClickCallback, Context context, List<VlcConnector.PlaylistEntry> items) {
-            super(context, layoutResourceId, items);
+        public PlaylistEntry_ViewAdapter(View.OnClickListener onClickCallback, Context context) {
+            super(context, layoutResourceId, new ArrayList<VlcConnector.PlaylistEntry>());
             this.context = context;
-            this.items = items;
             this.onClickCallback = onClickCallback;
         }
 
@@ -113,7 +118,7 @@ public class PlaylistFragment extends VlcActionFragment
             }
 
             Row holder = new Row();
-            holder.values = items.get(position);
+            holder.values = this.getItem(position);
 
             holder.wPlaylistElement_Name = (TextView)row.findViewById(R.id.wPlaylistElement_Name);
             holder.wPlaylistElement_Name.setText(holder.values.name);

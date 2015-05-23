@@ -23,8 +23,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.jcraft.jsch.JSchException;
 import com.nico.vlcfremote.utils.NetworkingUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -199,10 +201,9 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
         } else {
             // TODO
             Log.e("TAG", "Starting SSH servers not yet supported");
-            /*
             final String START_VLC = "export DISPLAY=:0; vlc -f &";
 
-            NetworkingUtils.SendSSHCommand cmd = new NetworkingUtils.SendSSHCommand(START_VLC, "192.168.1.11", "laptus", "qwepoi", 22,
+            NetworkingUtils.SendSSHCommand cmd = new NetworkingUtils.SendSSHCommand(START_VLC, srv.ip, "blaptus", "qwepoi", 22,
                     new NetworkingUtils.SendSSHCommand.Callback() {
                         @Override
                         public void onResponseReceived(String response) {
@@ -225,7 +226,6 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
                         }
                     });
             cmd.execute();
-            */
         }
     }
 

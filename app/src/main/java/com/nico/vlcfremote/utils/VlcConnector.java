@@ -125,30 +125,12 @@ public class VlcConnector {
         doSimpleCommand(ACTION_PLAY_POSITION_JUMP + jumpPercent + URL_ENCODED_PERCENT);
     }
 
-    private boolean playPosition_JumpToPercent_InProgress = false;
     public synchronized void playPosition_JumpToPercent(int position) {
-        if (playPosition_JumpToPercent_InProgress) return;
-        playPosition_JumpToPercent_InProgress = true;
-
-        doSimpleGuardedCommand(ACTION_PLAY_POSITION_JUMP + String.valueOf(position) + URL_ENCODED_PERCENT, new Runnable() {
-            @Override
-            public void run() {
-                playPosition_JumpToPercent_InProgress = false;
-            }
-        });
+        doSimpleCommand(ACTION_PLAY_POSITION_JUMP + String.valueOf(position) + URL_ENCODED_PERCENT);
     }
 
-    private boolean setVolume_InProgress = false;
     public synchronized void setVolume(final int progress) {
-        if (setVolume_InProgress) return;
-        setVolume_InProgress = true;
-
-        doSimpleGuardedCommand(ACTION_SET_VOLUME + progress, new Runnable() {
-            @Override
-            public void run() {
-                setVolume_InProgress = false;
-            }
-        });
+        doSimpleCommand(ACTION_SET_VOLUME + progress);
     }
 
     public void updateStatus() {
@@ -161,35 +143,22 @@ public class VlcConnector {
     }
 
     private void doSimpleCommand(final String action) {
-        Log.d("VLCFREEMOTE", "START simple command " + action);
-        doSimpleGuardedCommand(action, new Runnable() {
-            @Override
-            public void run() {
-            }
-        });
-        Log.d("VLCFREEMOTE", "SENT simple command " + action);
-    }
-
-    private synchronized void doSimpleGuardedCommand(final String action, final Runnable whenFinished) {
-        final HttpGet getOp = new HttpGet(urlBase + action);
-        getOp.addHeader("Authorization", authStr);
-
         if (requestInProgress) {
-            Log.d("VLCFREEMOTE", "New RQ denied!");
-            whenFinished.run();
+            // Usually, this will only be triggered when the user changes the volume or some other
+            // seek bar or element that generates a lot of events
             return;
         }
 
         requestInProgress = true;
+        final HttpGet getOp = new HttpGet(urlBase + action);
+        getOp.addHeader("Authorization", authStr);
         new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
             @Override
-            public void onHttpConnectionFailure() { requestInProgress = false; whenFinished.run(); }
+            public void onHttpConnectionFailure() { requestInProgress = false; }
             @Override
             public void onHttpResponseReceived(int httpStatusCode, String msg) {
-                Log.d("VLCFREEMOTE", "Simple command response received for action " + action);
                 requestInProgress = false;
                 processVlcStatus(httpStatusCode, msg);
-                whenFinished.run();
             }
         }).execute();
     }
