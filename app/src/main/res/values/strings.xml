@@ -45,4 +45,5 @@
     <string name="wPlayer_CycleAudioTrack">Cycle audio track</string>
     <string name="wPlayer_CycleSubtitleTrack">Cycle subtitle</string>
     <string name="dir_listing_default_folder_label">Home directory</string>
+    <string name="playlist_element_current_status">Status for this playlist item</string>
 </resources>

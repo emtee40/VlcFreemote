@@ -2,20 +2,28 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:weightSum="100"
     android:orientation="horizontal" >
+
+    <ImageButton
+        android:id="@+id/wPlaylistElement_CurrentStatus"
+        android:layout_width="35dp"
+        android:layout_height="fill_parent"
+        android:visibility="invisible"
+        android:contentDescription="@string/playlist_element_current_status"
+        android:src="@android:drawable/ic_media_play"
+        android:background="?android:selectableItemBackground"
+        android:tint="@android:color/holo_blue_light" />
 
     <TextView
         android:layout_width="0dp"
-        android:layout_weight="70"
+        android:layout_weight="1"
         android:layout_height="fill_parent"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/playlist_element_name_placeholder"
         android:id="@+id/wPlaylistElement_Name" />
 
     <TextView
-        android:layout_width="0dp"
-        android:layout_weight="15"
+        android:layout_width="50dp"
         android:layout_height="fill_parent"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/playlist_element_duration_placeholder"
@@ -23,8 +31,7 @@
 
     <ImageButton
         android:id="@+id/wPlaylistElement_Remove"
-        android:layout_width="0dp"
-        android:layout_weight="15"
+        android:layout_width="35dp"
         android:layout_height="fill_parent"
         android:contentDescription="@string/playlist_element_remove_from_playlist"
         android:src="@android:drawable/ic_menu_delete"

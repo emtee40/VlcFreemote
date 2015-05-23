@@ -7,6 +7,7 @@
     <ImageView
         android:layout_width="30dp"
         android:layout_height="fill_parent"
+        android:padding="4dp"
         android:id="@+id/wDirListElement_DirOrFile"
         android:contentDescription="@string/dir_listing_file_or_directory_icon"
         android:background="?android:selectableItemBackground"
