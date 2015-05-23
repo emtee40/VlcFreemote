@@ -253,10 +253,9 @@ public class MainActivity extends FragmentActivity
 
     @Override
     public void Vlc_OnStatusUpdated(final VlcConnector.VlcStatus stat) {
-        // TODO
-        this.playlistView.updateCurrentlyPlayingMedia(-1);
+        this.playlistView.updateCurrentlyPlayingMedia(stat.currentMedia_title);
 
-        ((TextView) findViewById(R.id.wPlayer_CurrentlyPlaying)).setText("Current status: " + stat.state);
+        ((TextView) findViewById(R.id.wPlayer_CurrentlyPlaying)).setText(stat.state + " - " + stat.currentMedia_title);
 
         ((SeekBar) findViewById(R.id.wPlayer_Volume)).setProgress(stat.volume);
 

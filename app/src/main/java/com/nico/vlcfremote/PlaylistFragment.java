@@ -47,8 +47,8 @@ public class PlaylistFragment extends VlcActionFragment
         vlcConnection.getVlcConnector().updatePlaylist();
     }
 
-    public void updateCurrentlyPlayingMedia(int currentplid) {
-        playlistViewAdapter.setCurrentPlayingMedia(currentplid);
+    public void updateCurrentlyPlayingMedia(String currentPlayingMediaTitle) {
+        playlistViewAdapter.setCurrentPlayingMedia(currentPlayingMediaTitle);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class PlaylistFragment extends VlcActionFragment
         private static final int layoutResourceId = R.layout.fragment_playlist_list_element;
         private Context context;
         private final View.OnClickListener onClickCallback;
-        private int currentPlayingMedia;
+        private String currentPlayingMediaTitle;
 
         public static class Row {
             VlcConnector.PlaylistEntry values;
@@ -104,18 +104,16 @@ public class PlaylistFragment extends VlcActionFragment
             super(context, layoutResourceId, new ArrayList<VlcConnector.PlaylistEntry>());
             this.context = context;
             this.onClickCallback = onClickCallback;
-            this.currentPlayingMedia = -1;
+            this.currentPlayingMediaTitle = null;
         }
 
-        public void setCurrentPlayingMedia(int currentPlayingMedia) {
-            Log.i("UPDATE STAT", String.valueOf(currentPlayingMedia));
-
-            if (this.currentPlayingMedia == currentPlayingMedia) {
+        public void setCurrentPlayingMedia(String currentPlayingMediaTitle) {
+            if (this.currentPlayingMediaTitle != null && currentPlayingMediaTitle.equals(this.currentPlayingMediaTitle)) {
                 // No need to update anything
                 return;
             }
 
-            this.currentPlayingMedia = currentPlayingMedia;
+            this.currentPlayingMediaTitle = currentPlayingMediaTitle;
             this.notifyDataSetChanged();
         }
 
@@ -138,10 +136,12 @@ public class PlaylistFragment extends VlcActionFragment
             holder.wPlaylistElement_CurrentStatus.setOnClickListener(onClickCallback);
 
 
-            Log.i("UPDATE STAT", String.valueOf(currentPlayingMedia) + " == " + holder.values.id);
+            Log.i("UPDATE STAT", String.valueOf(currentPlayingMediaTitle) + " == " + holder.values.id);
 
-            if (currentPlayingMedia == holder.values.id) {
+            if (currentPlayingMediaTitle != null && currentPlayingMediaTitle.equals(holder.values.name)) {
                 holder.wPlaylistElement_CurrentStatus.setVisibility(View.VISIBLE);
+            } else {
+                holder.wPlaylistElement_CurrentStatus.setVisibility(View.INVISIBLE);
             }
 
             holder.wPlaylistElement_Name = (TextView)row.findViewById(R.id.wPlaylistElement_Name);
