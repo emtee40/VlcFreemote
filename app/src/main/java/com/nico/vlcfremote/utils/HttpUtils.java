@@ -1,7 +1,6 @@
 package com.nico.vlcfremote.utils;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -69,8 +68,6 @@ public class HttpUtils {
     public static <T> List<T> parseXmlList(final String xmlMsg, final String interestingTag, XmlMogrifier<T> objDeserializer)
                 throws CantCreateXmlParser, CantParseXmlResponse
     {
-        Log.e("ASD", xmlMsg);
-
         List<T> foundObjects = new ArrayList<>();
         final XmlPullParser xpp = createXmlParserFor(xmlMsg);
 
@@ -99,23 +96,31 @@ public class HttpUtils {
     public static <T> T parseXmlObject(final String xmlMsg, XmlMogrifier<T> objDeserializer)
             throws CantCreateXmlParser, CantParseXmlResponse
     {
-        Log.e("ASD", xmlMsg);
-
         final XmlPullParser xpp = createXmlParserFor(xmlMsg);
         objDeserializer.reset();
 
         try {
-            int eventType = xpp.getEventType();
             String currentTag = null;
+            String currentMetaInfo = null;
+            int eventType = xpp.getEventType();
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 switch (eventType) {
                     case XmlPullParser.START_TAG:
                         currentTag = xpp.getName();
+                        currentMetaInfo = xpp.getAttributeValue(null, "name");
                         break;
 
                     case XmlPullParser.TEXT:
                         if (currentTag != null) {
-                            objDeserializer.parseValue(objDeserializer.getParsedObject(), currentTag, xpp.getText());
+
+                            // VLC returns a list of metadata for the current item being played with
+                            // the format <info name='$META_VAR'>$VALUE>, so instead of using the
+                            // name of the tag element, we need to use its first attribute
+                            if (currentMetaInfo != null) {
+                                objDeserializer.parseValue(objDeserializer.getParsedObject(), currentMetaInfo, xpp.getText());
+                            } else {
+                                objDeserializer.parseValue(objDeserializer.getParsedObject(), currentTag, xpp.getText());
+                            }
                         }
                         break;
 

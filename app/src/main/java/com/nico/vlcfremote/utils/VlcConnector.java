@@ -176,6 +176,12 @@ public class VlcConnector {
         public boolean random;
         public boolean fullscreen;
         public String state;
+        public String currentMedia_filename;
+        public String currentMedia_album;
+        public String currentMedia_title;
+        public String currentMedia_artist;
+        public int currentMedia_trackNumber;
+        public int currentMedia_tracksTotal;
 
         VlcStatus() { state = ""; }
 
@@ -226,8 +232,26 @@ public class VlcConnector {
                         case "state":
                             obj.state = val;
                             break;
+                        case "filename":
+                            obj.currentMedia_filename = val;
+                            break;
+                        case "album":
+                            obj.currentMedia_album = val;
+                            break;
+                        case "title":
+                            obj.currentMedia_title = val;
+                            break;
+                        case "artist":
+                            obj.currentMedia_artist = val;
+                            break;
+                        case "track_number":
+                            obj.currentMedia_trackNumber = Integer.parseInt(val);
+                            break;
+                        case "track_total":
+                            obj.currentMedia_tracksTotal = Integer.parseInt(val);
+                            break;
                         default:
-                                    /* Do nothing, we don't care about this tag */
+                            /* Do nothing, we don't care about this tag */
                     }
                 }
             });
