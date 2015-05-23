@@ -44,4 +44,5 @@
     <string name="wPlayer_ToggleFullscreen">Toggle Fullscreen</string>
     <string name="wPlayer_CycleAudioTrack">Cycle audio track</string>
     <string name="wPlayer_CycleSubtitleTrack">Cycle subtitle</string>
+    <string name="dir_listing_default_folder_label">Home directory</string>
 </resources>

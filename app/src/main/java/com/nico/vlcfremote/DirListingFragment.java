@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.nico.vlcfremote.utils.VlcActionFragment;
 import com.nico.vlcfremote.utils.VlcConnector;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DirListingFragment extends VlcActionFragment implements View.OnClickListener {
@@ -25,95 +26,54 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
         return inflater.inflate(R.layout.fragment_dir_listing, container, false);
     }
 
+    String currentPath = "~";
+    String currentPath_display = "Home directory";
+    DirListEntry_ViewAdapter dirViewAdapter;
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        dirViewAdapter = new DirListEntry_ViewAdapter(this, getActivity());
+        ((ListView) getActivity().findViewById(R.id.wDirListing_List)).setAdapter(dirViewAdapter);
+    }
+
     @Override
     public void onResume() {
         super.onResume();
-        updateDirectoryList();
+
+        // If we're visible and belong to an activity (?) do an update
+        if (getUserVisibleHint() && isAdded()) updateDirectoryList();
     }
-
-    private static class DirListEntry_ViewAdapter extends ArrayAdapter<VlcConnector.DirListEntry> {
-        private static final int layoutResourceId = R.layout.fragment_dir_listing_list_element;
-
-        final private List<VlcConnector.DirListEntry> items;
-        final private LayoutInflater inflater;
-        final private View.OnClickListener onClickCallback;
-
-        public DirListEntry_ViewAdapter(View.OnClickListener onClickCallback, Context context, List<VlcConnector.DirListEntry> items) {
-            super(context, layoutResourceId, items);
-            this.inflater = ((Activity) context).getLayoutInflater();
-            this.items = items;
-            this.onClickCallback = onClickCallback;
-        }
-
-        public static class Row {
-            VlcConnector.DirListEntry values;
-            ImageView dirOrFile;
-            TextView fName;
-            ImageButton actionButton;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            final View row;
-            if (convertView == null) {
-                row = inflater.inflate(layoutResourceId, parent, false);
-            } else {
-                row = convertView;
-            }
-
-            Row holder = new Row();
-            holder.values = items.get(position);
-
-            holder.dirOrFile = (ImageView)row.findViewById(R.id.wDirListElement_DirOrFile);
-            if (!holder.values.isDirectory) holder.dirOrFile.setVisibility(View.INVISIBLE);
-
-            holder.fName = (TextView)row.findViewById(R.id.wDirListElement_Name);
-            holder.fName.setText(holder.values.name);
-            holder.fName.setTag(holder.values);
-            holder.fName.setOnClickListener(onClickCallback);
-
-            holder.actionButton = (ImageButton)row.findViewById(R.id.wDirListElement_Action);
-            holder.actionButton.setTag(holder.values);
-            holder.actionButton.setOnClickListener(onClickCallback);
-
-            row.setTag(holder);
-
-            return row;
-        }
-    }
-
-    String currentPath = "~";
-    String currentPath_display = "Home directory";
 
     public void updateDirectoryList() {
         // If there's no activity we're not being displayed, so it's better not to update the UI
+        if (!isAdded()) return;
         final FragmentActivity activity = getActivity();
-        if (activity == null) return;
 
         vlcConnection.getVlcConnector().getDirList(currentPath);
         ((TextView) activity.findViewById(R.id.wDirListing_CurrentPath)).setText(currentPath_display);
 
+        dirViewAdapter.clear();
         activity.findViewById(R.id.wDirListing_List).setEnabled(false);
         activity.findViewById(R.id.wDirListing_LoadingIndicator).setVisibility(View.VISIBLE);
     }
 
     public void Vlc_OnDirListingFetched(List<VlcConnector.DirListEntry> contents) {
         // If there's no activity we're not being displayed, so it's better not to update the UI
+        if (!isAdded()) return;
         final FragmentActivity activity = getActivity();
-        if (activity == null) return;
 
         activity.findViewById(R.id.wDirListing_List).setEnabled(true);
         activity.findViewById(R.id.wDirListing_LoadingIndicator).setVisibility(View.GONE);
 
-        final DirListEntry_ViewAdapter adapt = new DirListEntry_ViewAdapter(this, activity, contents);
-        // TODO: Clean & set adapt instead of new?
-        ((ListView) activity.findViewById(R.id.wDirListing_List)).setAdapter(adapt);
-        adapt.notifyDataSetChanged();
+        dirViewAdapter.addAll(contents);
     }
 
     public void Vlc_OnSelectDirIsInvalid() {
+        // Is this Windows compatible? Who knows...
         currentPath = "~";
-        currentPath_display = "Home directory";
+        currentPath_display = getResources().getString(R.string.dir_listing_default_folder_label);
+        updateDirectoryList();
     }
 
     private void addPathToPlaylist(final String path) {
@@ -148,6 +108,55 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
 
             default:
                 throw new RuntimeException(DirListingFragment.class.getName() + " received a click event it can't handle.");
+        }
+    }
+
+    private static class DirListEntry_ViewAdapter extends ArrayAdapter<VlcConnector.DirListEntry> {
+        private static final int layoutResourceId = R.layout.fragment_dir_listing_list_element;
+
+        final private LayoutInflater inflater;
+        final private View.OnClickListener onClickCallback;
+
+        public DirListEntry_ViewAdapter(View.OnClickListener onClickCallback, Context context) {
+            super(context, layoutResourceId, new ArrayList<VlcConnector.DirListEntry>());
+            this.inflater = ((Activity) context).getLayoutInflater();
+            this.onClickCallback = onClickCallback;
+        }
+
+        public static class Row {
+            VlcConnector.DirListEntry values;
+            ImageView dirOrFile;
+            TextView fName;
+            ImageButton actionButton;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            final View row;
+            if (convertView == null) {
+                row = inflater.inflate(layoutResourceId, parent, false);
+            } else {
+                row = convertView;
+            }
+
+            Row holder = new Row();
+            holder.values = this.getItem(position);
+
+            holder.dirOrFile = (ImageView)row.findViewById(R.id.wDirListElement_DirOrFile);
+            if (!holder.values.isDirectory) holder.dirOrFile.setVisibility(View.INVISIBLE);
+
+            holder.fName = (TextView)row.findViewById(R.id.wDirListElement_Name);
+            holder.fName.setText(holder.values.name);
+            holder.fName.setTag(holder.values);
+            holder.fName.setOnClickListener(onClickCallback);
+
+            holder.actionButton = (ImageButton)row.findViewById(R.id.wDirListElement_Action);
+            holder.actionButton.setTag(holder.values);
+            holder.actionButton.setOnClickListener(onClickCallback);
+
+            row.setTag(holder);
+
+            return row;
         }
     }
 }
