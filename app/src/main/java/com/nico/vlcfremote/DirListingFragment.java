@@ -24,22 +24,18 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
     // Is this Windows compatible? Who knows...
     private static final String VLC_DEFAULT_START_PATH = "~";
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_dir_listing, container, false);
-    }
-
     String currentPath;
     String currentPath_display;
     DirListEntry_ViewAdapter dirViewAdapter;
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_dir_listing, container, false);
         dirViewAdapter = new DirListEntry_ViewAdapter(this, getActivity());
-        ((ListView) getActivity().findViewById(R.id.wDirListing_List)).setAdapter(dirViewAdapter);
+        ((ListView) v.findViewById(R.id.wDirListing_List)).setAdapter(dirViewAdapter);
         currentPath = VLC_DEFAULT_START_PATH;
         currentPath_display = getResources().getString(R.string.dir_listing_default_folder_label);
+        return v;
     }
 
     @Override

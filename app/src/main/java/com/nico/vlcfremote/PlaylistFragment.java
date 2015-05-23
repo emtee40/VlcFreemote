@@ -3,6 +3,7 @@ package com.nico.vlcfremote;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,18 +25,14 @@ public class PlaylistFragment extends VlcActionFragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_playlist, container, false);
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        getActivity().findViewById(R.id.wPlaylist_Clear).setOnClickListener(this);
-        getActivity().findViewById(R.id.wPlaylist_Refresh).setOnClickListener(this);
+        View v = inflater.inflate(R.layout.fragment_playlist, container, false);
 
         playlistViewAdapter = new PlaylistEntry_ViewAdapter(this, getActivity());
-        ((ListView) getActivity().findViewById(R.id.wPlaylist_List)).setAdapter(playlistViewAdapter);
+        v.findViewById(R.id.wPlaylist_Clear).setOnClickListener(this);
+        v.findViewById(R.id.wPlaylist_Refresh).setOnClickListener(this);
+        ((ListView) v.findViewById(R.id.wPlaylist_List)).setAdapter(playlistViewAdapter);
+
+        return v;
     }
 
     @Override
@@ -51,7 +48,7 @@ public class PlaylistFragment extends VlcActionFragment
     }
 
     public void updateCurrentlyPlayingMedia(int currentplid) {
-        // TODO
+        playlistViewAdapter.setCurrentPlayingMedia(currentplid);
     }
 
     @Override
@@ -71,6 +68,7 @@ public class PlaylistFragment extends VlcActionFragment
             throw new RuntimeException(PlaylistFragment.class.getName() + " received a click event for a view with no playlist item.");
 
         switch (v.getId()) {
+            case R.id.wPlaylistElement_CurrentStatus:
             case R.id.wPlaylistElement_Duration:
             case R.id.wPlaylistElement_Name:
                 vlcConnection.getVlcConnector().startPlaying(item.id);
@@ -92,9 +90,11 @@ public class PlaylistFragment extends VlcActionFragment
         private static final int layoutResourceId = R.layout.fragment_playlist_list_element;
         private Context context;
         private final View.OnClickListener onClickCallback;
+        private int currentPlayingMedia;
 
         public static class Row {
             VlcConnector.PlaylistEntry values;
+            ImageButton wPlaylistElement_CurrentStatus;
             TextView wPlaylistElement_Name;
             TextView wPlaylistElement_Duration;
             ImageButton wPlaylistElement_Remove;
@@ -104,6 +104,19 @@ public class PlaylistFragment extends VlcActionFragment
             super(context, layoutResourceId, new ArrayList<VlcConnector.PlaylistEntry>());
             this.context = context;
             this.onClickCallback = onClickCallback;
+            this.currentPlayingMedia = -1;
+        }
+
+        public void setCurrentPlayingMedia(int currentPlayingMedia) {
+            Log.i("UPDATE STAT", String.valueOf(currentPlayingMedia));
+
+            if (this.currentPlayingMedia == currentPlayingMedia) {
+                // No need to update anything
+                return;
+            }
+
+            this.currentPlayingMedia = currentPlayingMedia;
+            this.notifyDataSetChanged();
         }
 
         @Override
@@ -119,6 +132,17 @@ public class PlaylistFragment extends VlcActionFragment
 
             Row holder = new Row();
             holder.values = this.getItem(position);
+
+            holder.wPlaylistElement_CurrentStatus = (ImageButton)row.findViewById(R.id.wPlaylistElement_CurrentStatus);
+            holder.wPlaylistElement_CurrentStatus.setTag(holder.values);
+            holder.wPlaylistElement_CurrentStatus.setOnClickListener(onClickCallback);
+
+
+            Log.i("UPDATE STAT", String.valueOf(currentPlayingMedia) + " == " + holder.values.id);
+
+            if (currentPlayingMedia == holder.values.id) {
+                holder.wPlaylistElement_CurrentStatus.setVisibility(View.VISIBLE);
+            }
 
             holder.wPlaylistElement_Name = (TextView)row.findViewById(R.id.wPlaylistElement_Name);
             holder.wPlaylistElement_Name.setText(holder.values.name);

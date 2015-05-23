@@ -25,7 +25,15 @@ import java.util.regex.Pattern;
 
 public class NetworkingUtils {
 
+    private static final String IPADDRESS_PATTERN =
+            "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+                    "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+                    "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+                    "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
+
     public static List<String> getLocalIPAddresses() {
+        final Pattern ip_pattern = Pattern.compile(IPADDRESS_PATTERN);
+
         List<String> addresses = new ArrayList<>();
         final List<NetworkInterface> interfaces;
 
@@ -37,9 +45,17 @@ public class NetworkingUtils {
 
         for (NetworkInterface netInterface : interfaces) {
             for (InetAddress address : Collections.list(netInterface.getInetAddresses())) {
-                if (!address.isLoopbackAddress()) {
-                    addresses.add(address.getHostAddress().toUpperCase());
+                if (address.isLoopbackAddress()) {
+                    continue;
                 }
+
+                final String ip = address.getHostAddress().toUpperCase();
+                if (!ip_pattern.matcher(ip).matches()) {
+                    Log.w(ServerScanner.class.getName(), "IP " + ip + " is not of a supported type (IPv6?)");
+                    continue;
+                }
+
+                addresses.add(ip);
             }
         }
 
@@ -66,20 +82,14 @@ public class NetworkingUtils {
         // A small scan timeout should be enough for LANs
         private static final int SERVER_SCAN_TIMEOUT = 10;
 
-        private final Pattern ip_pattern;
-        private static final String IPADDRESS_PATTERN =
-                "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
-                        "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
-                        "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
-                        "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
-
-
+        /**
+         * @param localIps List of IPv4
+         */
         public ServerScanner(List<String> localIps, int vlcPort, int sshPort, Callback callback) {
             this.callback = callback;
             this.localIps = localIps;
             this.vlcPort = vlcPort;
             this.sshPort = sshPort;
-            this.ip_pattern = Pattern.compile(IPADDRESS_PATTERN);
         }
 
         private ScannedServer scanSshIpPort(final String ip, int sshPort) {
@@ -121,11 +131,6 @@ public class NetworkingUtils {
             List<ScannedServer> servers = new ArrayList<>();
 
             for (final String localIp : localIps) {
-                if (!ip_pattern.matcher(localIp).matches()) {
-                    Log.w(ServerScanner.class.getName(), "IP " + localIp + " is not of a supported type (IPv6?)");
-                    continue;
-                }
-
                 // This assumes a /24 is used: if that's not the case, we won't support it anyway
                 // as scanning would be too slow. Also, if the user is not using a /24 he's probably
                 // smart enough to manually enter his IP

@@ -1,6 +1,7 @@
 package com.nico.vlcfremote.utils;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -68,6 +69,8 @@ public class HttpUtils {
     public static <T> List<T> parseXmlList(final String xmlMsg, final String interestingTag, XmlMogrifier<T> objDeserializer)
                 throws CantCreateXmlParser, CantParseXmlResponse
     {
+        Log.e("ASD", xmlMsg);
+
         List<T> foundObjects = new ArrayList<>();
         final XmlPullParser xpp = createXmlParserFor(xmlMsg);
 
@@ -96,6 +99,8 @@ public class HttpUtils {
     public static <T> T parseXmlObject(final String xmlMsg, XmlMogrifier<T> objDeserializer)
             throws CantCreateXmlParser, CantParseXmlResponse
     {
+        Log.e("ASD", xmlMsg);
+
         final XmlPullParser xpp = createXmlParserFor(xmlMsg);
         objDeserializer.reset();
 

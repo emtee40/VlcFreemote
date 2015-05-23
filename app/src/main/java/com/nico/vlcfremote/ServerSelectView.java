@@ -46,17 +46,13 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_server_select, container, false);
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+        View v = inflater.inflate(R.layout.fragment_server_select, container, false);
         this.listViewAdapter = new Servers_ViewAdapter(this, getActivity());
-        ((ListView) getActivity().findViewById(R.id.wServerSelect_ScannedServersList)).setAdapter(listViewAdapter);
+        ((ListView) v.findViewById(R.id.wServerSelect_ScannedServersList)).setAdapter(listViewAdapter);
 
-        getActivity().findViewById(R.id.wServerSelect_ToggleServerScanning).setOnClickListener(this);
-        getActivity().findViewById(R.id.wServerSelect_CustomServerSet).setOnClickListener(this);
+        v.findViewById(R.id.wServerSelect_ToggleServerScanning).setOnClickListener(this);
+        v.findViewById(R.id.wServerSelect_CustomServerSet).setOnClickListener(this);
+        return v;
     }
 
     @Override
@@ -85,7 +81,6 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
         scanServers();
     }
 
-
     private void toggleServerScanning() {
         // If there's no activity we're not being displayed, so it's better not to update the UI
         if (!isAdded()) return;
@@ -96,7 +91,7 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
             scanServers();
         } else {
             // Currently scanning, we should cancel
-            this.scannerService.cancel(true);
+            if (this.scannerService != null) this.scannerService.cancel(true);
             activity.findViewById(R.id.wServerSelect_ScanningServersIndicator).setVisibility(View.GONE);
             ((Button)activity.findViewById(R.id.wServerSelect_ToggleServerScanning)).setText(R.string.server_select_toggle_scanning_start);
         }
@@ -115,6 +110,8 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
             CharSequence msg = getResources().getString(R.string.status_no_network_detected);
             Toast toast = Toast.makeText(activity.getApplicationContext(), msg, Toast.LENGTH_LONG);
             toast.show();
+            activity.findViewById(R.id.wServerSelect_ScanningServersIndicator).setVisibility(View.GONE);
+            ((Button) activity.findViewById(R.id.wServerSelect_ToggleServerScanning)).setText(R.string.server_select_toggle_scanning_start);
             return;
         }
 

@@ -164,7 +164,6 @@ public class VlcConnector {
     }
 
     public static class VlcStatus {
-        public int currentplid;
         public int length;
         public float position; // Progress % of the current file
         public int volume;
@@ -178,6 +177,8 @@ public class VlcConnector {
         public boolean fullscreen;
         public String state;
 
+        VlcStatus() { state = ""; }
+
         public boolean isCurrentlyPlayingSomething() { return state.equalsIgnoreCase("playing"); }
     }
 
@@ -189,9 +190,6 @@ public class VlcConnector {
                 @Override
                 void parseValue(VlcStatus obj, String key, String val) {
                     switch (key) {
-                        case "currentplid":
-                            obj.currentplid = Integer.parseInt(val);
-                            break;
                         case "length":
                             obj.length = Integer.parseInt(val);
                             break;
