@@ -57,16 +57,16 @@
         android:id="@+id/wServerSelect_ToggleServerScanning"
         android:layout_gravity="end" />
 
-    <ProgressBar
-        android:id="@+id/wServerSelect_ScanningServersIndicator"
-        android:layout_gravity="center"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/wServerSelect_ScannedServersList"
         android:layout_gravity="center_horizontal" />
+
+    <ProgressBar
+        android:id="@+id/wServerSelect_ScanningServersIndicator"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

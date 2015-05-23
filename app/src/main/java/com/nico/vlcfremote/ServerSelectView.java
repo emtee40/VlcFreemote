@@ -23,6 +23,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nico.vlcfremote.utils.NetworkingUtils;
+
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -37,10 +39,21 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
 
     private NetworkingUtils.ServerScanner scannerService;
     private OnServerSelectedCallback onServerSelectCallback;
+    private Servers_ViewAdapter listViewAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_server_select, container, false);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        this.listViewAdapter = new Servers_ViewAdapter(this, getActivity());
+        ((ListView) getActivity().findViewById(R.id.wServerSelect_ScannedServersList)).setAdapter(listViewAdapter);
+
+        getActivity().findViewById(R.id.wServerSelect_ToggleServerScanning).setOnClickListener(this);
+        getActivity().findViewById(R.id.wServerSelect_CustomServerSet).setOnClickListener(this);
     }
 
     @Override
@@ -64,19 +77,16 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
     public void onResume() {
         super.onResume();
 
-        // If there's no activity we're not being displayed, so it's better not to update the UI
-        final FragmentActivity activity = getActivity();
-        if (activity == null) return;
-        activity.findViewById(R.id.wServerSelect_ToggleServerScanning).setOnClickListener(this);
-        activity.findViewById(R.id.wServerSelect_CustomServerSet).setOnClickListener(this);
-
+        // If we're not visible, don't start scanning
+        if (!getUserVisibleHint()) return;
         scanServers();
     }
 
+
     private void toggleServerScanning() {
         // If there's no activity we're not being displayed, so it's better not to update the UI
+        if (!isAdded()) return;
         final FragmentActivity activity = getActivity();
-        if (activity == null) return;
 
         if (activity.findViewById(R.id.wServerSelect_ScanningServersIndicator).getVisibility() == View.GONE) {
             // No scanning ongoing, start one
@@ -85,18 +95,19 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
             // Currently scanning, we should cancel
             this.scannerService.cancel(true);
             activity.findViewById(R.id.wServerSelect_ScanningServersIndicator).setVisibility(View.GONE);
-            activity.findViewById(R.id.wServerSelect_ScannedServersList).setVisibility(View.VISIBLE);
             ((Button)activity.findViewById(R.id.wServerSelect_ToggleServerScanning)).setText(R.string.server_select_toggle_scanning_start);
         }
     }
 
-    synchronized void scanServers() {
+    synchronized public void scanServers() {
+        // TODO: Remove this
+        Log.e("ASDASDASDASDAS", "ScanServer RQ");
+
         // If there's no activity we're not being displayed, so it's better not to update the UI
+        if (!isAdded()) return;
         final FragmentActivity activity = getActivity();
-        if (activity == null) return;
 
         activity.findViewById(R.id.wServerSelect_ScanningServersIndicator).setVisibility(View.VISIBLE);
-        activity.findViewById(R.id.wServerSelect_ScannedServersList).setVisibility(View.GONE);
         ((Button)activity.findViewById(R.id.wServerSelect_ToggleServerScanning)).setText(R.string.server_select_toggle_scanning_stop);
 
         final List<String> interfaces = NetworkingUtils.getLocalIPAddresses();
@@ -107,37 +118,27 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
             return;
         }
 
-        final ServerSelectView self = this;
+        // Clean old servers list
+        this.listViewAdapter.clear();
+
         this.scannerService = new NetworkingUtils.ServerScanner(interfaces, DEFAULT_VLC_SERVER_SCAN_PORT, DEFAULT_SSH_SERVER_SCAN_PORT,
                 new NetworkingUtils.ServerScanner.Callback() {
+
+            @Override
+            public void onServerDiscovered(NetworkingUtils.ScannedServer srv) {
+                listViewAdapter.add(srv);
+            }
+
             @Override
             public void onScanFinished(List<NetworkingUtils.ScannedServer> ips) {
                 if (ips == null) throw new RuntimeException(ServerSelectView.class.getName() + " got null list of servers.");
 
                 // If there's no activity we're not being displayed, so it's better not to update the UI
+                if (!isAdded()) return;
                 final FragmentActivity activity = getActivity();
-                if (activity == null) return;
 
-                final Servers_ViewAdapter adapt = new Servers_ViewAdapter(self, activity, ips);
-                final ListView lst = (ListView) activity.findViewById(R.id.wServerSelect_ScannedServersList);
-                if (lst != null) {
-                    lst.setAdapter(adapt);
-                    ((ArrayAdapter) lst.getAdapter()).notifyDataSetChanged();
-
-                    activity.findViewById(R.id.wServerSelect_ScanningServersIndicator).setVisibility(View.GONE);
-                    activity.findViewById(R.id.wServerSelect_ScannedServersList).setVisibility(View.VISIBLE);
-                    ((Button) activity.findViewById(R.id.wServerSelect_ToggleServerScanning)).setText(R.string.server_select_toggle_scanning_start);
-                }
-            }
-
-            @Override
-            public void onServerDiscovered(NetworkingUtils.ScannedServer srv) {
-                // TODO: Add server in here instead of waiting for full list
-                if (srv.sshPort != null) {
-                    Log.i("ASDASDASD", "Found SSH server " + srv.ip);
-                } else {
-                    Log.i("ASDASDASD", "Found VLC server " + srv.ip);
-                }
+                activity.findViewById(R.id.wServerSelect_ScanningServersIndicator).setVisibility(View.GONE);
+                ((Button) activity.findViewById(R.id.wServerSelect_ToggleServerScanning)).setText(R.string.server_select_toggle_scanning_start);
             }
         });
         this.scannerService.execute();
@@ -145,8 +146,8 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
 
     private void setNewServer(final String ip, final String port) {
         // If there's no activity we're not being displayed, so it's better not to update the UI
+        if (!isAdded()) return;
         final FragmentActivity activity = getActivity();
-        if (activity == null) return;
 
         final String savedPwd = activity.getPreferences(0).getString("VLC_" + ip + ":" + String.valueOf(port), "");
 
@@ -161,8 +162,8 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 // If there's no activity we're not being displayed, so it's better not to update the UI
+                if (!isAdded()) return;
                 final FragmentActivity activity = getActivity();
-                if (activity == null) return;
 
                 final String password = input.getText().toString();
                 SharedPreferences.Editor cfg = activity.getPreferences(0).edit();
@@ -184,8 +185,8 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
 
     private void useCustomServer() {
         // If there's no activity we're not being displayed, so it's better not to update the UI
+        if (!isAdded()) return;
         final FragmentActivity activity = getActivity();
-        if (activity == null) return;
 
         final String ip = ((EditText)activity.findViewById(R.id.wServerSelect_CustomServerIp)).getText().toString();
         final String port = ((EditText)activity.findViewById(R.id.wServerSelect_CustomServerPort)).getText().toString();
@@ -247,7 +248,6 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
     }
 
     private static class Servers_ViewAdapter extends ArrayAdapter<NetworkingUtils.ScannedServer> {
-        private final List<NetworkingUtils.ScannedServer> items;
         private static final int layoutResourceId = R.layout.fragment_server_select_element;
         private final Context context;
         private final View.OnClickListener onClickCallback;
@@ -259,10 +259,9 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
             ImageButton wServerSelect_ScannedServerSelect;
         }
 
-        public Servers_ViewAdapter(View.OnClickListener onClickCallback, Context context, List<NetworkingUtils.ScannedServer> items) {
-            super(context, layoutResourceId, items);
+        public Servers_ViewAdapter(View.OnClickListener onClickCallback, Context context) {
+            super(context, layoutResourceId, new ArrayList<NetworkingUtils.ScannedServer>());
             this.context = context;
-            this.items = items;
             this.onClickCallback = onClickCallback;
         }
 
@@ -278,7 +277,7 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
             }
 
             Row holder = new Row();
-            holder.value = items.get(position);
+            holder.value = this.getItem(position);
 
             holder.wServerSelect_ServerTypeIcon = (ImageView)row.findViewById(R.id.wServerSelect_ServerTypeIcon);
             holder.wServerSelect_ServerTypeIcon.setOnClickListener(onClickCallback);
