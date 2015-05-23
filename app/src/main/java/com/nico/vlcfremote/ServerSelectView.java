@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -100,9 +101,6 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
     }
 
     synchronized public void scanServers() {
-        // TODO: Remove this
-        Log.e("ASDASDASDASDAS", "ScanServer RQ");
-
         // If there's no activity we're not being displayed, so it's better not to update the UI
         if (!isAdded()) return;
         final FragmentActivity activity = getActivity();
@@ -141,7 +139,9 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
                 ((Button) activity.findViewById(R.id.wServerSelect_ToggleServerScanning)).setText(R.string.server_select_toggle_scanning_start);
             }
         });
-        this.scannerService.execute();
+
+        // Exec this on the background, so we don't block possible BG ops for main VLC connection
+        this.scannerService.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void)null);
     }
 
     private void setNewServer(final String ip, final String port) {
