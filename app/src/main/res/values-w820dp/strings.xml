@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="playlist_element_current_status">Status for this playlist item</string>
+</resources>
