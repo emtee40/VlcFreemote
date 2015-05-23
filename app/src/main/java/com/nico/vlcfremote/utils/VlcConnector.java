@@ -34,6 +34,7 @@ public class VlcConnector {
     final HttpClient httpClient = new DefaultHttpClient();
     private final VlcConnectionCallback callback;
     private VlcStatus lastKnownStatus;
+    private boolean requestInProgress = false;
 
     public VlcStatus getLastKnownStatus() {
         return lastKnownStatus;
@@ -44,6 +45,7 @@ public class VlcConnector {
     }
 
     public VlcConnector(final VlcConnectionCallback callback,final String url, final String pass) {
+        this.lastKnownStatus = new VlcStatus();
         this.callback = callback;
         urlBase = url;
         authStr = "Basic " + Base64.encodeToString((":" + pass).getBytes(), Base64.DEFAULT);
@@ -159,18 +161,36 @@ public class VlcConnector {
     }
 
     private void doSimpleCommand(final String action) {
-        doSimpleGuardedCommand(action, new Runnable() { @Override public void run() {}});
+        Log.d("VLCFREEMOTE", "START simple command " + action);
+        doSimpleGuardedCommand(action, new Runnable() {
+            @Override
+            public void run() {
+            }
+        });
+        Log.d("VLCFREEMOTE", "SENT simple command " + action);
     }
 
-    private void doSimpleGuardedCommand(final String action, final Runnable whenFinished) {
+    private synchronized void doSimpleGuardedCommand(final String action, final Runnable whenFinished) {
         final HttpGet getOp = new HttpGet(urlBase + action);
         getOp.addHeader("Authorization", authStr);
 
+        if (requestInProgress) {
+            Log.d("VLCFREEMOTE", "New RQ denied!");
+            whenFinished.run();
+            return;
+        }
+
+        requestInProgress = true;
         new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
             @Override
-            public void onHttpConnectionFailure() { whenFinished.run(); }
+            public void onHttpConnectionFailure() { requestInProgress = false; whenFinished.run(); }
             @Override
-            public void onHttpResponseReceived(int httpStatusCode, String msg) { processVlcStatus(httpStatusCode, msg); whenFinished.run(); }
+            public void onHttpResponseReceived(int httpStatusCode, String msg) {
+                Log.d("VLCFREEMOTE", "Simple command response received for action " + action);
+                requestInProgress = false;
+                processVlcStatus(httpStatusCode, msg);
+                whenFinished.run();
+            }
         }).execute();
     }
 
@@ -196,7 +216,7 @@ public class VlcConnector {
         if (!isHttpCodeValid(httpStatusCode)) return;
 
         try {
-            VlcStatus stat = HttpUtils.parseXmlObjec(msg, new HttpUtils.XmlMogrifier<VlcStatus>(VlcStatus.class) {
+            VlcStatus stat = HttpUtils.parseXmlObject(msg, new HttpUtils.XmlMogrifier<VlcStatus>(VlcStatus.class) {
                 @Override
                 void parseValue(VlcStatus obj, String key, String val) {
                     switch (key) {
@@ -258,16 +278,22 @@ public class VlcConnector {
         final HttpGet getOp = new HttpGet(urlBase + ACTION_GET_PLAYLIST);
         getOp.addHeader("Authorization", authStr);
 
+        Log.d("VLCFREEMOTE","Sending playlist update RQ");
         new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
             @Override
             public void onHttpConnectionFailure() { callback.Vlc_OnConnectionFail(); }
 
             @Override
             public void onHttpResponseReceived(int httpStatusCode, String msg) {
+                Log.d("VLCFREEMOTE","Received playlist update response");
                 if (!isHttpCodeValid(httpStatusCode)) return;
 
                 try {
-                    callback.Vlc_OnPlaylistFetched(parsePlaylistXml(msg));
+                    Log.d("VLCFREEMOTE","Received playlist update response - XML parse start");
+                    final List<PlaylistEntry> parsed = parsePlaylistXml(msg);
+                    Log.d("VLCFREEMOTE","Received playlist update response - XML parse end, callback start");
+                    callback.Vlc_OnPlaylistFetched(parsed);
+                    Log.d("VLCFREEMOTE","Received playlist update response - callback end");
                 } catch (HttpUtils.CantCreateXmlParser cantCreateXmlParser) {
                     callback.Vlc_OnInternalError(cantCreateXmlParser);
                 } catch (HttpUtils.CantParseXmlResponse cantParseXmlResponse) {
@@ -275,12 +301,14 @@ public class VlcConnector {
                 }
             }
         }).execute();
+        Log.d("VLCFREEMOTE","Sent playlist update RQ");
     }
 
     public void getDirList(final String path) {
         final HttpGet getOp = new HttpGet(urlBase + ACTION_DIR_LIST + path);
         getOp.addHeader("Authorization", authStr);
 
+        Log.d("VLCFREEMOTE","Get dir list RQ send start");
         new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
             @Override
             public void onHttpConnectionFailure() { callback.Vlc_OnConnectionFail(); }
@@ -288,6 +316,9 @@ public class VlcConnector {
             @Override
             public void onHttpResponseReceived(int httpStatusCode, String msg) {
                 if (!isHttpCodeValid(httpStatusCode)) return;
+
+
+                Log.d("VLCFREEMOTE","Get dir list RQ response ready, XML parse start");
 
                 try {
                     final List<DirListEntry> lst = HttpUtils.parseXmlList(msg, "element", new HttpUtils.XmlMogrifier<DirListEntry>(DirListEntry.class) {
@@ -304,6 +335,8 @@ public class VlcConnector {
                         }
                     });
 
+                    Log.d("VLCFREEMOTE","Get dir list RQ parse done, sort start");
+
                     Collections.sort(lst, new Comparator<DirListEntry>() {
                         @Override
                         public int compare(DirListEntry lhs, DirListEntry rhs) {
@@ -315,6 +348,8 @@ public class VlcConnector {
                         }
                     });
 
+
+                    Log.d("VLCFREEMOTE","Get dir list RQ sort done, start CB");
                     // If browsing to the directory fails we get an html response with a 200 status
                     // instead of a nice http error or a parsable xml message
                     if ((lst.size() == 0) && msg.contains("cannot open directory")) {
@@ -322,6 +357,7 @@ public class VlcConnector {
                     } else {
                         callback.Vlc_OnDirListingFetched(path, lst);
                     }
+                    Log.d("VLCFREEMOTE","Get dir list RQ CB done");
                 } catch (HttpUtils.CantCreateXmlParser cantCreateXmlParser) {
                     callback.Vlc_OnInternalError(cantCreateXmlParser);
                 } catch (HttpUtils.CantParseXmlResponse cantParseXmlResponse) {
@@ -329,6 +365,7 @@ public class VlcConnector {
                 }
             }
         }).execute();
+        Log.d("VLCFREEMOTE","Get dir list RQ sent");
     }
 
     private boolean isHttpCodeValid(int httpStatusCode){

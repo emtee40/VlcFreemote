@@ -93,7 +93,7 @@ public class HttpUtils {
         return foundObjects;
     }
 
-    public static <T> T parseXmlObjec(final String xmlMsg, XmlMogrifier<T> objDeserializer)
+    public static <T> T parseXmlObject(final String xmlMsg, XmlMogrifier<T> objDeserializer)
             throws CantCreateXmlParser, CantParseXmlResponse
     {
         final XmlPullParser xpp = createXmlParserFor(xmlMsg);

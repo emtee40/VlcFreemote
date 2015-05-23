@@ -143,11 +143,14 @@ public class MainActivity extends FragmentActivity
 
 
         this.mainMenu = new MainMenuNavigation(((ViewPager) super.findViewById(R.id.wMainMenu)),
-                                                getSupportFragmentManager(), playlistView, dirlistView, serverSelectView);
+                getSupportFragmentManager(), playlistView, dirlistView, serverSelectView);
 
         ((SeekBar) findViewById(R.id.wPlayer_Volume)).setOnSeekBarChangeListener(this);
         ((SeekBar) findViewById(R.id.wPlayer_PlayPosition)).setOnSeekBarChangeListener(this);
 
+    }
+        // TODO: Commented out til vlcConnector gets refactored into a priority queue
+        /*
         // Periodically update VLC
         vlcStatusUpdateTimerHandler.postDelayed(vlcStatusUpdateTimer, 0);
     }
@@ -166,6 +169,7 @@ public class MainActivity extends FragmentActivity
         super.onPause();
         vlcStatusUpdateTimerHandler.removeCallbacks(vlcStatusUpdateTimer    );
     }
+    */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
