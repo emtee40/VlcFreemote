@@ -1,12 +1,12 @@
 package com.nico.vlcfremote.utils;
 
 import android.util.Base64;
-import android.util.Log;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -14,20 +14,48 @@ import java.util.List;
 // TODO
 // $ vim /usr/share/doc/vlc/lua/http/requests/README.txt.gz
 public class VlcConnector {
-    private static final String ACTION_DIR_LIST = "requests/browse.xml?dir=";
-    private static final String ACTION_GET_PLAYLIST = "requests/playlist.xml";
-    private static final String ACTION_ADD_TO_PLAYLIST = "requests/status.xml?command=in_enqueue&input=";
-    private static final String ACTION_TOGGLE_PLAY = "requests/status.xml?command=pl_pause";
-    private static final String ACTION_START_PLAYING = "requests/status.xml?command=pl_play&id=";
-    private static final String ACTION_PLAY_NEXT = "requests/status.xml?command=pl_next";
-    private static final String ACTION_PLAY_PREVIOUS = "requests/status.xml?command=pl_previous";
-    private static final String ACTION_SET_VOLUME = "requests/status.xml?command=volume&val=";
-    private static final String ACTION_DELETE_FROM_PLAYLIST = "requests/status.xml?command=pl_delete&id=";
-    private static final String ACTION_CLEAR_PLAYLIST = "requests/status.xml?command=pl_empty";
-    private static final String ACTION_GET_STATUS = "requests/status.xml";
-    private static final String ACTION_PLAY_POSITION_JUMP = "requests/status.xml?command=seek&val=";
-    private static final String ACTION_TOGGLE_FULLSCREEN = "requests/status.xml?command=fullscreen";
+
     private static final String URL_ENCODED_PERCENT = "%25";
+
+    private enum VLC_Actions {
+        // Replaceable actions
+        ACTION_DIR_LIST,
+        ACTION_GET_PLAYLIST,
+        ACTION_SET_VOLUME,
+        ACTION_PLAY_POSITION_JUMP,
+
+        // Ordered and priority actions
+        ACTION_ADD_TO_PLAYLIST,
+        ACTION_TOGGLE_PLAY,
+        ACTION_START_PLAYING,
+        ACTION_PLAY_NEXT,
+        ACTION_PLAY_PREVIOUS,
+        ACTION_DELETE_FROM_PLAYLIST,
+        ACTION_CLEAR_PLAYLIST,
+        ACTION_TOGGLE_FULLSCREEN,
+
+        // Lowest priority actions (only if nothing other than ACTION_DIR_LIST or ACTION_GET_PLAYLIST are pending)
+        ACTION_GET_STATUS
+    }
+
+    private static String getUrlForAction(final VLC_Actions action) {
+        switch (action) {
+            case ACTION_DIR_LIST: return "requests/browse.xml?dir=";
+            case ACTION_GET_PLAYLIST: return "requests/playlist.xml";
+            case ACTION_ADD_TO_PLAYLIST: return "requests/status.xml?command=in_enqueue&input=";
+            case ACTION_TOGGLE_PLAY: return "requests/status.xml?command=pl_pause";
+            case ACTION_START_PLAYING: return "requests/status.xml?command=pl_play&id=";
+            case ACTION_PLAY_NEXT: return "requests/status.xml?command=pl_next";
+            case ACTION_PLAY_PREVIOUS: return "requests/status.xml?command=pl_previous";
+            case ACTION_SET_VOLUME: return "requests/status.xml?command=volume&val=";
+            case ACTION_DELETE_FROM_PLAYLIST: return "requests/status.xml?command=pl_delete&id=";
+            case ACTION_CLEAR_PLAYLIST: return "requests/status.xml?command=pl_empty";
+            case ACTION_GET_STATUS: return "requests/status.xml";
+            case ACTION_PLAY_POSITION_JUMP: return "requests/status.xml?command=seek&val=";
+            case ACTION_TOGGLE_FULLSCREEN: return "requests/status.xml?command=fullscreen";
+            default: throw new RuntimeException("Requested non existent VLC action");
+        }
+    }
 
     final String urlBase;
     final String authStr;
@@ -49,6 +77,31 @@ public class VlcConnector {
         this.callback = callback;
         urlBase = url;
         authStr = "Basic " + Base64.encodeToString((":" + pass).getBytes(), Base64.DEFAULT);
+    }
+
+    public static class VlcStatus {
+        public int length;
+        public float position; // Progress % of the current file
+        public int volume;
+        public int time;
+        public float rate;
+        public float audiodelay;
+        public float subtitledelay;
+        public boolean repeat;
+        public boolean loop;
+        public boolean random;
+        public boolean fullscreen;
+        public String state;
+        public String currentMedia_filename;
+        public String currentMedia_album;
+        public String currentMedia_title;
+        public String currentMedia_artist;
+        public int currentMedia_trackNumber;
+        public int currentMedia_tracksTotal;
+
+        VlcStatus() { state = ""; }
+
+        public boolean isCurrentlyPlayingSomething() { return state.equalsIgnoreCase("playing"); }
     }
 
     public static class PlaylistEntry {
@@ -88,32 +141,32 @@ public class VlcConnector {
     }
 
     public void togglePlay() {
-        doSimpleCommand(ACTION_TOGGLE_PLAY);
+        doSimpleCommand(VLC_Actions.ACTION_TOGGLE_PLAY);
     }
 
     public void playNext() {
-        doSimpleCommand(ACTION_PLAY_NEXT);
+        doSimpleCommand(VLC_Actions.ACTION_PLAY_NEXT);
     }
 
     public void playPrevious() {
-        doSimpleCommand(ACTION_PLAY_PREVIOUS);
+        doSimpleCommand(VLC_Actions.ACTION_PLAY_PREVIOUS);
     }
 
     public void toggleFullscreen() {
-        doSimpleCommand(ACTION_TOGGLE_FULLSCREEN);
+        doSimpleCommand(VLC_Actions.ACTION_TOGGLE_FULLSCREEN);
     }
 
     public void startPlaying(Integer id) {
-        doSimpleCommand(ACTION_START_PLAYING + String.valueOf(id));
+        doSimpleCommand(VLC_Actions.ACTION_START_PLAYING, String.valueOf(id));
     }
 
     public void removeFromPlaylist(Integer id) {
-        doSimpleCommand(ACTION_DELETE_FROM_PLAYLIST + String.valueOf(id));
+        doSimpleCommand(VLC_Actions.ACTION_DELETE_FROM_PLAYLIST, String.valueOf(id));
         updatePlaylist();
     }
 
     public void clearPlaylist() {
-        doSimpleCommand(ACTION_CLEAR_PLAYLIST);
+        doSimpleCommand(VLC_Actions.ACTION_CLEAR_PLAYLIST);
         updatePlaylist();
     }
 
@@ -122,27 +175,34 @@ public class VlcConnector {
      * @param jumpPercent Percent to jump, including - or + (5 is not valid, +5 is)
      */
     public void playPosition_JumpRelative(final String jumpPercent) {
-        doSimpleCommand(ACTION_PLAY_POSITION_JUMP + jumpPercent + URL_ENCODED_PERCENT);
+        doSimpleCommand(VLC_Actions.ACTION_PLAY_POSITION_JUMP, jumpPercent + URL_ENCODED_PERCENT);
     }
 
     public synchronized void playPosition_JumpToPercent(int position) {
-        doSimpleCommand(ACTION_PLAY_POSITION_JUMP + String.valueOf(position) + URL_ENCODED_PERCENT);
+        doSimpleCommand(VLC_Actions.ACTION_PLAY_POSITION_JUMP, String.valueOf(position) + URL_ENCODED_PERCENT);
     }
 
     public synchronized void setVolume(final int progress) {
-        doSimpleCommand(ACTION_SET_VOLUME + progress);
+        doSimpleCommand(VLC_Actions.ACTION_SET_VOLUME, String.valueOf(progress));
     }
 
     public void updateStatus() {
-        doSimpleCommand(ACTION_GET_STATUS);
+        doSimpleCommand(VLC_Actions.ACTION_GET_STATUS);
     }
 
     public void addToPlayList(final String uri) {
-        doSimpleCommand(ACTION_ADD_TO_PLAYLIST + uri);
+        doSimpleCommand(VLC_Actions.ACTION_ADD_TO_PLAYLIST, uri);
         updatePlaylist();
     }
 
-    private void doSimpleCommand(final String action) {
+
+    /**
+     * Forwards an action with no param
+     * @param action VLC action to perform
+     */
+    private void doSimpleCommand(final VLC_Actions action) { doSimpleCommand(action, null); }
+
+    private void doSimpleCommand(final VLC_Actions action, final String param) {
         if (requestInProgress) {
             // Usually, this will only be triggered when the user changes the volume or some other
             // seek bar or element that generates a lot of events
@@ -150,42 +210,185 @@ public class VlcConnector {
         }
 
         requestInProgress = true;
-        final HttpGet getOp = new HttpGet(urlBase + action);
+        final HttpGet getOp = new HttpGet(urlBase + getUrlForAction(action) + param);
         getOp.addHeader("Authorization", authStr);
-        new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
+        HttpUtils.AsyncRequester task = new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
             @Override
-            public void onHttpConnectionFailure() { requestInProgress = false; }
+            public void onHttpConnectionFailure() {
+                requestInProgress = false;
+            }
+
             @Override
             public void onHttpResponseReceived(int httpStatusCode, String msg) {
                 requestInProgress = false;
                 processVlcStatus(httpStatusCode, msg);
             }
-        }).execute();
+        });
+
+        queueTask(task, action);
     }
 
-    public static class VlcStatus {
-        public int length;
-        public float position; // Progress % of the current file
-        public int volume;
-        public int time;
-        public float rate;
-        public float audiodelay;
-        public float subtitledelay;
-        public boolean repeat;
-        public boolean loop;
-        public boolean random;
-        public boolean fullscreen;
-        public String state;
-        public String currentMedia_filename;
-        public String currentMedia_album;
-        public String currentMedia_title;
-        public String currentMedia_artist;
-        public int currentMedia_trackNumber;
-        public int currentMedia_tracksTotal;
+    public void updatePlaylist() {
+        final HttpGet getOp = new HttpGet(urlBase + getUrlForAction(VLC_Actions.ACTION_GET_PLAYLIST));
+        getOp.addHeader("Authorization", authStr);
 
-        VlcStatus() { state = ""; }
+        HttpUtils.AsyncRequester task = new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
+            @Override
+            public void onHttpConnectionFailure() {
+                callback.Vlc_OnConnectionFail();
+            }
 
-        public boolean isCurrentlyPlayingSomething() { return state.equalsIgnoreCase("playing"); }
+            @Override
+            public void onHttpResponseReceived(int httpStatusCode, String msg) {
+                if (!isHttpCodeValid(httpStatusCode)) return;
+
+                try {
+                    final List<PlaylistEntry> parsed = parsePlaylistXml(msg);
+                    callback.Vlc_OnPlaylistFetched(parsed);
+                } catch (HttpUtils.CantCreateXmlParser cantCreateXmlParser) {
+                    callback.Vlc_OnInternalError(cantCreateXmlParser);
+                } catch (HttpUtils.CantParseXmlResponse cantParseXmlResponse) {
+                    callback.Vlc_OnInvalidResponseReceived(cantParseXmlResponse);
+                }
+            }
+        });
+
+        queueTask(task, VLC_Actions.ACTION_GET_PLAYLIST);
+    }
+
+    public void getDirList(final String path) {
+        final HttpGet getOp = new HttpGet(urlBase + getUrlForAction(VLC_Actions.ACTION_DIR_LIST) + path);
+        getOp.addHeader("Authorization", authStr);
+
+        HttpUtils.AsyncRequester task = new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
+            @Override
+            public void onHttpConnectionFailure() {
+                callback.Vlc_OnConnectionFail();
+            }
+
+            @Override
+            public void onHttpResponseReceived(int httpStatusCode, String msg) {
+                if (!isHttpCodeValid(httpStatusCode)) return;
+
+                try {
+                    final List<DirListEntry> lst = HttpUtils.parseXmlList(msg, "element", new HttpUtils.XmlMogrifier<DirListEntry>(DirListEntry.class) {
+                        @Override
+                        void parseValue(DirListEntry object, String key, String value) {
+                            switch (key) {
+                                // Using the uri as path saves the work of url encoding stuff: the uri (sans
+                                // it's protocol) is enough to be passed to vlc again as a param
+                                case "uri":
+                                    object.path = value.substring("file://".length());
+                                    break;
+                                case "path":
+                                    object.human_friendly_path = value;
+                                    break;
+                                case "name":
+                                    object.name = value;
+                                    break;
+                                case "type":
+                                    object.isDirectory = (value.equals("dir"));
+                                    break;
+                            }
+                        }
+                    });
+
+                    Collections.sort(lst, new Comparator<DirListEntry>() {
+                        @Override
+                        public int compare(DirListEntry lhs, DirListEntry rhs) {
+                            if (lhs.isDirectory == rhs.isDirectory) {
+                                return lhs.name.compareTo(rhs.name);
+                            }
+
+                            return lhs.isDirectory ? -1 : 1;
+                        }
+                    });
+
+
+                    // If browsing to the directory fails we get an html response with a 200 status
+                    // instead of a nice http error or a parsable xml message
+                    if ((lst.size() == 0) && msg.contains("cannot open directory")) {
+                        callback.Vlc_OnSelectDirIsInvalid(path);
+                    } else {
+                        callback.Vlc_OnDirListingFetched(path, lst);
+                    }
+                } catch (HttpUtils.CantCreateXmlParser cantCreateXmlParser) {
+                    callback.Vlc_OnInternalError(cantCreateXmlParser);
+                } catch (HttpUtils.CantParseXmlResponse cantParseXmlResponse) {
+                    callback.Vlc_OnInvalidResponseReceived(cantParseXmlResponse);
+                }
+            }
+        });
+
+        queueTask(task, VLC_Actions.ACTION_DIR_LIST);
+    }
+
+    private static class PendingTask {
+        final public HttpUtils.AsyncRequester task;
+        final public VLC_Actions action;
+        PendingTask(final HttpUtils.AsyncRequester task, final VLC_Actions action) {
+            this.task = task;
+            this.action = action;
+        }
+    }
+
+    private void queueTask(final HttpUtils.AsyncRequester task, final VLC_Actions action) {
+        /*
+        // Replace actions
+        ACTION_DIR_LIST
+        ACTION_GET_PLAYLIST
+        ACTION_SET_VOLUME
+        ACTION_PLAY_POSITION_JUMP
+
+        // Priority and ordered actions
+        ACTION_ADD_TO_PLAYLIST
+        ACTION_TOGGLE_PLAY
+        ACTION_START_PLAYING
+        ACTION_PLAY_NEXT
+        ACTION_PLAY_PREVIOUS
+        ACTION_DELETE_FROM_PLAYLIST
+        ACTION_CLEAR_PLAYLIST
+        ACTION_TOGGLE_FULLSCREEN
+
+         // Solo hay ACTION_DIR_LIST o ACTION_GET_PLAYLIST y nada mas pendings
+        ACTION_GET_STATUS
+                */
+        /*
+        List<PendingTask> pendingTasks = new ArrayList<>();
+        pendingTasks.add(new PendingTask(task, action));
+        pending.task.execute();
+        */
+        PendingTask pending = new PendingTask(task, action);
+        pending.task.execute();
+    }
+
+
+    /**
+     * Helpers to parse stuff
+     */
+    private boolean isHttpCodeValid(int httpStatusCode){
+        if (httpStatusCode == 401) {
+            callback.Vlc_OnLoginIncorrect();
+            return false;
+        } else if (httpStatusCode != 200) {
+            callback.Vlc_OnInvalidResponseReceived(new InvalidHttpResponseCode(httpStatusCode));
+            return false;
+        }
+        return true;
+    }
+
+    private static List<PlaylistEntry> parsePlaylistXml(final String msg) throws HttpUtils.CantParseXmlResponse, HttpUtils.CantCreateXmlParser {
+        return HttpUtils.parseXmlList(msg, "leaf", new HttpUtils.XmlMogrifier<PlaylistEntry>(PlaylistEntry.class) {
+            @Override
+            void parseValue(PlaylistEntry object, String key, String value) {
+                switch (key) {
+                    case "uri": object.uri = value; break;
+                    case "name": object.name = value; break;
+                    case "id": object.id = Integer.parseInt(value); break;
+                    case "duration": object.duration = Integer.parseInt(value); break;
+                }
+            }
+        });
     }
 
     private void processVlcStatus(int httpStatusCode, String msg) {
@@ -263,125 +466,6 @@ public class VlcConnector {
         } catch (HttpUtils.CantParseXmlResponse cantParseXmlResponse) {
             callback.Vlc_OnInvalidResponseReceived(cantParseXmlResponse);
         }
-    }
-
-    public void updatePlaylist() {
-        final HttpGet getOp = new HttpGet(urlBase + ACTION_GET_PLAYLIST);
-        getOp.addHeader("Authorization", authStr);
-
-        Log.d("VLCFREEMOTE","Sending playlist update RQ");
-        new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
-            @Override
-            public void onHttpConnectionFailure() { callback.Vlc_OnConnectionFail(); }
-
-            @Override
-            public void onHttpResponseReceived(int httpStatusCode, String msg) {
-                Log.d("VLCFREEMOTE","Received playlist update response");
-                if (!isHttpCodeValid(httpStatusCode)) return;
-
-                try {
-                    Log.d("VLCFREEMOTE","Received playlist update response - XML parse start");
-                    final List<PlaylistEntry> parsed = parsePlaylistXml(msg);
-                    Log.d("VLCFREEMOTE","Received playlist update response - XML parse end, callback start");
-                    callback.Vlc_OnPlaylistFetched(parsed);
-                    Log.d("VLCFREEMOTE","Received playlist update response - callback end");
-                } catch (HttpUtils.CantCreateXmlParser cantCreateXmlParser) {
-                    callback.Vlc_OnInternalError(cantCreateXmlParser);
-                } catch (HttpUtils.CantParseXmlResponse cantParseXmlResponse) {
-                    callback.Vlc_OnInvalidResponseReceived(cantParseXmlResponse);
-                }
-            }
-        }).execute();
-        Log.d("VLCFREEMOTE","Sent playlist update RQ");
-    }
-
-    public void getDirList(final String path) {
-        final HttpGet getOp = new HttpGet(urlBase + ACTION_DIR_LIST + path);
-        getOp.addHeader("Authorization", authStr);
-
-        Log.d("VLCFREEMOTE","Get dir list RQ send start");
-        new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
-            @Override
-            public void onHttpConnectionFailure() { callback.Vlc_OnConnectionFail(); }
-
-            @Override
-            public void onHttpResponseReceived(int httpStatusCode, String msg) {
-                if (!isHttpCodeValid(httpStatusCode)) return;
-
-
-                Log.d("VLCFREEMOTE","Get dir list RQ response ready, XML parse start");
-
-                try {
-                    final List<DirListEntry> lst = HttpUtils.parseXmlList(msg, "element", new HttpUtils.XmlMogrifier<DirListEntry>(DirListEntry.class) {
-                        @Override
-                        void parseValue(DirListEntry object, String key, String value) {
-                            switch (key) {
-                                // Using the uri as path saves the work of url encoding stuff: the uri (sans
-                                // it's protocol) is enough to be passed to vlc again as a param
-                                case "uri": object.path = value.substring("file://".length()); break;
-                                case "path": object.human_friendly_path = value; break;
-                                case "name": object.name = value; break;
-                                case "type": object.isDirectory = (value.equals("dir")); break;
-                            }
-                        }
-                    });
-
-                    Log.d("VLCFREEMOTE","Get dir list RQ parse done, sort start");
-
-                    Collections.sort(lst, new Comparator<DirListEntry>() {
-                        @Override
-                        public int compare(DirListEntry lhs, DirListEntry rhs) {
-                            if (lhs.isDirectory == rhs.isDirectory) {
-                                return lhs.name.compareTo(rhs.name);
-                            }
-
-                            return lhs.isDirectory? -1 : 1;
-                        }
-                    });
-
-
-                    Log.d("VLCFREEMOTE","Get dir list RQ sort done, start CB");
-                    // If browsing to the directory fails we get an html response with a 200 status
-                    // instead of a nice http error or a parsable xml message
-                    if ((lst.size() == 0) && msg.contains("cannot open directory")) {
-                        callback.Vlc_OnSelectDirIsInvalid(path);
-                    } else {
-                        callback.Vlc_OnDirListingFetched(path, lst);
-                    }
-                    Log.d("VLCFREEMOTE","Get dir list RQ CB done");
-                } catch (HttpUtils.CantCreateXmlParser cantCreateXmlParser) {
-                    callback.Vlc_OnInternalError(cantCreateXmlParser);
-                } catch (HttpUtils.CantParseXmlResponse cantParseXmlResponse) {
-                    callback.Vlc_OnInvalidResponseReceived(cantParseXmlResponse);
-                }
-            }
-        }).execute();
-        Log.d("VLCFREEMOTE","Get dir list RQ sent");
-    }
-
-    private boolean isHttpCodeValid(int httpStatusCode){
-        if (httpStatusCode == 401) {
-            callback.Vlc_OnLoginIncorrect();
-            return false;
-        } else if (httpStatusCode != 200) {
-            callback.Vlc_OnInvalidResponseReceived(new InvalidHttpResponseCode(httpStatusCode));
-            return false;
-        }
-        return true;
-    }
-
-    private static List<PlaylistEntry> parsePlaylistXml(final String msg) throws HttpUtils.CantParseXmlResponse, HttpUtils.CantCreateXmlParser {
-        return HttpUtils.parseXmlList(msg, "leaf", new HttpUtils.XmlMogrifier<PlaylistEntry>(PlaylistEntry.class) {
-            @Override
-            void parseValue(PlaylistEntry object, String key, String value) {
-                switch (key) {
-                    case "uri": object.uri = value; break;
-                    case "name": object.name = value; break;
-                    case "id": object.id = Integer.parseInt(value); break;
-                    case "duration": object.duration = Integer.parseInt(value); break;
-                }
-            }
-        });
     }
 }
 
