@@ -1,18 +1,39 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:orientation="vertical"
-    android:weightSum="1">
+    android:orientation="vertical">
 
-    <TextView
-        android:layout_width="fill_parent"
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="@string/dir_listing_current_path"
-        android:id="@+id/wDirListing_CurrentPath"
-        android:layout_gravity="center_horizontal" />
+        android:orientation="horizontal">
+
+        <Button
+            style="?android:buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/wDirListing_JumpToBookmark_label"
+            android:id="@+id/wDirListing_JumpToBookmark" />
+
+        <Button
+            style="?android:buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/wDirListing_Bookmark_label"
+            android:id="@+id/wDirListing_Bookmark" />
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/dir_listing_current_path"
+            android:id="@+id/wDirListing_CurrentPath"
+            android:layout_gravity="center_horizontal" />
+
+    </LinearLayout>
 
     <ProgressBar
         android:id="@+id/wDirListing_LoadingIndicator"
