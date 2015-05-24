@@ -73,11 +73,15 @@ public class VlcConnector {
         this(callback, "http://" + ip + ":" + port + "/", pass);
     }
 
-    public VlcConnector(final VlcConnectionCallback callback,final String url, final String pass) {
+    private VlcConnector(final VlcConnectionCallback callback,final String url, final String pass) {
         this.lastKnownStatus = new VlcStatus();
         this.callback = callback;
         urlBase = url;
         authStr = "Basic " + Base64.encodeToString((":" + pass).getBytes(), Base64.DEFAULT);
+    }
+
+    public final String getServerUrl() {
+        return urlBase;
     }
 
     public static class VlcStatus {
