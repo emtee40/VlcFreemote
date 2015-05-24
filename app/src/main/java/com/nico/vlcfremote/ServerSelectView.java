@@ -148,7 +148,7 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
         if (!isAdded()) return;
         final FragmentActivity activity = getActivity();
 
-        final String savedPwd = activity.getPreferences(0).getString("VLC_" + ip + ":" + String.valueOf(port), "");
+        final String savedPwd = activity.getPreferences(Context.MODE_PRIVATE).getString("VLC_" + ip + ":" + String.valueOf(port), "");
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(getString(R.string.server_select_request_password_dialog_title));
@@ -165,7 +165,7 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
                 final FragmentActivity activity = getActivity();
 
                 final String password = input.getText().toString();
-                SharedPreferences.Editor cfg = activity.getPreferences(0).edit();
+                SharedPreferences.Editor cfg = activity.getPreferences(Context.MODE_PRIVATE).edit();
                 cfg.putString("VLC_" + ip + ":" + String.valueOf(port), password);
                 cfg.apply();
                 onServerSelectCallback.onNewServerSelected(ip, port, password);
