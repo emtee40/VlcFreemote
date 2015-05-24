@@ -83,6 +83,7 @@ public class PlaylistFragment extends VlcActionFragment
     }
 
     public void Vlc_OnPlaylistFetched(final List<VlcConnector.PlaylistEntry> contents) {
+        playlistViewAdapter.clear();
         playlistViewAdapter.addAll(contents);
     }
 
@@ -134,9 +135,6 @@ public class PlaylistFragment extends VlcActionFragment
             holder.wPlaylistElement_CurrentStatus = (ImageButton)row.findViewById(R.id.wPlaylistElement_CurrentStatus);
             holder.wPlaylistElement_CurrentStatus.setTag(holder.values);
             holder.wPlaylistElement_CurrentStatus.setOnClickListener(onClickCallback);
-
-
-            Log.i("UPDATE STAT", String.valueOf(currentPlayingMediaTitle) + " == " + holder.values.id);
 
             if (currentPlayingMediaTitle != null && currentPlayingMediaTitle.equals(holder.values.name)) {
                 holder.wPlaylistElement_CurrentStatus.setVisibility(View.VISIBLE);
