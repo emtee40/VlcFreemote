@@ -1,6 +1,7 @@
 package com.nico.vlcfremote.utils;
 
 import android.util.Base64;
+import android.util.Log;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -210,8 +211,11 @@ public class VlcConnector {
         }
 
         requestInProgress = true;
-        final HttpGet getOp = new HttpGet(urlBase + getUrlForAction(action) + param);
+        String url = urlBase + getUrlForAction(action);
+        if (param != null) url += param;
+        final HttpGet getOp = new HttpGet(url);
         getOp.addHeader("Authorization", authStr);
+        
         HttpUtils.AsyncRequester task = new HttpUtils.AsyncRequester(httpClient, getOp, new HttpUtils.HttpResponseCallback() {
             @Override
             public void onHttpConnectionFailure() {
@@ -358,6 +362,7 @@ public class VlcConnector {
         pendingTasks.add(new PendingTask(task, action));
         pending.task.execute();
         */
+        Log.i("PENDING QUEUE", "Enqueue " + getUrlForAction(action));
         PendingTask pending = new PendingTask(task, action);
         pending.task.execute();
     }
