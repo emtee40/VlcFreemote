@@ -114,9 +114,18 @@ public class MainActivity extends FragmentActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        getSupportFragmentManager().putFragment(outState, PlaylistFragment.class.getName(), playlistView);
-        getSupportFragmentManager().putFragment(outState, DirListingFragment.class.getName(), dirlistView);
-        getSupportFragmentManager().putFragment(outState, ServerSelectView.class.getName(), serverSelectView);
+        safePutFragment(outState, PlaylistFragment.class.getName(), playlistView);
+        safePutFragment(outState, DirListingFragment.class.getName(), dirlistView);
+        safePutFragment(outState, ServerSelectView.class.getName(), serverSelectView);
+    }
+
+    private void safePutFragment(final Bundle outState, final String name, Fragment obj) {
+        try {
+            getSupportFragmentManager().putFragment(outState, name, obj);
+        } catch (IllegalStateException e) {
+            // Some fragments might not be in the fragment manager: if this is the case, just save a null
+            // object to give the activity a chance of recreating the fragment when resuming
+        }
     }
 
     @Override
