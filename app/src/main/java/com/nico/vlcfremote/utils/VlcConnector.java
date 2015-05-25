@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 // TODO
 // $ vim /usr/share/doc/vlc/lua/http/requests/README.txt.gz
@@ -341,34 +343,51 @@ public class VlcConnector {
     }
 
     private void queueTask(final HttpUtils.AsyncRequester task, final VLC_Actions action) {
+        task.execute();
         /*
-        // Replace actions
-        ACTION_DIR_LIST
-        ACTION_GET_PLAYLIST
-        ACTION_SET_VOLUME
-        ACTION_PLAY_POSITION_JUMP
-
-        // Priority and ordered actions
-        ACTION_ADD_TO_PLAYLIST
-        ACTION_TOGGLE_PLAY
-        ACTION_START_PLAYING
-        ACTION_PLAY_NEXT
-        ACTION_PLAY_PREVIOUS
-        ACTION_DELETE_FROM_PLAYLIST
-        ACTION_CLEAR_PLAYLIST
-        ACTION_TOGGLE_FULLSCREEN
-
-         // Solo hay ACTION_DIR_LIST o ACTION_GET_PLAYLIST y nada mas pendings
-        ACTION_GET_STATUS
-                */
-        /*
-        List<PendingTask> pendingTasks = new ArrayList<>();
-        pendingTasks.add(new PendingTask(task, action));
-        pending.task.execute();
-        */
         Log.i("PENDING QUEUE", "Enqueue " + getUrlForAction(action));
-        PendingTask pending = new PendingTask(task, action);
-        pending.task.execute();
+
+        List<PendingTask> pendingTasks = new ArrayList<>();
+        // These actions always take priority and must be executed in order
+        switch (action) {
+            case ACTION_ADD_TO_PLAYLIST:
+            case ACTION_TOGGLE_PLAY:
+            case ACTION_START_PLAYING:
+            case ACTION_PLAY_NEXT:
+            case ACTION_PLAY_PREVIOUS:
+            case ACTION_DELETE_FROM_PLAYLIST:
+            case ACTION_CLEAR_PLAYLIST:
+            case ACTION_TOGGLE_FULLSCREEN:
+                pendingTasks.add(new PendingTask(task, action));
+                return;
+        }
+
+        // It makes no sense to queue more than one of these actions
+        switch (action) {
+            case ACTION_DIR_LIST:
+            case ACTION_GET_PLAYLIST:
+            case ACTION_SET_VOLUME:
+            case ACTION_PLAY_POSITION_JUMP:
+                for (int i=0; i<pendingTasks.size(); ++i) {
+                    if (pendingTasks.get(i).action == action) {
+                        pendingTasks.remove(i);
+                        break;
+                    }
+                }
+                pendingTasks.add(new PendingTask(task, action));
+                return;
+        }
+
+        // Low priority actions, only exec if there are no other pending tasks
+        switch (action) {
+            case ACTION_GET_STATUS:
+                if (pendingTasks.size() == 0) {
+                    pendingTasks.add(new PendingTask(task, action));
+                }
+                //noinspection UnnecessaryReturnStatement
+                return;
+        }
+        */
     }
 
 
