@@ -35,7 +35,20 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:background="#000000" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/wPlayer_ExtraOptions_label"
+            android:layout_gravity="center_horizontal" />
+
         <Button
+            style="?android:buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/wPlayer_ToggleFullscreen"
@@ -44,6 +57,7 @@
             android:layout_gravity="center_horizontal" />
 
         <Button
+            style="?android:buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/wPlayer_CycleAudioTrack"
@@ -52,6 +66,7 @@
             android:layout_gravity="center_horizontal" />
 
         <Button
+            style="?android:buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/wPlayer_CycleSubtitleTrack"
@@ -59,6 +74,11 @@
             android:onClick="onPlayer_CycleSubtitleTrack"
             android:layout_gravity="center_horizontal" />
 
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:background="#000000" />
+        
      </LinearLayout>
 
 
