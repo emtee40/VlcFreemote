@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +30,7 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
     // Is this Windows compatible? Who knows...
     private static final String VLC_DEFAULT_START_PATH = "~";
 
-    // A char that can never appear in a path, used to sepparate two paths in a setting
+    // A char that can never appear in a path, used to separate two paths in a setting
     private static final char BOOKMARK_PATHS_SEPARATOR = '|';
 
     String currentPath;
@@ -139,13 +138,21 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
         final String prefKey = vlcConnection.getVlcConnector().getServerUrl() + "_dirBookmarks";
 
         // Get the known bookmarks for the current server
-        Set<String> bookmarks = activity.getPreferences(Context.MODE_PRIVATE).getStringSet(prefKey, new HashSet<String>());
+        Set<String> oldBookmarks = activity.getPreferences(Context.MODE_PRIVATE).getStringSet(prefKey, null);
+        HashSet<String> newBookmarks = new HashSet<>();
 
-        bookmarks.add(pathUri + BOOKMARK_PATHS_SEPARATOR + pathDisplayName);
+        // I have no idea why I can't reuse the same oldBookmarks object, but if I do so stuff
+        // doesn't get saved properly
+        newBookmarks.add(pathUri + BOOKMARK_PATHS_SEPARATOR + pathDisplayName);
+        if (oldBookmarks != null) {
+            for (String s : oldBookmarks) {
+                newBookmarks.add(s);
+            }
+        }
+
         SharedPreferences.Editor cfg = activity.getPreferences(Context.MODE_PRIVATE).edit();
-        cfg.putStringSet(prefKey, bookmarks);
+        cfg.putStringSet(prefKey, newBookmarks);
         cfg.apply();
-        cfg.commit();
 
         final String msg = String.format(getResources().getString(R.string.dir_listing_saved_bookmark), pathDisplayName);
         Toast toast = Toast.makeText(activity.getApplicationContext(), msg, Toast.LENGTH_SHORT);
@@ -166,19 +173,13 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
             final String pathDisplayName = bookmark.substring(bookmark.indexOf(BOOKMARK_PATHS_SEPARATOR)+1);
             pathUris.add(pathUri);
             pathDisplayNames.add(pathDisplayName);
-            Log.i("ASDASDA", pathUri + " -> " + pathDisplayName);
         }
-
-        Log.i("ASDASDA", String.valueOf(pathDisplayNames.toArray(new String[pathDisplayNames.size()])));
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(activity.getString(R.string.R_string_dir_listing_goto_bookmark_title));
         builder.setItems(pathDisplayNames.toArray(new String[pathDisplayNames.size()]), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                // the user clicked on colors[which]
-                Log.i("ASDASDA", pathUris.get(which));
-
                 currentPath = pathUris.get(which);
                 currentPath_display = pathDisplayNames.get(which);
                 updateDirectoryList();
