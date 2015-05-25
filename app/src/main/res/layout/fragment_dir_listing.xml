@@ -24,16 +24,23 @@
             android:text="@string/wDirListing_Bookmark_label"
             android:id="@+id/wDirListing_Bookmark" />
 
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="@string/dir_listing_current_path"
-            android:id="@+id/wDirListing_CurrentPath"
-            android:layout_gravity="center_horizontal" />
+        <Button
+            style="?android:buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/wDirListing_ManageBookmark_label"
+            android:id="@+id/wDirListing_ManageBookmark" />
 
     </LinearLayout>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="@string/dir_listing_current_path"
+        android:id="@+id/wDirListing_CurrentPath"
+        android:layout_gravity="center_horizontal" />
 
     <ProgressBar
         android:id="@+id/wDirListing_LoadingIndicator"

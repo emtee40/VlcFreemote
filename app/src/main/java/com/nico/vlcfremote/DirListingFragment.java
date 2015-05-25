@@ -44,6 +44,7 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
         ((ListView) v.findViewById(R.id.wDirListing_List)).setAdapter(dirViewAdapter);
         v.findViewById(R.id.wDirListing_Bookmark).setOnClickListener(this);
         v.findViewById(R.id.wDirListing_JumpToBookmark).setOnClickListener(this);
+        v.findViewById(R.id.wDirListing_ManageBookmark).setOnClickListener(this);
         currentPath = VLC_DEFAULT_START_PATH;
         currentPath_display = getResources().getString(R.string.dir_listing_default_folder_label);
         return v;
@@ -122,7 +123,11 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
                 break;
 
             case R.id.wDirListing_JumpToBookmark:
-                displayBookmarkPicker();
+                gotoBookmark();
+                break;
+
+            case R.id.wDirListing_ManageBookmark:
+                deleteBookmark();
                 break;
 
             default:
@@ -134,41 +139,57 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
         if (!isAdded()) return;
         final FragmentActivity activity = getActivity();
 
-        // Bookmarks are kept per server
-        final String prefKey = vlcConnection.getVlcConnector().getServerUrl() + "_dirBookmarks";
-
-        // Get the known bookmarks for the current server
-        Set<String> oldBookmarks = activity.getPreferences(Context.MODE_PRIVATE).getStringSet(prefKey, null);
-        HashSet<String> newBookmarks = new HashSet<>();
-
-        // I have no idea why I can't reuse the same oldBookmarks object, but if I do so stuff
-        // doesn't get saved properly
-        newBookmarks.add(pathUri + BOOKMARK_PATHS_SEPARATOR + pathDisplayName);
-        if (oldBookmarks != null) {
-            for (String s : oldBookmarks) {
-                newBookmarks.add(s);
-            }
-        }
-
-        SharedPreferences.Editor cfg = activity.getPreferences(Context.MODE_PRIVATE).edit();
-        cfg.putStringSet(prefKey, newBookmarks);
-        cfg.apply();
+        final HashSet<String> bookmarks = getSavedBookmarks(activity);
+        bookmarks.add(pathUri + BOOKMARK_PATHS_SEPARATOR + pathDisplayName);
+        saveBookmarksToPrefs(activity, bookmarks);
 
         final String msg = String.format(getResources().getString(R.string.dir_listing_saved_bookmark), pathDisplayName);
         Toast toast = Toast.makeText(activity.getApplicationContext(), msg, Toast.LENGTH_SHORT);
         toast.show();
     }
 
-    private void displayBookmarkPicker() {
+    private static interface BookmarkSelected {
+        void callback(final String pathUri, final String pathName);
+    }
+
+    private void gotoBookmark() {
+        displayBookmarkPicker(R.string.R_string_dir_listing_goto_bookmark_title, new BookmarkSelected() {
+            @Override
+            public void callback(String pathUri, String pathName) {
+                currentPath = pathUri;
+                currentPath_display = pathName;
+                updateDirectoryList();
+            }
+        });
+    }
+
+    private void deleteBookmark() {
         if (!isAdded()) return;
         final FragmentActivity activity = getActivity();
 
-        final String prefKey = vlcConnection.getVlcConnector().getServerUrl() + "_dirBookmarks";
-        Set<String> bookmarks = activity.getPreferences(Context.MODE_PRIVATE).getStringSet(prefKey, new HashSet<String>());
+        displayBookmarkPicker(R.string.R_string_dir_listing_delete_bookmark_title, new BookmarkSelected() {
+            @Override
+            public void callback(String pathUri, String pathName) {
+                final String bookmarkToDelete = pathUri + BOOKMARK_PATHS_SEPARATOR + pathName;
+                HashSet<String> newBookmarks = new HashSet<>();
+                for (String bookmark : getSavedBookmarks(activity)) {
+                    if (!bookmarkToDelete.equals(bookmark)) {
+                        newBookmarks.add(bookmark);
+                    }
+                }
+
+                saveBookmarksToPrefs(activity, newBookmarks);
+            }
+        });
+    }
+
+    private void displayBookmarkPicker(int titleStringId, final BookmarkSelected cb) {
+        if (!isAdded()) return;
+        final FragmentActivity activity = getActivity();
 
         final List<String> pathDisplayNames = new ArrayList<>();
         final List<String> pathUris = new ArrayList<>();
-        for (String bookmark : bookmarks) {
+        for (String bookmark : getSavedBookmarks(activity)) {
             final String pathUri = bookmark.substring(0, bookmark.indexOf(BOOKMARK_PATHS_SEPARATOR));
             final String pathDisplayName = bookmark.substring(bookmark.indexOf(BOOKMARK_PATHS_SEPARATOR)+1);
             pathUris.add(pathUri);
@@ -176,16 +197,41 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setTitle(activity.getString(R.string.R_string_dir_listing_goto_bookmark_title));
+        builder.setTitle(activity.getString(titleStringId));
         builder.setItems(pathDisplayNames.toArray(new String[pathDisplayNames.size()]), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                currentPath = pathUris.get(which);
-                currentPath_display = pathDisplayNames.get(which);
-                updateDirectoryList();
+                cb.callback(pathUris.get(which), pathDisplayNames.get(which));
             }
         });
         builder.show();
+    }
+
+    private HashSet<String> getSavedBookmarks(final FragmentActivity activity) {
+        // Get the known bookmarks for the current server
+        Set<String> oldBookmarks = activity.getPreferences(Context.MODE_PRIVATE).getStringSet(getBookmarksPrefKey(), null);
+        HashSet<String> newBookmarks = new HashSet<>();
+
+        // I have no idea why I can't reuse the same oldBookmarks object, but if I do so stuff
+        // doesn't get saved properly
+        if (oldBookmarks != null) {
+            for (String s : oldBookmarks) {
+                newBookmarks.add(s);
+            }
+        }
+
+        return newBookmarks;
+    }
+
+    private void saveBookmarksToPrefs(final Activity activity, final HashSet<String> bookmarks) {
+        SharedPreferences.Editor cfg = activity.getPreferences(Context.MODE_PRIVATE).edit();
+        cfg.putStringSet(getBookmarksPrefKey(), bookmarks);
+        cfg.apply();
+    }
+
+    private String getBookmarksPrefKey() {
+        // Bookmarks are kept per server
+        return vlcConnection.getVlcConnector().getServerUrl() + "_dirBookmarks";
     }
 
     private static class DirListEntry_ViewAdapter extends ArrayAdapter<VlcConnector.DirListEntry> {
