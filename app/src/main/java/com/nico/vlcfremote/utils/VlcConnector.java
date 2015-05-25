@@ -202,6 +202,13 @@ public class VlcConnector {
         updatePlaylist();
     }
 
+    public void cycleAudioTrack() {
+        // TODO
+    }
+
+    public void cycleSubtitleTrack() {
+        // TODO
+    }
 
     /**
      * Forwards an action with no param

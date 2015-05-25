@@ -211,11 +211,12 @@ public class MainActivity extends FragmentActivity
     }
 
     public void onPlayer_CycleAudioTrack(View view) {
+        vlc.cycleAudioTrack();
     }
 
     public void onPlayer_CycleSubtitleTrack(View view) {
+        vlc.cycleSubtitleTrack();
     }
-
 
     @Override
     public VlcConnector getVlcConnector() {
