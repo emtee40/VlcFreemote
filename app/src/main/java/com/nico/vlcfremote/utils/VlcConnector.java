@@ -36,6 +36,8 @@ public class VlcConnector {
         ACTION_DELETE_FROM_PLAYLIST,
         ACTION_CLEAR_PLAYLIST,
         ACTION_TOGGLE_FULLSCREEN,
+        ACTION_CYCLE_SUBTITLE,
+        ACTION_CYCLE_AUDIO,
 
         // Lowest priority actions (only if nothing other than ACTION_DIR_LIST or ACTION_GET_PLAYLIST are pending)
         ACTION_GET_STATUS
@@ -56,6 +58,8 @@ public class VlcConnector {
             case ACTION_GET_STATUS: return "requests/status.xml";
             case ACTION_PLAY_POSITION_JUMP: return "requests/status.xml?command=seek&val=";
             case ACTION_TOGGLE_FULLSCREEN: return "requests/status.xml?command=fullscreen";
+            case ACTION_CYCLE_SUBTITLE: return "requests/status.xml?command=key&val=subtitle-track";
+            case ACTION_CYCLE_AUDIO: return "requests/status.xml?command=key&val=audio-track";
             default: throw new RuntimeException("Requested non existent VLC action");
         }
     }
@@ -203,11 +207,11 @@ public class VlcConnector {
     }
 
     public void cycleAudioTrack() {
-        // TODO
+        doSimpleCommand(VLC_Actions.ACTION_CYCLE_AUDIO);
     }
 
     public void cycleSubtitleTrack() {
-        // TODO
+        doSimpleCommand(VLC_Actions.ACTION_CYCLE_SUBTITLE);
     }
 
     /**
@@ -365,6 +369,8 @@ public class VlcConnector {
             case ACTION_DELETE_FROM_PLAYLIST:
             case ACTION_CLEAR_PLAYLIST:
             case ACTION_TOGGLE_FULLSCREEN:
+            case ACTION_CYCLE_SUBTITLE:
+            case ACTION_CYCLE_AUDIO:
                 pendingTasks.add(new PendingTask(task, action));
                 return;
         }
