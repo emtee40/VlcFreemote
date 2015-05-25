@@ -109,13 +109,17 @@ public class PlaylistFragment extends VlcActionFragment
         }
 
         public void setCurrentPlayingMedia(String currentPlayingMediaTitle) {
-            if (this.currentPlayingMediaTitle != null && currentPlayingMediaTitle.equals(this.currentPlayingMediaTitle)) {
-                // No need to update anything
-                return;
-            }
+            @SuppressWarnings("ConstantConditions")
+            boolean mediaChanged =
+                (this.currentPlayingMediaTitle == null) && (currentPlayingMediaTitle != null) ||
+                (currentPlayingMediaTitle == null) && (this.currentPlayingMediaTitle != null) ||
+                ((currentPlayingMediaTitle != null) && (this.currentPlayingMediaTitle != null) &&
+                        currentPlayingMediaTitle.equals(this.currentPlayingMediaTitle));
 
-            this.currentPlayingMediaTitle = currentPlayingMediaTitle;
-            this.notifyDataSetChanged();
+            if (mediaChanged) {
+                this.currentPlayingMediaTitle = currentPlayingMediaTitle;
+                this.notifyDataSetChanged();
+            }
         }
 
         @Override
