@@ -53,4 +53,5 @@
     <string name="R.string.dir_listing_goto_bookmark_title">Jump to bookmark…</string>
     <string name="R_string_dir_listing_delete_bookmark_title">Pick a bookmark to delete</string>
     <string name="wPlayer_ExtraOptions_label">Extra VLC options</string>
+    <string name="wDirListing_AddRandom_label">Play Random</string>
 </resources>

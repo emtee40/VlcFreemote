@@ -31,6 +31,13 @@
             android:text="@string/wDirListing_ManageBookmark_label"
             android:id="@+id/wDirListing_ManageBookmark" />
 
+        <Button
+            style="?android:buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/wDirListing_AddRandom_label"
+            android:id="@+id/wDirListing_PlayRandom" />
+
     </LinearLayout>
 
     <TextView

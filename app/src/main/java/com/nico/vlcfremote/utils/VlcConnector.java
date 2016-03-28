@@ -135,19 +135,24 @@ public class VlcConnector {
         @Override public String getMessage() { return msg; }
     }
 
-    public static interface VlcConnectionCallback {
-        void Vlc_OnPlaylistFetched(final List<PlaylistEntry> contents);
-        void Vlc_OnDirListingFetched(final String requestedPath, final List<DirListEntry> contents);
-        void Vlc_OnSelectDirIsInvalid(String path);
-        void Vlc_OnStatusUpdated(VlcStatus stat);
-
+    public interface CallbackCommon {
         void Vlc_OnLoginIncorrect();
         void Vlc_OnConnectionFail();
         void Vlc_OnInternalError(final Throwable ex);
         void Vlc_OnInvalidResponseReceived(final Throwable ex);
     }
 
-    public static interface VlcConnectionHandler {
+    public interface Callback_OnDirListingFetched extends CallbackCommon {
+        void Vlc_OnDirListingFetched(final String requestedPath, final List<DirListEntry> contents);
+        void Vlc_OnSelectDirIsInvalid(String path);
+    }
+
+    public interface VlcConnectionCallback extends Callback_OnDirListingFetched {
+        void Vlc_OnPlaylistFetched(final List<PlaylistEntry> contents);
+        void Vlc_OnStatusUpdated(VlcStatus stat);
+    }
+
+    public interface VlcConnectionHandler {
         VlcConnector getVlcConnector();
     }
 
@@ -278,6 +283,11 @@ public class VlcConnector {
     }
 
     public void getDirList(final String path) {
+        this.getDirList(path, callback);
+    }
+
+    public void getDirList(final String path, final Callback_OnDirListingFetched callback) {
+
         final HttpGet getOp = new HttpGet(urlBase + getUrlForAction(VLC_Actions.ACTION_DIR_LIST) + path);
         getOp.addHeader("Authorization", authStr);
 

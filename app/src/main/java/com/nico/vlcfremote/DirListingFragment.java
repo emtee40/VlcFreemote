@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +24,7 @@ import com.nico.vlcfremote.utils.VlcConnector;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 public class DirListingFragment extends VlcActionFragment implements View.OnClickListener {
@@ -45,6 +47,7 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
         v.findViewById(R.id.wDirListing_Bookmark).setOnClickListener(this);
         v.findViewById(R.id.wDirListing_JumpToBookmark).setOnClickListener(this);
         v.findViewById(R.id.wDirListing_ManageBookmark).setOnClickListener(this);
+        v.findViewById(R.id.wDirListing_PlayRandom).setOnClickListener(this);
         currentPath = VLC_DEFAULT_START_PATH;
         currentPath_display = getResources().getString(R.string.dir_listing_default_folder_label);
         return v;
@@ -91,7 +94,7 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
     private void addPathToPlaylist(final String path) {
         vlcConnection.getVlcConnector().addToPlayList(path);
         if (!vlcConnection.getVlcConnector().getLastKnownStatus().isCurrentlyPlayingSomething()) {
-            vlcConnection.getVlcConnector().togglePlay();
+            vlcConnection.getVlcConnector().playNext();
         }
         vlcConnection.getVlcConnector().updatePlaylist();
     }
@@ -130,9 +133,62 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
                 deleteBookmark();
                 break;
 
+            case R.id.wDirListing_PlayRandom:
+                playRandomSubDir(currentPath);
+                break;
+
             default:
                 throw new RuntimeException(DirListingFragment.class.getName() + " received a click event it can't handle.");
         }
+    }
+
+    private void playRandomSubDir(final String startPath) {
+        Log.i(this.getClass().getName(), "Picking random directory from start point " + startPath);
+
+        final DirListingFragment self = this;
+        vlcConnection.getVlcConnector().getDirList(startPath, new VlcConnector.Callback_OnDirListingFetched() {
+            @Override
+            public void Vlc_OnDirListingFetched(String requestedPath, List<VlcConnector.DirListEntry> contents) {
+                List<String> subDirs = new ArrayList<>();
+                for (VlcConnector.DirListEntry i : contents) {
+                    if (i.isDirectory && (!i.name.equals(".."))) subDirs.add(i.path);
+                }
+
+                if (subDirs.isEmpty()) {
+                    self.addPathToPlaylist(requestedPath);
+                } else {
+                    final Random rand = new Random();
+                    final int i = rand.nextInt(subDirs.size());
+                    // TODO: Refactor rec call out
+                    self.playRandomSubDir(subDirs.get(i));
+                }
+            }
+
+            @Override
+            public void Vlc_OnSelectDirIsInvalid(String path) {
+                Log.e("DirListing", "Error fetching dir list: invalid dir");
+            }
+
+            @Override
+            public void Vlc_OnLoginIncorrect() {
+                Log.e("DirListing", "Error fetching dir list: invalid login");
+            }
+
+            @Override
+            public void Vlc_OnConnectionFail() {
+                Log.e("DirListing", "Error fetching dir list: connection failed");
+            }
+
+            @Override
+            public void Vlc_OnInternalError(Throwable ex) {
+                Log.e("DirListing", "Error fetching dir list: internal error");
+            }
+
+            @Override
+            public void Vlc_OnInvalidResponseReceived(Throwable ex) {
+                Log.e("DirListing", "Error fetching dir list: invalid server response");
+            }
+        });
     }
 
     private void saveBookmark(final String pathDisplayName, final String pathUri) {
@@ -148,7 +204,7 @@ public class DirListingFragment extends VlcActionFragment implements View.OnClic
         toast.show();
     }
 
-    private static interface BookmarkSelected {
+    private interface BookmarkSelected {
         void callback(final String pathUri, final String pathName);
     }
 
