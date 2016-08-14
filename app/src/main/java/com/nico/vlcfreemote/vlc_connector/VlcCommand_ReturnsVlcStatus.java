@@ -110,7 +110,7 @@ public abstract class VlcCommand_ReturnsVlcStatus implements VlcCommand {
                     }
 
                     @Override
-                    public void onXmlDecodingError(Exception e) { cb.onVlcStatusFetchError(); }
+                    public void onXmlDecodingError() { cb.onVlcStatusFetchError(); }
 
                     @Override
                     public void onResult(List<VlcStatus> results) {

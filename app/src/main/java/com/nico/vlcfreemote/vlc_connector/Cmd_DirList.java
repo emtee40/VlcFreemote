@@ -96,7 +96,7 @@ public class Cmd_DirList implements VlcCommand {
                     }
 
                     @Override
-                    public void onXmlDecodingError(Exception e) {
+                    public void onXmlDecodingError() {
                         cb.onContentError();
                     }
 

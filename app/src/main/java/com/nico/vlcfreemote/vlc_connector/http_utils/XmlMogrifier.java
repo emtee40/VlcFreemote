@@ -25,7 +25,7 @@ public abstract class XmlMogrifier<T> extends AsyncTask<String, Void, List<T>> {
      */
     public interface Callback<X> {
         void onXmlSystemError(Exception e);
-        void onXmlDecodingError(Exception e);
+        void onXmlDecodingError();
         void onResult(List<X> results);
     }
 
@@ -94,7 +94,7 @@ public abstract class XmlMogrifier<T> extends AsyncTask<String, Void, List<T>> {
                 return;
             }
 
-            callback.onXmlDecodingError(request_exception);
+            callback.onXmlDecodingError();
             return;
         }
 

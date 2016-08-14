@@ -72,7 +72,7 @@ public class Cmd_GetPlaylist implements VlcCommand {
                     }
 
                     @Override
-                    public void onXmlDecodingError(Exception e) {
+                    public void onXmlDecodingError() {
                         cb.onContentError();
                     }
 
