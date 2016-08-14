@@ -3,6 +3,8 @@ package com.nico.vlcfreemote.net_utils;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.nico.vlcfreemote.model.Server;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;

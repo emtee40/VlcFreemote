@@ -9,7 +9,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.nico.vlcfreemote.net_utils.Server;
+import com.nico.vlcfreemote.model.Server;
 import com.nico.vlcfreemote.vlc_connector.Cmd_AddToPlaylist;
 import com.nico.vlcfreemote.vlc_connector.Cmd_TogglePlay;
 import com.nico.vlcfreemote.vlc_connector.RemoteVlc;

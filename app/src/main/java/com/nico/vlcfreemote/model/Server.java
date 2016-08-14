@@ -1,4 +1,4 @@
-package com.nico.vlcfreemote.net_utils;
+package com.nico.vlcfreemote.model;
 
 public class Server {
     public final String ip;

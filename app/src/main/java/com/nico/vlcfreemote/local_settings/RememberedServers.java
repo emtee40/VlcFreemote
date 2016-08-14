@@ -4,7 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
 
-import com.nico.vlcfreemote.net_utils.Server;
+import com.nico.vlcfreemote.model.Server;
 
 public class RememberedServers extends LocalSettings {
 

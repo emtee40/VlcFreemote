@@ -17,7 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nico.vlcfreemote.model.VlcPath;
-import com.nico.vlcfreemote.net_utils.Server;
+import com.nico.vlcfreemote.model.Server;
 import com.nico.vlcfreemote.vlc_connector.Cmd_DirList;
 import com.nico.vlcfreemote.vlc_connector.RemoteVlc;
 import com.nico.vlcfreemote.vlc_connector.VlcCommand;

@@ -23,7 +23,7 @@ import android.widget.Toast;
 
 import com.nico.vlcfreemote.local_settings.LocalSettings;
 import com.nico.vlcfreemote.local_settings.RememberedServers;
-import com.nico.vlcfreemote.net_utils.Server;
+import com.nico.vlcfreemote.model.Server;
 import com.nico.vlcfreemote.net_utils.ServerScanner;
 
 import java.util.ArrayList;

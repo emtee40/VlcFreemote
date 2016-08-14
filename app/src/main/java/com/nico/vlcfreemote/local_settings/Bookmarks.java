@@ -5,7 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 
-import com.nico.vlcfreemote.net_utils.Server;
+import com.nico.vlcfreemote.model.Server;
 
 import java.util.ArrayList;
 import java.util.List;
