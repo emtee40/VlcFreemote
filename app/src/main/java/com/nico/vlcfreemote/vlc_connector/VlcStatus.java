@@ -35,7 +35,7 @@ public class VlcStatus {
 
     public VlcStatus() { state = ""; }
 
-    public boolean isStoped() { return state.equals("stopped"); }
+    public boolean isStopped() { return state.equals("stopped"); }
 
     public String getHumanReadableState() {
         switch (state) {

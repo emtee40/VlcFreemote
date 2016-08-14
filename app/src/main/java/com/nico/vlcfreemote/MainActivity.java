@@ -158,7 +158,7 @@ public class MainActivity extends FragmentActivity
         Log.i(getClass().getSimpleName(), "Add to playlist: " + uri);
         vlcConnection.exec(new Cmd_AddToPlaylist(uri, vlcConnection));
 
-        if (vlcConnection.getLatestStats().isStoped()) {
+        if (vlcConnection.getLatestStats().isStopped()) {
             vlcConnection.exec(new Cmd_TogglePlay(vlcConnection));
         }
 
