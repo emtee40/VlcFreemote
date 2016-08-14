@@ -13,13 +13,15 @@ import java.util.List;
 
 public class Bookmarks extends LocalSettings {
 
-    public static final String TABLE_NAME = "bookmarks";
-    public static final String COLUMN_IP = "ip";
-    public static final String COLUMN_VLCPORT = "port";
-    public static final String COLUMN_PATH = "path";
+    private static final int DB_VERSION = 1;
+    private static final String DB_NAME = "bookmarks.db";
+    private static final String TABLE_NAME = "bookmarks";
+    private static final String COLUMN_IP = "ip";
+    private static final String COLUMN_VLCPORT = "port";
+    private static final String COLUMN_PATH = "path";
 
     public Bookmarks(Context context) {
-        super(context);
+        super(context, DB_NAME, DB_VERSION);
     }
 
     @Override
@@ -30,10 +32,10 @@ public class Bookmarks extends LocalSettings {
     @Override
     protected String getCreateTableSQL() {
         return "CREATE TABLE " + TABLE_NAME + " (" +
-                COLUMN_IP + " TEXT, " +
-                COLUMN_VLCPORT + " INTEGER, " +
-                COLUMN_PATH + " TEXT, " +
-                "PRIMARY KEY ("+ COLUMN_IP + "," + COLUMN_VLCPORT + ", " + COLUMN_PATH + ") " +
+                    COLUMN_IP + " TEXT, " +
+                    COLUMN_VLCPORT + " INTEGER, " +
+                    COLUMN_PATH + " TEXT, " +
+                    "PRIMARY KEY ("+ COLUMN_IP + "," + COLUMN_VLCPORT + ", " + COLUMN_PATH + ") " +
                 " )";
     }
 
@@ -54,7 +56,7 @@ public class Bookmarks extends LocalSettings {
         final String query =
             "SELECT " + COLUMN_PATH + " FROM " + TABLE_NAME +
             " WHERE " + COLUMN_IP + " = ? " +
-            " AND " + COLUMN_VLCPORT + " = ? ";
+            "   AND " + COLUMN_VLCPORT + " = ? ";
 
         final String[] args = new String[]{srv.ip, String.valueOf(srv.vlcPort)};
 
@@ -77,17 +79,17 @@ public class Bookmarks extends LocalSettings {
 
     public void deleteBookmark(final Server srv, final String path) {
         final String query = "DELETE FROM " + TABLE_NAME +
-                             " WHERE " + COLUMN_IP + "=? " +
-                             " AND " + COLUMN_VLCPORT + "=?" +
-                             " AND " + COLUMN_PATH + "=?";
+                             "      WHERE " + COLUMN_IP + "=? " +
+                             "        AND " + COLUMN_VLCPORT + "=?" +
+                             "        AND " + COLUMN_PATH + "=?";
         final String[] args = new String[]{srv.ip, String.valueOf(srv.vlcPort), path};
         run(query, args);
     }
 
     public void forgetAllBookmarks(final Server srv) {
         final String query = "DELETE FROM " + TABLE_NAME +
-                             " WHERE " + COLUMN_IP + "=? " +
-                             " AND " + COLUMN_VLCPORT + "=?";
+                             "      WHERE " + COLUMN_IP + "=? " +
+                             "        AND " + COLUMN_VLCPORT + "=?";
         final String[] args = new String[]{srv.ip, String.valueOf(srv.vlcPort)};
         run(query, args);
     }

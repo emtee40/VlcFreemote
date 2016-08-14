@@ -5,6 +5,7 @@ public class Server {
     public final Integer sshPort;
     public final Integer vlcPort;
     public String password;
+    private String lastPath;
 
     public Server(String ip, Integer vlcPort, Integer sshPort) {
         this.ip = ip;
@@ -19,4 +20,7 @@ public class Server {
     public String getPassword() {
         return password;
     }
+
+    public void setLastPath(String lastPath) { this.lastPath = lastPath; }
+    public String getLastPath() { return this.lastPath; }
 }

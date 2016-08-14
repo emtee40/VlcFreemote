@@ -144,7 +144,7 @@ public class MainActivity extends FragmentActivity
             this.vlcConnection = new RemoteVlc(srv, this);
         } else {
             // Connect to dummy server: the first command will fail and prompt a new server select
-            this.vlcConnection = new RemoteVlc(new Server("VLC", 0, null), this);
+            this.vlcConnection = new RemoteVlc(new Server("", 0, null), this);
         }
 
         dirListView.onServerChanged(srv);

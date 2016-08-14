@@ -126,7 +126,7 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
 
         // Get last used pass for this server, if known
         final RememberedServers db = new RememberedServers(getContext());
-        final String rememberedPass = db.getRememberedPassword(srv.ip, srv.vlcPort);
+        final String rememberedPass = db.getRememberedPassword(srv);
 
         // Show a dialog to confirm the pass (or enter a new one)
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

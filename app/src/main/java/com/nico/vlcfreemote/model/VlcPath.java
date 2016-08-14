@@ -44,18 +44,16 @@ public class VlcPath {
     private Runnable saveLastPathTask = null;
 
     public VlcPath(RemoteVlc.ConnectionProvider vlcProvider, Context dbContext, UICallback uiCallback) {
-        final RememberedServers db = new RememberedServers(dbContext);
         final Server srv = vlcProvider.getActiveVlcConnection().getServer();
-        final String rememberedPath = db.getLastPathForServer(srv);
 
-        if (rememberedPath == null) {
+        if (srv.getLastPath() == null) {
             Log.e("XXXXXXXX", "Default path used ");
             this.currentPath = VLC_DEFAULT_START_PATH;
             this.prettyPath = VLC_DEFAULT_START_PATH;
         } else {
-            Log.e("XXXXXXXX", "Path == " + rememberedPath);
-            this.currentPath = rememberedPath;
-            this.prettyPath = rememberedPath;
+            Log.e("XXXXXXXX", "Path == " + srv.getLastPath());
+            this.currentPath = srv.getLastPath();
+            this.prettyPath = srv.getLastPath();
         }
 
         this.vlcProvider = vlcProvider;
@@ -64,29 +62,37 @@ public class VlcPath {
     }
 
     public void onServerChanged(final Server srv) {
-        // TODO: Move this into Server object so I don't have to manually retrieve it
-        final String path = (new RememberedServers(dbContext).getLastPathForServer(srv));
-        Log.e("CD TO ", "XXX" + path);
-        this.cd(path, path);
+        if (srv.getLastPath() != null) {
+            Log.e("CD TO ", "XXX" + srv.getLastPath());
+            this.currentPath = srv.getLastPath();
+            this.prettyPath = srv.getLastPath();
+        }
     }
 
+    /**
+     * Changes directory to $path and saves $path as the last known directory for the current server
+     * @param path CD to $path
+     * @param prettyPath Display name for $path
+     */
     public void cd(final String path, final String prettyPath) {
         this.currentPath = path;
         this.prettyPath = prettyPath;
-        saveCurrentPath(path);
+
+        final Server srv = vlcProvider.getActiveVlcConnection().getServer();
+        srv.setLastPath(path);
+        saveCurrentPath(srv);
     }
 
-    private void saveCurrentPath(final String path) {
+    private void saveCurrentPath(final Server srv) {
 
         if (saveLastPathTask != null) {
             bgRunner.removeCallbacks(saveLastPathTask);
         }
 
-        final Server srv = vlcProvider.getActiveVlcConnection().getServer();
         saveLastPathTask = new Runnable() {
             @Override
             public void run() {
-                new RememberedServers(dbContext).saveLastPathForServer(path, srv);
+                new RememberedServers(dbContext).saveLastPathForServer(srv);
             }
         };
 

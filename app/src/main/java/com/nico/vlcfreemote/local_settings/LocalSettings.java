@@ -7,11 +7,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
 abstract class LocalSettings extends SQLiteOpenHelper implements BaseColumns {
-    public static final String DB_NAME = "VlcFreemote.db";
-    public static final int DB_VERSION = 1;
 
-    public LocalSettings(Context context) {
-        super(context, DB_NAME, null, DB_VERSION);
+    public LocalSettings(Context context, final String DbName, int DbVersion) {
+        super(context, DbName, null, DbVersion);
     }
 
     @Override
@@ -33,6 +31,7 @@ abstract class LocalSettings extends SQLiteOpenHelper implements BaseColumns {
 
     public void insert(final String table, final ContentValues values) {
         SQLiteDatabase db = this.getWritableDatabase();
+        //noinspection TryFinallyCanBeTryWithResources
         try {
             db.insert(table, null, values);
         } finally {
