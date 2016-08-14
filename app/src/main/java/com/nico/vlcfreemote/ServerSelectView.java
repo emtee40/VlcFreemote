@@ -21,6 +21,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.nico.vlcfreemote.local_settings.LocalSettings;
 import com.nico.vlcfreemote.local_settings.RememberedServers;
 import com.nico.vlcfreemote.net_utils.Server;
 import com.nico.vlcfreemote.net_utils.ServerScanner;
@@ -127,9 +128,16 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
         // Get last used pass for this server, if known. This server will have some settings saved
         // (Like last used path)
         final RememberedServers db = new RememberedServers(getContext());
-        final Server rememberedServer = db.getRememberedServer(srv);
+        Server dbServer;
+        try {
+            dbServer = db.getRememberedServer(srv);
+        } catch (LocalSettings.LocalSettingsError localSettingsError) {
+            Log.e(getClass().getSimpleName(), localSettingsError.getMessage());
+            dbServer = srv;
+        }
 
         // Show a dialog to confirm the pass (or enter a new one)
+        final Server rememberedServer = dbServer;
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(getString(R.string.server_select_request_password_dialog_title));
         final EditText input = new EditText(getActivity());
@@ -251,7 +259,12 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
      * @return last used server
      */
     public Server getLastUsedServer(Context context) {
-        return (new RememberedServers(context)).getLastUsedServer();
+        try {
+            return (new RememberedServers(context)).getLastUsedServer();
+        } catch (LocalSettings.LocalSettingsError localSettingsError) {
+            Log.e(getClass().getSimpleName(), localSettingsError.getMessage());
+            return null;
+        }
     }
 
     /************************************************************/

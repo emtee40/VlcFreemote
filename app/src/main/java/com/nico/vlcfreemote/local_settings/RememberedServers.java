@@ -74,7 +74,7 @@ public class RememberedServers extends LocalSettings {
      *
      * @return Last used server
      */
-    public Server getLastUsedServer() {
+    public Server getLastUsedServer() throws LocalSettingsError {
         final String query = "SELECT * "+
                              "  FROM " + TABLE_NAME +
                              " WHERE " + COLUMN_LAST_USED+ " =?";
@@ -96,7 +96,7 @@ public class RememberedServers extends LocalSettings {
      * @param srv ip:port that needs a password
      * @return Known last password, or null if not known
      */
-    public Server getRememberedServer(final Server srv) {
+    public Server getRememberedServer(final Server srv) throws LocalSettingsError {
         final String query = "SELECT * " +
                              "  FROM " + TABLE_NAME +
                              " WHERE " + COLUMN_IP + " =? " +
@@ -110,13 +110,13 @@ public class RememberedServers extends LocalSettings {
             // End of world exception: either unique constrain failed in sqlite or the pass column
             // is unknown. In any case, something is horribly wrong and we can't recover.
             res.close();
-            // TODO throw new IOException("ASD");
+            throw new LocalSettingsError();
         }
 
         return readServerFrom(res);
     }
 
-    private Server readServerFrom(final Cursor c) {
+    private Server readServerFrom(final Cursor c) throws LocalSettingsError {
         if (c.getCount() == 0) {
             c.close();
             return null;
@@ -134,8 +134,7 @@ public class RememberedServers extends LocalSettings {
             pass = c.getString(c.getColumnIndexOrThrow(COLUMN_PASS));
             lastPath = c.getString(c.getColumnIndexOrThrow(COLUMN_LAST_PATH));
         } catch (Exception e) {
-            // TODO throw new IOException("ASD");
-            throw e;
+            throw new LocalSettingsError();
         } finally {
             c.close();
         }

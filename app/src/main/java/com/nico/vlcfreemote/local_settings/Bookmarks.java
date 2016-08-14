@@ -62,12 +62,13 @@ public class Bookmarks extends LocalSettings {
 
         Cursor res = getReadableDatabase().rawQuery(query, args);
 
+        final List<String> results = new ArrayList<>();
+
         if (res.getColumnIndex(COLUMN_PATH) == -1) {
             res.close();
-            // TODO throw new IOException("ASD");
+            return results;
         }
 
-        final List<String> results = new ArrayList<>();
         while (res.moveToNext()) {
             results.add(res.getString(res.getColumnIndex(COLUMN_PATH)));
         }

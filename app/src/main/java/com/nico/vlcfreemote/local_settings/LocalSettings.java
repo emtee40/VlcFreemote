@@ -6,7 +6,16 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
-abstract class LocalSettings extends SQLiteOpenHelper implements BaseColumns {
+public abstract class LocalSettings extends SQLiteOpenHelper implements BaseColumns {
+
+    /**
+     * An error condition in the sql layer which can't be recovered.
+     * The only real purpose of this class is to force explicit handling in upper layers.
+     */
+    public static class LocalSettingsError extends Exception {
+        @Override
+        public String getMessage() { return "Unexpected SQLite error. Try clearing application data."; }
+    }
 
     public LocalSettings(Context context, final String DbName, int DbVersion) {
         super(context, DbName, null, DbVersion);
