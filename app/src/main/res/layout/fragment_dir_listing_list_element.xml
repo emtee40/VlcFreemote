@@ -22,6 +22,17 @@
         android:text="@string/dir_listing_onclick_action"
         android:id="@+id/wDirListElement_Name" />
 
+    <ImageView
+        android:layout_width="30dp"
+        android:layout_height="fill_parent"
+        android:padding="4dp"
+        android:id="@+id/wDirListElement_AlreadySeen"
+        android:contentDescription="@string/dir_listing_already_seen_icon"
+        android:background="?android:selectableItemBackground"
+        android:tint="@android:color/holo_blue_light"
+        android:src="@android:drawable/presence_video_online"
+        android:visibility="invisible"/>
+
     <ImageButton
         android:id="@+id/wDirListElement_Action"
         android:layout_width="40dp"

@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">VlcFreemote</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_playlist_view">PlaylistView</string>
     <string name="main_menu_title_dir_listing">Browse</string>
@@ -14,7 +13,9 @@
     <string name="playlist_element_remove_from_playlist">Remove from playlist</string>
     <string name="status_invalid_vlc_response">VLC sent a wrong XML document or a response that otherwise can\'t be understood.</string>
     <string name="stats_vlc_parser_internal_error">An internal error was found when trying to parse VLC\'s response. The application may be out of memory.</string>
-    <string name="status_vlc_cant_connect">Couldn\'t connect to VLC. Please select a new server.</string>
+    <string name="status_vlc_cant_connect">Couldn\'t connect to VLC at %1$s. Please select a new server.</string>
+    <string name="status_fatal_app_error">A fatal error was found when connecting to server %1$s. This typically means there is a bug in the application.</string>
+    <string name="status_fatal_app_error_extra_info">Please submit a bug report. Additional information: %1$s</string>
     <string name="status_vlc_wrong_password">The supplied password is not valid</string>
     <string name="main_menu_title_servers">Servers</string>
     <string name="status_no_network_detected">VlcFreemote can\'t detect any networking interfaces configured in this device. Are you sure you are online?</string>
@@ -38,20 +39,21 @@
     <string name="server_select_request_password_dialog_title">Enter password…</string>
     <string name="wPlayer_PlayPosition_CurrentPositionText">00:00</string>
     <string name="playlist_view_clear_playlist_button">Clear</string>
-    <string name="playlist_item_duration_unknown">Unknown</string>
+    <string name="playlist_item_duration_unknown"></string>
     <string name="playlist_view_refresh_playlist_button">Refresh</string>
     <string name="wPlayer_ToggleMoreOptions">See more options</string>
     <string name="wPlayer_ToggleFullscreen">Toggle Fullscreen</string>
     <string name="wPlayer_CycleAudioTrack">Cycle audio track</string>
     <string name="wPlayer_CycleSubtitleTrack">Cycle subtitle</string>
-    <string name="dir_listing_default_folder_label">Home directory</string>
     <string name="playlist_element_current_status">Status for this playlist item</string>
-    <string name="wDirListing_JumpToBookmark_label">Jump to…</string>
+    <string name="wDirListing_JumpToBookmark_label">Goto…</string>
     <string name="wDirListing_Bookmark_label">Bookmark</string>
-    <string name="wDirListing_ManageBookmark_label">Delete bookmark</string>
+    <string name="wDirListing_ManageBookmark_label">Rm bookmark</string>
     <string name="dir_listing_saved_bookmark">Saved bookmark %1$s</string>
     <string name="R.string.dir_listing_goto_bookmark_title">Jump to bookmark…</string>
     <string name="R_string_dir_listing_delete_bookmark_title">Pick a bookmark to delete</string>
     <string name="wPlayer_ExtraOptions_label">Extra VLC options</string>
-    <string name="wDirListing_AddRandom_label">Play Random</string>
+    <string name="wDirListing_AddRandom_label">Random</string>
+    <string name="dir_listing_already_seen_icon">Video already seen</string>
+    <string name="error_on_playlist_retrieve">Error retrieving playlist. Please try reconnecting.</string>
 </resources>
