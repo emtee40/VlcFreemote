@@ -81,6 +81,8 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginLeft="5dp"
                 android:textAppearance="?android:attr/textAppearanceSmall"
+                android:singleLine="true"
+                android:ellipsize="end"
                 android:text="@string/wPlayer_CurrentlyPlaying"
                 android:id="@+id/wPlayer_CurrentlyPlaying"
                 android:layout_gravity="center_horizontal" />

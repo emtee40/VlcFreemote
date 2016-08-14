@@ -10,7 +10,8 @@ import java.util.PriorityQueue;
 
 
 public class RemoteVlc implements VlcStatus.ObserverRegister,
-                                  Wget.CallbackWhenTaskFinished {
+                                  Wget.CallbackWhenTaskFinished,
+                                  VlcStatus.Observer {
 
     /**
      * An interface to retrieve the current active connection: useful so that fragments won't need
@@ -28,6 +29,7 @@ public class RemoteVlc implements VlcStatus.ObserverRegister,
     private Wget lastCmd = null;
     private  VlcCommand lowPriorityCommand = null;
     private final PriorityQueue<VlcCommand> pendingCommands;
+    private VlcStatus latestStatus = null;
 
     /**
      * Construct an object to connect to a remote Vlc
@@ -36,7 +38,7 @@ public class RemoteVlc implements VlcStatus.ObserverRegister,
      *            and VlcStatus.ObserverRegister.
      */
     public <Callbacks extends VlcCommand.GeneralCallback & VlcStatus.Observer>
-        RemoteVlc(final Server srv, final Callbacks cbs) {
+    RemoteVlc(final Server srv, final Callbacks cbs) {
         base_url = "http://" + srv.ip + ":" + srv.vlcPort + "/";
         hashedPass = "Basic " + Base64.encodeToString((":" + srv.getPassword()).getBytes(), Base64.DEFAULT);
         this.general_cb = cbs;
@@ -50,6 +52,13 @@ public class RemoteVlc implements VlcStatus.ObserverRegister,
             }
         });
     }
+
+    private String getBaseUrl() { return base_url; }
+    private String getAuth() { return hashedPass; }
+
+    public Server getServer() { return srv; }
+
+    public VlcStatus getLatestStats() { return latestStatus; }
 
     public synchronized void exec(final VlcCommand cmd) {
         if (lastCmd != null) {
@@ -83,13 +92,22 @@ public class RemoteVlc implements VlcStatus.ObserverRegister,
         }
     }
 
+
+    // Decorate the status observer with this to keep a copy of the latest status
     @Override
     public VlcStatus.Observer getVlcStatusObserver() {
-        return statusObserver;
+        return this;
     }
 
-    private String getBaseUrl() { return base_url; }
-    private String getAuth() { return hashedPass; }
+    @Override
+    public void onVlcStatusUpdate(VlcStatus results) {
+        this.latestStatus = results;
+        statusObserver.onVlcStatusUpdate(results);
+    }
 
-    public Server getServer() { return srv; }
+    @Override
+    public void onVlcStatusFetchError() {
+        statusObserver.onVlcStatusFetchError();
+    }
+
 }

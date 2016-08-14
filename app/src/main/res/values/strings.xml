@@ -52,4 +52,6 @@
     <string name="wDirListing_AddRandom_label">Random</string>
     <string name="dir_listing_already_seen_icon">Video already seen</string>
     <string name="error_on_playlist_retrieve">Error retrieving playlist. Please try reconnecting.</string>
+    <string name="playing_track_status">Track %1$s of %2$s</string>
+    <string name="general_vlc_status">%1$s - %2$s</string>
 </resources>

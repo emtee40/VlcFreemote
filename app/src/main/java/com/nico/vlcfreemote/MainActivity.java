@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.nico.vlcfreemote.net_utils.Server;
 import com.nico.vlcfreemote.vlc_connector.Cmd_AddToPlaylist;
+import com.nico.vlcfreemote.vlc_connector.Cmd_TogglePlay;
 import com.nico.vlcfreemote.vlc_connector.RemoteVlc;
 import com.nico.vlcfreemote.vlc_connector.VlcCommand;
 import com.nico.vlcfreemote.vlc_connector.VlcStatus;
@@ -153,10 +154,13 @@ public class MainActivity extends FragmentActivity
 
     @Override
     public void onAddToPlaylistRequested(final String uri) {
-        Log.e(getClass().getSimpleName(), "Add to playlist: " + uri);
+        Log.i(getClass().getSimpleName(), "Add to playlist: " + uri);
         vlcConnection.exec(new Cmd_AddToPlaylist(uri, vlcConnection));
 
-        // TODO: If not currently playing, play URI
+        if (vlcConnection.getLatestStats().isStoped()) {
+            vlcConnection.exec(new Cmd_TogglePlay(vlcConnection));
+        }
+
         this.playlistView.triggerPlaylistUpdate();
     }
 
