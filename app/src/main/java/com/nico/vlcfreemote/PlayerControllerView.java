@@ -18,7 +18,7 @@ import com.nico.vlcfreemote.vlc_connector.Cmd_Prev;
 import com.nico.vlcfreemote.vlc_connector.Cmd_SetVolume;
 import com.nico.vlcfreemote.vlc_connector.Cmd_ToggleFullscreen;
 import com.nico.vlcfreemote.vlc_connector.Cmd_TogglePlay;
-import com.nico.vlcfreemote.vlc_connector.VlcStatus;
+import com.nico.vlcfreemote.model.VlcStatus;
 
 import java.util.Locale;
 

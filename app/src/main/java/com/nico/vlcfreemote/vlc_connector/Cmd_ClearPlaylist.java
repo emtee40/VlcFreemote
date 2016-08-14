@@ -1,5 +1,7 @@
 package com.nico.vlcfreemote.vlc_connector;
 
+import com.nico.vlcfreemote.model.VlcStatus;
+
 public class Cmd_ClearPlaylist extends VlcCommand_ReturnsVlcStatus {
 
     public Cmd_ClearPlaylist(VlcStatus.ObserverRegister cb) {

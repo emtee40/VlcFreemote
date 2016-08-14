@@ -1,5 +1,6 @@
 package com.nico.vlcfreemote.vlc_connector;
 
+import com.nico.vlcfreemote.model.VlcStatus;
 import com.nico.vlcfreemote.vlc_connector.http_utils.Wget;
 import com.nico.vlcfreemote.vlc_connector.http_utils.XmlMogrifier;
 import com.nico.vlcfreemote.vlc_connector.http_utils.XmlObjectReader;

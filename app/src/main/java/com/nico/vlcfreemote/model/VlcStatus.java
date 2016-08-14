@@ -1,4 +1,4 @@
-package com.nico.vlcfreemote.vlc_connector;
+package com.nico.vlcfreemote.model;
 
 import android.content.res.Resources;
 

@@ -14,7 +14,7 @@ import com.nico.vlcfreemote.vlc_connector.Cmd_AddToPlaylist;
 import com.nico.vlcfreemote.vlc_connector.Cmd_TogglePlay;
 import com.nico.vlcfreemote.vlc_connector.RemoteVlc;
 import com.nico.vlcfreemote.vlc_connector.VlcCommand;
-import com.nico.vlcfreemote.vlc_connector.VlcStatus;
+import com.nico.vlcfreemote.model.VlcStatus;
 
 public class MainActivity extends FragmentActivity
                           implements RemoteVlc.ConnectionProvider,

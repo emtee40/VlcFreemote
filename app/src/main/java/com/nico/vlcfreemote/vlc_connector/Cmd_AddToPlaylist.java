@@ -1,5 +1,7 @@
 package com.nico.vlcfreemote.vlc_connector;
 
+import com.nico.vlcfreemote.model.VlcStatus;
+
 public class Cmd_AddToPlaylist extends VlcCommand_ReturnsVlcStatus {
 
     private final String mediaUri;

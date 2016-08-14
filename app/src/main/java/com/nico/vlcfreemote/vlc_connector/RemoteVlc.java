@@ -2,6 +2,7 @@ package com.nico.vlcfreemote.vlc_connector;
 
 import android.util.Base64;
 
+import com.nico.vlcfreemote.model.VlcStatus;
 import com.nico.vlcfreemote.net_utils.Server;
 import com.nico.vlcfreemote.vlc_connector.http_utils.Wget;
 

@@ -1,5 +1,7 @@
 package com.nico.vlcfreemote.vlc_connector;
 
+import com.nico.vlcfreemote.model.VlcStatus;
+
 public class Cmd_JumpToPositionPercent extends VlcCommand_ReturnsVlcStatus {
     private static final String URL_ENCODED_PERCENT = "%25";
     private final String pos;
