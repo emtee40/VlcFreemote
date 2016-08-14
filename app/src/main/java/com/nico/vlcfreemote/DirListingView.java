@@ -1,10 +1,11 @@
 package com.nico.vlcfreemote;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.nico.vlcfreemote.model.VlcPath;
 import com.nico.vlcfreemote.net_utils.Server;
@@ -123,20 +125,15 @@ public class DirListingView extends VlcFragment
                 break;
 
             case R.id.wDirListing_Bookmark:
-                vlcPath.bookmarkCurrentDirectory();
+                saveCurrentPathAsBookmark();
                 break;
 
             case R.id.wDirListing_JumpToBookmark:
-                List<String> lst = vlcPath.getBookmarks();
-                for (String p : lst) {
-                    Log.e("XXXXXXXXXX", p);
-                }
-                // TODO gotoBookmark();
+                jumpToBookmark();
                 break;
 
             case R.id.wDirListing_ManageBookmark:
-                // TODO deleteBookmark();
-                vlcPath.deleteBookmark(null);
+                deleteBookmark();
                 break;
 
             case R.id.wDirListing_PlayRandom:
@@ -190,6 +187,63 @@ public class DirListingView extends VlcFragment
     public void onServerChanged(final Server srv) {
         if (vlcPath != null) vlcPath.onServerChanged(srv);
     }
+
+    private void saveCurrentPathAsBookmark() {
+        vlcPath.bookmarkCurrentDirectory();
+
+        final String msg = String.format(getResources().getString(R.string.dir_listing_saved_bookmark), vlcPath.getPrettyCWD());
+        Toast toast = Toast.makeText(getActivity().getApplicationContext(), msg, Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
+    // TODO: Move to a Fragment?
+    private interface BookmarkCallback {
+        void onBookmarkSelected(final String uri, final String prettyName);
+    }
+
+    private void jumpToBookmark() {
+        displayBookmarkPicker(R.string.R_string_dir_listing_goto_bookmark_title, new BookmarkCallback() {
+            @Override
+            public void onBookmarkSelected(String uri, String prettyName) {
+                vlcPath.cd(uri, prettyName);
+                triggerCurrentPathListUpdate();
+            }
+        });
+    }
+
+    private void deleteBookmark() {
+        displayBookmarkPicker(R.string.R_string_dir_listing_delete_bookmark_title, new BookmarkCallback() {
+            @Override
+            public void onBookmarkSelected(String uri, String prettyName) {
+                vlcPath.deleteBookmark(uri);
+            }
+        });
+    }
+
+    private void displayBookmarkPicker(int titleStringId, final BookmarkCallback cb) {
+        List<String> bookmarks = vlcPath.getBookmarks();
+
+        final List<String> pathDisplayNames = new ArrayList<>();
+        final List<String> pathUris = new ArrayList<>();
+        for (String bookmark : bookmarks) {
+            pathUris.add(bookmark);
+            pathDisplayNames.add(bookmark);
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(getActivity().getString(titleStringId));
+        builder.setItems(pathDisplayNames.toArray(new String[pathDisplayNames.size()]), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                final String uri = pathUris.get(which);
+                final String prettyName = pathDisplayNames.get(which);
+                cb.onBookmarkSelected(uri, prettyName);
+            }
+        });
+
+        builder.show();
+    }
+
 
     /************************************************************/
     /* List view stuff                                          */
