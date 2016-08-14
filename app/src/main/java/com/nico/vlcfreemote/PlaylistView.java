@@ -19,6 +19,7 @@ import com.nico.vlcfreemote.vlc_connector.Cmd_StartPlaying;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 
 public class PlaylistView extends VlcFragment implements View.OnClickListener {
@@ -196,7 +197,7 @@ public class PlaylistView extends VlcFragment implements View.OnClickListener {
             holder.wPlaylistElement_Duration = (TextView)row.findViewById(R.id.wPlaylistElement_Duration);
             if (holder.values.duration >= 0) {
                 holder.wPlaylistElement_Duration.
-                        setText(String.format("%d:%02d", holder.values.duration / 60, holder.values.duration % 60));
+                        setText(String.format(Locale.getDefault(), "%d:%02d", holder.values.duration / 60, holder.values.duration % 60));
             } else {
                 holder.wPlaylistElement_Duration.setText(context.getString(R.string.playlist_item_duration_unknown));
             }

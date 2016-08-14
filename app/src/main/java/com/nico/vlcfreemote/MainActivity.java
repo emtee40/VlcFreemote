@@ -192,8 +192,9 @@ public class MainActivity extends FragmentActivity
 
     @Override
     public void onVlcStatusFetchError() {
-        // TODO
-        Log.e("XXX", "Stat err");
+        // Getting here means there was an error that couldn't be handled. The only handled. The
+        // only reasonable thing to do is to disconnect and try again.
+        onConnectionError();
     }
 
     @Override
@@ -205,12 +206,8 @@ public class MainActivity extends FragmentActivity
         final String fmtMsg = String.format(msg, server);
 
         final String fmtMsgExtra;
-        if (e != null) {
-            final String msgExtra = getString(R.string.status_fatal_app_error_extra_info);
-            fmtMsgExtra = String.format(msgExtra, e.getMessage());
-        } else {
-            fmtMsgExtra = "";
-        }
+        final String msgExtra = getString(R.string.status_fatal_app_error_extra_info);
+        fmtMsgExtra = String.format(msgExtra, e.getMessage());
 
         Toast toast = Toast.makeText(getApplicationContext(), fmtMsg + fmtMsgExtra, Toast.LENGTH_LONG);
         toast.show();

@@ -63,6 +63,7 @@ public class PlayedFiles extends LocalSettings {
     }
 
     private void deleteOldPlayedFiles() {
+        // Hint: read from the inside out
         final String query = "DELETE FROM " + TABLE_NAME +
                              " WHERE " + COLUMN_ID + " < ( " +
                              "   SELECT min(t.id) " +

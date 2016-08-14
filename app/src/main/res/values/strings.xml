@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name">VlcFreemote</string>
-    <string name="action_settings">Settings</string>
-    <string name="title_activity_playlist_view">PlaylistView</string>
     <string name="main_menu_title_dir_listing">Browse</string>
     <string name="main_menu_title_playlist">Playlist</string>
     <string name="dir_listing_current_path">Current path…</string>
@@ -11,9 +9,7 @@
     <string name="playlist_element_name_placeholder">File name</string>
     <string name="playlist_element_duration_placeholder">Duration</string>
     <string name="playlist_element_remove_from_playlist">Remove from playlist</string>
-    <string name="status_invalid_vlc_response">VLC sent a wrong XML document or a response that otherwise can\'t be understood.</string>
-    <string name="stats_vlc_parser_internal_error">An internal error was found when trying to parse VLC\'s response. The application may be out of memory.</string>
-    <string name="status_vlc_cant_connect">Couldn\'t connect to VLC at %1$s. Please select a new server.</string>
+    <string name="status_vlc_cant_connect">Could not connect to VLC at %1$s. Please select a new server.</string>
     <string name="status_fatal_app_error">A fatal error was found when connecting to server %1$s. This typically means there is a bug in the application.</string>
     <string name="status_fatal_app_error_extra_info">Please submit a bug report. Additional information: %1$s</string>
     <string name="status_vlc_wrong_password">The supplied password is not valid</string>
@@ -39,7 +35,7 @@
     <string name="server_select_request_password_dialog_title">Enter password…</string>
     <string name="wPlayer_PlayPosition_CurrentPositionText">00:00</string>
     <string name="playlist_view_clear_playlist_button">Clear</string>
-    <string name="playlist_item_duration_unknown"></string>
+    <string name="playlist_item_duration_unknown"> </string>
     <string name="playlist_view_refresh_playlist_button">Refresh</string>
     <string name="wPlayer_ToggleMoreOptions">See more options</string>
     <string name="wPlayer_ToggleFullscreen">Toggle Fullscreen</string>

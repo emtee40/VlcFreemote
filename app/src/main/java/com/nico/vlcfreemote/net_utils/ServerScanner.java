@@ -92,7 +92,7 @@ public class ServerScanner extends AsyncTask<Void, Server, List<Server>> {
     /* Get local network interfaces                             */
     /************************************************************/
 
-    private static final String IPADDRESS_PATTERN =
+    private static final String IP_ADDRESS_PATTERN =
             "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
                     "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
                     "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
@@ -109,7 +109,7 @@ public class ServerScanner extends AsyncTask<Void, Server, List<Server>> {
      * @return list of IPs for local networks, eg ["192.168.0.", "127.0.0."]
      */
     private static List<String> getLocalNetworks() {
-        final Pattern ip_pattern = Pattern.compile(IPADDRESS_PATTERN);
+        final Pattern ip_pattern = Pattern.compile(IP_ADDRESS_PATTERN);
 
         List<String> addresses = new ArrayList<>();
         final List<NetworkInterface> interfaces;

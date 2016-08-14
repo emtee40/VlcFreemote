@@ -75,9 +75,9 @@ public class RememberedServers extends LocalSettings {
      * @return Last used server
      */
     public Server getLastUsedServer() throws LocalSettingsError {
-        final String query = "SELECT * "+
-                             "  FROM " + TABLE_NAME +
-                             " WHERE " + COLUMN_LAST_USED+ " =?";
+        final String query = "SELECT * " +
+                             "   FROM "  + TABLE_NAME +
+                             "  WHERE "  + COLUMN_LAST_USED+ " =?";
         final String[] args = new String[]{"1"};
 
         Cursor res = getReadableDatabase().rawQuery(query, args);

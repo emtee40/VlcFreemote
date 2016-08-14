@@ -1,7 +1,5 @@
 package com.nico.vlcfreemote.vlc_connector;
 
-import android.util.Log;
-
 import com.nico.vlcfreemote.vlc_connector.http_utils.Wget;
 import com.nico.vlcfreemote.vlc_connector.http_utils.XmlListReader;
 import com.nico.vlcfreemote.vlc_connector.http_utils.XmlMogrifier;

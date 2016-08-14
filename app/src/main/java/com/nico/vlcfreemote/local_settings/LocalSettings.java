@@ -42,7 +42,7 @@ public abstract class LocalSettings extends SQLiteOpenHelper implements BaseColu
         SQLiteDatabase db = this.getWritableDatabase();
         //noinspection TryFinallyCanBeTryWithResources
         try {
-            db.insert(table, null, values);
+            db.insertOrThrow(table, null, values);
         } finally {
             db.close();
         }
