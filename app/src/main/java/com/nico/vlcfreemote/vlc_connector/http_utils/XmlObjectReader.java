@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class XmlObjectReader<T> extends XmlMogrifier<T> {
-    public XmlObjectReader(String src, String interestingTag, XmlKeyValReader<T> xmlKeyValReader, Callback<T> callback) {
-        super(src, interestingTag, xmlKeyValReader, callback);
+    public XmlObjectReader(String src, XmlKeyValReader<T> xmlKeyValReader, Callback<T> callback) {
+        super(src, null, xmlKeyValReader, callback);
     }
 
     @Override

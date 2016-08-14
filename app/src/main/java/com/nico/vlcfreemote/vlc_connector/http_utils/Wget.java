@@ -32,10 +32,10 @@ public class Wget extends AsyncTask<String, Void, String> {
     private static final int HTTP_RESPONSE_OK = 200;
 
     private final String auth;
-    final Callback callback;
-    final CallbackWhenTaskFinished cb2;
-    Exception request_exception;
-    int httpRetCode;
+    private final Callback callback;
+    private final CallbackWhenTaskFinished cb2;
+    private Exception request_exception;
+    private int httpRetCode;
 
     public Wget(final String url, final String auth, Callback callback, CallbackWhenTaskFinished cb2) {
         this.auth = auth;

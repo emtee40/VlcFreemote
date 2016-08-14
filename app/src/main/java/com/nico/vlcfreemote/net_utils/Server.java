@@ -4,7 +4,7 @@ public class Server {
     public final String ip;
     public final Integer sshPort;
     public final Integer vlcPort;
-    public String password;
+    private String password;
     private String lastPath;
 
     public Server(String ip, Integer vlcPort, Integer sshPort) {

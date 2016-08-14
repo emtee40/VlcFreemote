@@ -102,7 +102,7 @@ public abstract class VlcCommand_ReturnsVlcStatus implements VlcCommand {
                     }
                 };
 
-                new XmlObjectReader<>(result, null, kvReader, new XmlMogrifier.Callback<VlcStatus>() {
+                new XmlObjectReader<>(result, kvReader, new XmlMogrifier.Callback<VlcStatus>() {
                     @Override
                     public void onXmlSystemError(Exception e) {
                         generalCallback.onSystemError(e);

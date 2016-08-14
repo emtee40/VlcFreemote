@@ -25,7 +25,7 @@ public abstract class VlcFragment extends Fragment {
         vlcProvider = null;
     }
 
-    protected RemoteVlc getVlc() {
+    RemoteVlc getVlc() {
         return vlcProvider.getActiveVlcConnection();
     }
 }

@@ -41,7 +41,7 @@ public class VlcPath {
     // in saving them all, so there will be a timeout after which we can consider the user has
     // decided; only then will the directory be saved.
     private static final int LAST_PATH_SAVE_DELAY_MS = 5000;
-    final Handler bgRunner = new Handler();
+    private final Handler bgRunner = new Handler();
     private Runnable saveLastPathTask = null;
 
     public VlcPath(RemoteVlc.ConnectionProvider vlcProvider, Context dbContext, UICallback uiCallback) {

@@ -57,8 +57,8 @@ public abstract class XmlMogrifier<T> extends AsyncTask<String, Void, List<T>> {
      * @param xmlKeyValReader A key=>value converter. @see XmlKeyValReader
      * @param callback Callback to invoke after processing.
      */
-    protected XmlMogrifier(final String src, final String interestingTag,
-                        final XmlKeyValReader<T> xmlKeyValReader, final Callback<T> callback) {
+    XmlMogrifier(final String src, final String interestingTag,
+                 final XmlKeyValReader<T> xmlKeyValReader, final Callback<T> callback) {
 
         if (xmlParserFactory == null) try {
             xmlParserFactory = XmlPullParserFactory.newInstance();

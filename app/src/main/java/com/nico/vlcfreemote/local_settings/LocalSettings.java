@@ -17,7 +17,7 @@ public abstract class LocalSettings extends SQLiteOpenHelper implements BaseColu
         public String getMessage() { return "Unexpected SQLite error. Try clearing application data."; }
     }
 
-    public LocalSettings(Context context, final String DbName, int DbVersion) {
+    LocalSettings(Context context, final String DbName, int DbVersion) {
         super(context, DbName, null, DbVersion);
     }
 
@@ -38,7 +38,7 @@ public abstract class LocalSettings extends SQLiteOpenHelper implements BaseColu
         onUpgrade(db, i, i1);
     }
 
-    public void insert(final String table, final ContentValues values) {
+    void insert(final String table, final ContentValues values) {
         SQLiteDatabase db = this.getWritableDatabase();
         //noinspection TryFinallyCanBeTryWithResources
         try {
@@ -48,7 +48,7 @@ public abstract class LocalSettings extends SQLiteOpenHelper implements BaseColu
         }
     }
 
-    protected <Args> void run(final String query, Args[] args) {
+    <Args> void run(final String query, Args[] args) {
         SQLiteDatabase db = this.getWritableDatabase();
         //noinspection TryFinallyCanBeTryWithResources
         try {

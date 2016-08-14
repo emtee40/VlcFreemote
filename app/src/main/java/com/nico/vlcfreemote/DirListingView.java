@@ -148,7 +148,7 @@ public class DirListingView extends VlcFragment
     /************************************************************/
     /* UI stuff                                                 */
     /************************************************************/
-    public void triggerCurrentPathListUpdate() {
+    private void triggerCurrentPathListUpdate() {
         // If there's no activity we're not being displayed, so it's better not to update the UI
         if (!isAdded()) return;
         final FragmentActivity activity = getActivity();
