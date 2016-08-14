@@ -1,5 +1,6 @@
 package com.nico.vlcfreemote;
 
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.widget.Toast;
 import com.nico.vlcfreemote.model.Server;
 import com.nico.vlcfreemote.vlc_connector.Cmd_AddToPlaylist;
 import com.nico.vlcfreemote.vlc_connector.Cmd_TogglePlay;
+import com.nico.vlcfreemote.vlc_connector.Cmd_UpdateStatus;
 import com.nico.vlcfreemote.vlc_connector.RemoteVlc;
 import com.nico.vlcfreemote.vlc_connector.VlcCommand;
 import com.nico.vlcfreemote.model.VlcStatus;
@@ -136,6 +138,7 @@ public class MainActivity extends FragmentActivity
                 getSupportFragmentManager(), playlistView, dirListView, serverSelectView);
 
         onNewServerSelected(serverSelectView.getLastUsedServer(this));
+        // TODO updateVlcStatus();
     }
 
     @Override
@@ -151,6 +154,20 @@ public class MainActivity extends FragmentActivity
         playlistView.triggerPlaylistUpdate();
         dirListView.onServerChanged(srv);
         mainMenu.jumpToPlaylist();
+    }
+
+    private void updateVlcStatus() {
+        // TODO
+        if (! vlcConnection.getLatestStats().isStopped()) {
+            (new Handler()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Log.e("XXXXXXX", "DELAYED");
+                    vlcConnection.exec(new Cmd_UpdateStatus(vlcConnection));
+                    updateVlcStatus();
+                }
+            }, 5000);
+        }
     }
 
     @Override
