@@ -32,9 +32,9 @@ public class Bookmarks extends LocalSettings {
     @Override
     protected String getCreateTableSQL() {
         return "CREATE TABLE " + TABLE_NAME + " (" +
-                    COLUMN_IP + " TEXT, " +
+                    COLUMN_IP      + " VARCHAR(15),, " +
                     COLUMN_VLCPORT + " INTEGER, " +
-                    COLUMN_PATH + " TEXT, " +
+                    COLUMN_PATH    + " TEXT, " +
                     "PRIMARY KEY ("+ COLUMN_IP + "," + COLUMN_VLCPORT + ", " + COLUMN_PATH + ") " +
                 " )";
     }
@@ -83,14 +83,6 @@ public class Bookmarks extends LocalSettings {
                              "        AND " + COLUMN_VLCPORT + "=?" +
                              "        AND " + COLUMN_PATH + "=?";
         final String[] args = new String[]{srv.ip, String.valueOf(srv.vlcPort), path};
-        run(query, args);
-    }
-
-    public void forgetAllBookmarks(final Server srv) {
-        final String query = "DELETE FROM " + TABLE_NAME +
-                             "      WHERE " + COLUMN_IP + "=? " +
-                             "        AND " + COLUMN_VLCPORT + "=?";
-        final String[] args = new String[]{srv.ip, String.valueOf(srv.vlcPort)};
         run(query, args);
     }
 }

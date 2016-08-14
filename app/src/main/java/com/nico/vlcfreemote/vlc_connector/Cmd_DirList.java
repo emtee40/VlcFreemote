@@ -12,6 +12,7 @@ public class Cmd_DirList implements VlcCommand {
 
     public static class DirListEntry {
         public boolean isDirectory;
+        public boolean wasPlayedBefore = false;
         public String name;
         public String path;
         public String human_friendly_path;
@@ -25,10 +26,12 @@ public class Cmd_DirList implements VlcCommand {
 
     private final String path;
     private final Callback cb;
+    private final List<String> filesPlayedInDir;
 
-    public Cmd_DirList(final String path, Callback cb) {
+    public Cmd_DirList(final String path, final List<String> filesPlayedInDir, Callback cb) {
         this.path = path;
         this.cb = cb;
+        this.filesPlayedInDir = filesPlayedInDir;
     }
 
     @Override
@@ -59,7 +62,7 @@ public class Cmd_DirList implements VlcCommand {
             public void onResponse(final String result) {
 
                 // If the request fails (ie dir doesn't exist) Vlc still returns http 200
-                if (result.indexOf("<title>Error loading /requests/browse.xml</title>") != -1) {
+                if (result.contains("<title>Error loading /requests/browse.xml</title>")) {
                     onHttpFail(-1, result);
                     return;
                 }
@@ -101,6 +104,10 @@ public class Cmd_DirList implements VlcCommand {
 
                     @Override
                     public void onResult(List<DirListEntry> results) {
+                        for (DirListEntry e : results) {
+                            e.wasPlayedBefore = (filesPlayedInDir.contains(e.path));
+                        }
+
                         cb.onContentAvailable(results);
                     }
                 });

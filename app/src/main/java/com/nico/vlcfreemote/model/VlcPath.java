@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.nico.vlcfreemote.local_settings.Bookmarks;
+import com.nico.vlcfreemote.local_settings.PlayedFiles;
 import com.nico.vlcfreemote.local_settings.RememberedServers;
 import com.nico.vlcfreemote.net_utils.Server;
 import com.nico.vlcfreemote.vlc_connector.Cmd_DirList;
@@ -105,7 +106,11 @@ public class VlcPath {
     }
 
     private void updateDirContents_impl(final boolean mayRecurse) {
-        vlcProvider.getActiveVlcConnection().exec(new Cmd_DirList(currentPath, new Cmd_DirList.Callback() {
+        final Server srv = vlcProvider.getActiveVlcConnection().getServer();
+        List<String> filesPlayedInDir = (new PlayedFiles(dbContext)).getListOfPlayedFiles(srv, currentPath);
+
+        vlcProvider.getActiveVlcConnection().exec(new Cmd_DirList(currentPath, filesPlayedInDir,
+                                                        new Cmd_DirList.Callback() {
             @Override
             public void onContentAvailable(List<Cmd_DirList.DirListEntry> results) {
                 uiCallback.onNewDirListAvailable(results);
@@ -142,5 +147,10 @@ public class VlcPath {
     public void deleteBookmark(final String path) {
         final Server srv = vlcProvider.getActiveVlcConnection().getServer();
         (new Bookmarks(dbContext)).deleteBookmark(srv, path);
+    }
+
+    public void onAddToPlaylistRequested(String path) {
+        final Server srv = vlcProvider.getActiveVlcConnection().getServer();
+        (new PlayedFiles(dbContext)).addPlayedFile(srv, path);
     }
 }

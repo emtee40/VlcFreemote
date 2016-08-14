@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -110,7 +111,7 @@ public class DirListingView extends VlcFragment
         switch (v.getId()) {
             case R.id.wDirListElement_Action:
                 if (item == null) throw new RuntimeException(DirListingView.class.getName() + " received a menu item with no tag");
-                onAddToPlaylistRequested(item.path);
+                onAddToPlaylistRequested(item);
                 break;
 
             case R.id.wDirListElement_Name:
@@ -119,7 +120,7 @@ public class DirListingView extends VlcFragment
                     vlcPath.cd(item.path, item.human_friendly_path);
                     triggerCurrentPathListUpdate();
                 } else {
-                    onAddToPlaylistRequested(item.path);
+                    onAddToPlaylistRequested(item);
                 }
 
                 break;
@@ -175,8 +176,13 @@ public class DirListingView extends VlcFragment
         dirViewAdapter.addAll(results);
     }
 
-    private void onAddToPlaylistRequested(final String path) {
-        callback.onAddToPlaylistRequested(path);
+    private void onAddToPlaylistRequested(final Cmd_DirList.DirListEntry path) {
+        callback.onAddToPlaylistRequested(path.path);
+
+
+        if (! path.isDirectory) {
+            vlcPath.onAddToPlaylistRequested(path.path);
+        }
     }
 
     @Override
@@ -289,8 +295,12 @@ public class DirListingView extends VlcFragment
             holder.fName.setOnClickListener(onClickCallback);
 
             holder.alreadySeen = (ImageView)row.findViewById(R.id.wDirListElement_AlreadySeen);
-            // TODO if (holder.values.seemsLikeAVideo()) holder.alreadySeen.setVisibility(View.VISIBLE);
-            holder.fName.setOnClickListener(onClickCallback);
+            holder.alreadySeen.setOnClickListener(onClickCallback);
+            if (holder.values.wasPlayedBefore) {
+                holder.alreadySeen.setVisibility(View.VISIBLE);
+            } else {
+                holder.alreadySeen.setVisibility(View.INVISIBLE);
+            }
 
             holder.actionButton = (ImageButton)row.findViewById(R.id.wDirListElement_Action);
             holder.actionButton.setTag(holder.values);
