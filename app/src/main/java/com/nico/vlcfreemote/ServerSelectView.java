@@ -115,7 +115,7 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
 
     private void onServerSelected(final Server srv) {
         setScanModeOff();
-        Log.e(getClass().getSimpleName(), "Selected server " + srv.ip + ":" + srv.vlcPort);
+        Log.i(getClass().getSimpleName(), "Selected server " + srv.ip + ":" + srv.vlcPort);
 
         if (srv.vlcPort == null) {
             CharSequence msg = "You can't use this server: functionality unimplemented (yet).";
@@ -124,26 +124,27 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
             return;
         }
 
-        // Get last used pass for this server, if known
+        // Get last used pass for this server, if known. This server will have some settings saved
+        // (Like last used path)
         final RememberedServers db = new RememberedServers(getContext());
-        final String rememberedPass = db.getRememberedPassword(srv);
+        final Server rememberedServer = db.getRememberedServer(srv);
 
         // Show a dialog to confirm the pass (or enter a new one)
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(getString(R.string.server_select_request_password_dialog_title));
         final EditText input = new EditText(getActivity());
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        input.setText(rememberedPass);
+        input.setText(rememberedServer.getPassword());
         builder.setView(input);
 
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 final String password = input.getText().toString();
-                srv.setPassword(password);
+                rememberedServer.setPassword(password);
 
-                db.rememberServer(srv);
-                callback.onNewServerSelected(srv);
+                db.rememberServer(rememberedServer);
+                callback.onNewServerSelected(rememberedServer);
             }
         });
 

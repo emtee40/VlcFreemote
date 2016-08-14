@@ -47,11 +47,9 @@ public class VlcPath {
         final Server srv = vlcProvider.getActiveVlcConnection().getServer();
 
         if (srv.getLastPath() == null) {
-            Log.e("XXXXXXXX", "Default path used ");
             this.currentPath = VLC_DEFAULT_START_PATH;
             this.prettyPath = VLC_DEFAULT_START_PATH;
         } else {
-            Log.e("XXXXXXXX", "Path == " + srv.getLastPath());
             this.currentPath = srv.getLastPath();
             this.prettyPath = srv.getLastPath();
         }
@@ -63,7 +61,6 @@ public class VlcPath {
 
     public void onServerChanged(final Server srv) {
         if (srv.getLastPath() != null) {
-            Log.e("CD TO ", "XXX" + srv.getLastPath());
             this.currentPath = srv.getLastPath();
             this.prettyPath = srv.getLastPath();
         }

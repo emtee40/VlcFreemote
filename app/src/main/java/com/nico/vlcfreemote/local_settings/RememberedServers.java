@@ -1,6 +1,5 @@
 package com.nico.vlcfreemote.local_settings;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
@@ -41,21 +40,22 @@ public class RememberedServers extends LocalSettings {
 
 
     /**
-     * Remember a server and its password. Will automatically set the last used flag.
+     * Remember a server and its settings. Will automatically set the last used flag.
      * @param srv Last used server
      */
     public void rememberServer(final Server srv) {
-        if (srv.vlcPort != null) {
-            resetLastUsedServer();
-        }
+        final String query = " REPLACE INTO " + TABLE_NAME + "( " +
+                                    COLUMN_IP + "," +
+                                    COLUMN_VLCPORT + "," +
+                                    COLUMN_PASS + "," +
+                                    COLUMN_LAST_PATH + ", " +
+                                    COLUMN_LAST_USED +
+                             " ) VALUES ( ?, ?, ?, ?, 1)";
 
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_IP, srv.ip);
-        values.put(COLUMN_VLCPORT, srv.vlcPort);
-        values.put(COLUMN_LAST_USED, 1);
-        values.put(COLUMN_PASS, srv.getPassword());
+        final String[] args = new String[]{srv.ip, String.valueOf(srv.vlcPort),
+                                           srv.getPassword(), srv.getLastPath()};
 
-        insert(TABLE_NAME, values);
+        run(query, args);
     }
 
     /**
@@ -82,13 +82,44 @@ public class RememberedServers extends LocalSettings {
 
         Cursor res = getReadableDatabase().rawQuery(query, args);
 
-        if (res.getCount() == 0) {
-            return null;
-        }
-
         if (res.getCount() > 1) {
             Log.w(getClass().getSimpleName(), "Multiple last used servers. Will reset flag.");
             resetLastUsedServer();
+        }
+
+        return readServerFrom(res);
+    }
+
+    /**
+     * Returns the remembered server for an ip:port set (in a Server object). This is useful
+     * to retrieve the saved settings (ie last path and password)
+     * @param srv ip:port that needs a password
+     * @return Known last password, or null if not known
+     */
+    public Server getRememberedServer(final Server srv) {
+        final String query = "SELECT * " +
+                             "  FROM " + TABLE_NAME +
+                             " WHERE " + COLUMN_IP + " =? " +
+                             "   AND " + COLUMN_VLCPORT + " =? ";
+
+        final String[] args = new String[]{srv.ip, String.valueOf(srv.vlcPort)};
+
+        Cursor res = getReadableDatabase().rawQuery(query, args);
+
+        if ((res.getCount() > 1) || (res.getColumnIndex(COLUMN_PASS) == -1)) {
+            // End of world exception: either unique constrain failed in sqlite or the pass column
+            // is unknown. In any case, something is horribly wrong and we can't recover.
+            res.close();
+            // TODO throw new IOException("ASD");
+        }
+
+        return readServerFrom(res);
+    }
+
+    private Server readServerFrom(final Cursor c) {
+        if (c.getCount() == 0) {
+            c.close();
+            return null;
         }
 
         final String ip;
@@ -96,17 +127,17 @@ public class RememberedServers extends LocalSettings {
         final String pass;
         final String lastPath;
 
-        res.moveToFirst();
+        c.moveToFirst();
         try {
-            ip = res.getString(res.getColumnIndexOrThrow(COLUMN_IP));
-            port = res.getInt(res.getColumnIndexOrThrow(COLUMN_VLCPORT));
-            pass = res.getString(res.getColumnIndexOrThrow(COLUMN_PASS));
-            lastPath = res.getString(res.getColumnIndexOrThrow(COLUMN_LAST_PATH));
+            ip = c.getString(c.getColumnIndexOrThrow(COLUMN_IP));
+            port = c.getInt(c.getColumnIndexOrThrow(COLUMN_VLCPORT));
+            pass = c.getString(c.getColumnIndexOrThrow(COLUMN_PASS));
+            lastPath = c.getString(c.getColumnIndexOrThrow(COLUMN_LAST_PATH));
         } catch (Exception e) {
             // TODO throw new IOException("ASD");
             throw e;
         } finally {
-            res.close();
+            c.close();
         }
 
         Server srv = new Server(ip, port, null);
@@ -116,43 +147,10 @@ public class RememberedServers extends LocalSettings {
     }
 
     /**
-     * Returns the password for a remembered server
-     * @param srv ip:port that needs a password
-     * @return Known last password, or null if not known
-     */
-    public String getRememberedPassword(final Server srv) {
-        final String query = "SELECT " + COLUMN_PASS +
-                             "  FROM " + TABLE_NAME +
-                             " WHERE " + COLUMN_IP + " =? " +
-                             "   AND " + COLUMN_VLCPORT + " =? ";
-
-        final String[] args = new String[]{srv.ip, String.valueOf(srv.vlcPort)};
-
-        Cursor res = getReadableDatabase().rawQuery(query, args);
-
-        if (res.getCount() == 0) {
-            return null;
-        }
-
-        if ((res.getCount() > 1) || (res.getColumnIndex(COLUMN_PASS) == -1)) {
-            // End of world exception: either unique constrain failed in sqlite or the pass column
-            // is unknown. In any case, something is horribly wrong and we can't recover.
-            res.close();
-            // TODO throw new IOException("ASD");
-        }
-
-        res.moveToFirst();
-        final String pass = res.getString(res.getColumnIndex(COLUMN_PASS));
-        res.close();
-        return pass;
-    }
-
-    /**
      * Updates the last known path for a server
      * @param srv Current server
      */
     public void saveLastPathForServer(final Server srv) {
-        Log.e("XXXXXXXX", "SAVED " + srv.getLastPath());
         final String query = "UPDATE " + TABLE_NAME +
                              "   SET " + COLUMN_LAST_PATH + "=? " +
                              " WHERE " + COLUMN_IP + "=? " +
