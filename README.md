@@ -17,3 +17,17 @@ In the future, whenever I get some free time, I'd like to add the ability to sta
  
 ### Why isn't this in Google play?
  Mostly cause I'm lazy and cheap. Getting a Google Play account costs 10 dollars or so, and I'm too lazy and too cheap to get one. Want me to upload it to Google Play? Feel free to buy me a beer. If not you can just get the APK from Github, or download the source code and build it yourself.
+
+### TODO
+* Auto start Vlc if shutdown when an ssh server is present
+* Add widget to control Vlc from a "desktop" (?) widget
+* Idem for lock screen?
+* Control remote Vlc volume from local volume key
+* Add chron job to auto get last status
+* Fix current play indicator in playlist view
+* Add license
+* Publish updated apk to GH
+* Publish apk to store?
+
+
+
