@@ -138,7 +138,6 @@ public class MainActivity extends FragmentActivity
                 getSupportFragmentManager(), playlistView, dirListView, serverSelectView);
 
         onNewServerSelected(serverSelectView.getLastUsedServer(this));
-        // TODO updateVlcStatus();
     }
 
     @Override
@@ -154,20 +153,9 @@ public class MainActivity extends FragmentActivity
         playlistView.triggerPlaylistUpdate();
         dirListView.onServerChanged(srv);
         mainMenu.jumpToPlaylist();
-    }
 
-    private void updateVlcStatus() {
-        // TODO
-        if (! vlcConnection.getLatestStats().isStopped()) {
-            (new Handler()).postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    Log.e("XXXXXXX", "DELAYED");
-                    vlcConnection.exec(new Cmd_UpdateStatus(vlcConnection));
-                    updateVlcStatus();
-                }
-            }, 5000);
-        }
+        // Update status on new server
+        vlcConnection.exec(new Cmd_UpdateStatus(vlcConnection));
     }
 
     @Override
@@ -183,9 +171,23 @@ public class MainActivity extends FragmentActivity
     }
 
     @Override
-    public void onVlcStatusUpdate(VlcStatus results) {
-        this.playlistView.onVlcStatusUpdate(results);
-        this.playerControllerView.onStatusUpdated(this, results);
+    public void onVlcStatusUpdate(VlcStatus result) {
+        this.playlistView.onVlcStatusUpdate(result);
+        this.playerControllerView.onStatusUpdated(this, result);
+
+        if (result.isPlaying()) {
+            /*
+            TODO: This works but if someone else requests a status update (eg by clicking play)
+            then there will be 2 postDealyed calls. We need to cancel the prev call.
+            (new Handler()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Log.e("XXXXXXX", "DELAYED");
+                    vlcConnection.exec(new Cmd_UpdateStatus(vlcConnection));
+                }
+            }, 2500);
+            */
+        }
     }
 
     @Override
