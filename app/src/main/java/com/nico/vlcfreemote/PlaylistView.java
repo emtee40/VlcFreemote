@@ -25,6 +25,7 @@ import java.util.Locale;
 public class PlaylistView extends VlcFragment implements View.OnClickListener {
 
     private PlaylistEntry_ViewAdapter playlistViewAdapter;
+    private boolean attached = false;
 
     /************************************************************/
     /* Mostly Android boilerplate                               */
@@ -56,6 +57,20 @@ public class PlaylistView extends VlcFragment implements View.OnClickListener {
             triggerPlaylistUpdate();
         }
     }
+
+    @Override
+    public void onAttach(Context activity) {
+        super.onAttach(activity);
+        attached = true;
+        triggerPlaylistUpdate();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        attached = false;
+    }
+
 
     /************************************************************/
     /* UI Logic                                                 */
@@ -109,6 +124,9 @@ public class PlaylistView extends VlcFragment implements View.OnClickListener {
     }
 
     public void triggerPlaylistUpdate() {
+        // Vlc may be null if the parent activity hasn't attached yet
+        if (! attached) return;
+
         getVlc().exec(new Cmd_GetPlaylist(new Cmd_GetPlaylist.Callback() {
             @Override
             public void onContentAvailable(List<Cmd_GetPlaylist.PlaylistEntry> results) {

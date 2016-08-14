@@ -148,6 +148,7 @@ public class MainActivity extends FragmentActivity
             this.vlcConnection = new RemoteVlc(new Server("", 0, null), this);
         }
 
+        playlistView.triggerPlaylistUpdate();
         dirListView.onServerChanged(srv);
         mainMenu.jumpToPlaylist();
     }

@@ -3,7 +3,6 @@ package com.nico.vlcfreemote;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -143,14 +142,6 @@ public class PlayerControllerView extends VlcFragment
     }
 
     public void onStatusUpdated(final Activity activity, VlcStatus status) {
-        Log.e("XXXXXXXX", "currentMedia_album=" + status.currentMedia_album);
-        Log.e("XXXXXXXX", "currentMedia_artist=" + status.currentMedia_artist);
-        Log.e("XXXXXXXX", "currentMedia_filename=" + status.currentMedia_filename);
-        Log.e("XXXXXXXX", "currentMedia_title=" + status.currentMedia_title);
-        Log.e("XXXXXXXX", "currentMedia_trackNumber=" + status.currentMedia_trackNumber);
-        Log.e("XXXXXXXX", "currentMedia_tracksTotal=" + status.currentMedia_tracksTotal);
-        Log.e("XXXXXXXX", "state=" + status.state);
-
         final String currFile = status.getCurrentPlayingFile(activity.getResources());
         final String currState = status.getHumanReadableState();
         final String stateFmt = activity.getResources().getString(R.string.general_vlc_status);
