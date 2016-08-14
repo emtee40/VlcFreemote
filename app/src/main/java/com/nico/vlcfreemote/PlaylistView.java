@@ -117,7 +117,7 @@ public class PlaylistView extends VlcFragment implements View.OnClickListener {
             }
 
             @Override
-            public void onContentError(Exception e) {
+            public void onContentError() {
                 CharSequence msg = getString(R.string.error_on_playlist_retrieve);
                 Toast toast = Toast.makeText(getActivity().getApplicationContext(), msg, Toast.LENGTH_LONG);
                 toast.show();
@@ -130,7 +130,7 @@ public class PlaylistView extends VlcFragment implements View.OnClickListener {
     /************************************************************/
     private static class PlaylistEntry_ViewAdapter extends ArrayAdapter<Cmd_GetPlaylist.PlaylistEntry> {
         private static final int layoutResourceId = R.layout.fragment_playlist_list_element;
-        private Context context;
+        private final Context context;
         private final View.OnClickListener onClickCallback;
         //private String currentPlayingMediaTitle;
 

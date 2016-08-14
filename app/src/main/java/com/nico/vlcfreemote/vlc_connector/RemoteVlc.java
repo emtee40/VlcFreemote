@@ -27,7 +27,7 @@ public class RemoteVlc implements VlcStatus.ObserverRegister,
     private final Server srv;
     private Wget lastCmd = null;
     private  VlcCommand lowPriorityCommand = null;
-    private PriorityQueue<VlcCommand> pendingCommands;
+    private final PriorityQueue<VlcCommand> pendingCommands;
 
     /**
      * Construct an object to connect to a remote Vlc

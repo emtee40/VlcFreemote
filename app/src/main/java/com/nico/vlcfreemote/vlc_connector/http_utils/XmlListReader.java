@@ -15,7 +15,7 @@ public class XmlListReader<T> extends XmlMogrifier<T> {
 
     @Override
     protected List<T> xmlParseImpl(final XmlPullParser xpp, final XmlKeyValReader<T> objDeserializer,
-                                   final String interestingTag, final String src)
+                                   final String interestingTag)
             throws CantParseXmlResponse, IllegalAccessException, InstantiationException
     {
         List<T> foundObjects = new ArrayList<>();

@@ -14,10 +14,10 @@ import java.net.URL;
 public class Wget extends AsyncTask<String, Void, String> {
 
     public interface Callback {
-        void onConnectionError(final Exception request_exception);
+        void onConnectionError();
         void onResponse(final String result);
         void onAuthFailure();
-        void onHttpFail(int httpRetCode, String result);
+        void onHttpNotOkResponse();
     }
 
     /**
@@ -93,13 +93,13 @@ public class Wget extends AsyncTask<String, Void, String> {
         cb2.onTaskFinished();
 
         if (request_exception != null) {
-            callback.onConnectionError(request_exception);
+            callback.onConnectionError();
         } else if (httpRetCode == HTTP_RESPONSE_UNAUTHORIZED) {
             callback.onAuthFailure();
         } else if (httpRetCode == HTTP_RESPONSE_OK) {
             callback.onResponse(result);
         } else {
-            callback.onHttpFail(httpRetCode, result);
+            callback.onHttpNotOkResponse();
         }
     }
 }

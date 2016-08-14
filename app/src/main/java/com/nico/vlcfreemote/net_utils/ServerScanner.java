@@ -24,8 +24,8 @@ public class ServerScanner extends AsyncTask<Void, Server, List<Server>> {
 
     public interface Callback {
         void onServerDiscovered(final Server srv);
-        void onScanFinished(final List<Server> discoveredServers);
-        void onScanCancelled(final List<Server> discoveredServers);
+        void onScanFinished();
+        void onScanCancelled();
         void onNoNetworkAvailable();
     }
 
@@ -71,12 +71,12 @@ public class ServerScanner extends AsyncTask<Void, Server, List<Server>> {
     @Override
     protected void onPostExecute(final List<Server> discoveredServers) {
         if (no_network) cb.onNoNetworkAvailable();
-        cb.onScanFinished(discoveredServers);
+        cb.onScanFinished();
     }
 
     @Override
     protected void onCancelled(final List<Server> discoveredServers) {
-        cb.onScanCancelled(discoveredServers);
+        cb.onScanCancelled();
     }
 
     @Override

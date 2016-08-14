@@ -17,7 +17,7 @@ public class Cmd_GetPlaylist implements VlcCommand {
 
     public interface Callback {
         void onContentAvailable(List<PlaylistEntry> results);
-        void onContentError(Exception e);
+        void onContentError();
     }
 
     private final Callback cb;
@@ -38,7 +38,7 @@ public class Cmd_GetPlaylist implements VlcCommand {
     public Wget.Callback getWgetCallback(final VlcCommand.GeneralCallback generalCallback) {
         return new Wget.Callback() {
             @Override
-            public void onConnectionError(Exception request_exception) { generalCallback.onConnectionError(); }
+            public void onConnectionError() { generalCallback.onConnectionError(); }
 
             @Override
             public void onAuthFailure() {
@@ -46,8 +46,8 @@ public class Cmd_GetPlaylist implements VlcCommand {
             }
 
             @Override
-            public void onHttpFail(int httpRetCode, String result) {
-                cb.onContentError(null);
+            public void onHttpNotOkResponse() {
+                cb.onContentError();
             }
 
             @Override
@@ -73,7 +73,7 @@ public class Cmd_GetPlaylist implements VlcCommand {
 
                     @Override
                     public void onXmlDecodingError(Exception e) {
-                        cb.onContentError(e);
+                        cb.onContentError();
                     }
 
                     @Override

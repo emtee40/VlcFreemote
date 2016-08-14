@@ -13,7 +13,7 @@ public class XmlObjectReader<T> extends XmlMogrifier<T> {
     }
 
     @Override
-    protected List<T> xmlParseImpl(XmlPullParser xpp, XmlKeyValReader<T> xmlKeyValReader, String interestingTag, String src)
+    protected List<T> xmlParseImpl(XmlPullParser xpp, XmlKeyValReader<T> xmlKeyValReader, String interestingTag)
             throws CantParseXmlResponse, IllegalAccessException, InstantiationException {
 
         xmlKeyValReader.reset();

@@ -44,7 +44,7 @@ public class Cmd_DirList implements VlcCommand {
     public Wget.Callback getWgetCallback(final VlcCommand.GeneralCallback generalCallback) {
         return new Wget.Callback() {
             @Override
-            public void onConnectionError(Exception request_exception) { generalCallback.onConnectionError(); }
+            public void onConnectionError() { generalCallback.onConnectionError(); }
 
             @Override
             public void onAuthFailure() {
@@ -52,7 +52,7 @@ public class Cmd_DirList implements VlcCommand {
             }
 
             @Override
-            public void onHttpFail(int httpRetCode, String result) {
+            public void onHttpNotOkResponse() {
                 cb.onContentError();
             }
 
@@ -61,7 +61,7 @@ public class Cmd_DirList implements VlcCommand {
 
                 // If the request fails (ie dir doesn't exist) Vlc still returns http 200
                 if (result.contains("<title>Error loading /requests/browse.xml</title>")) {
-                    onHttpFail(-1, result);
+                    onHttpNotOkResponse();
                     return;
                 }
 

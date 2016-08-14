@@ -27,7 +27,6 @@ import com.nico.vlcfreemote.net_utils.Server;
 import com.nico.vlcfreemote.net_utils.ServerScanner;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class ServerSelectView extends Fragment implements View.OnClickListener {
@@ -200,13 +199,13 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
             }
 
             @Override
-            public void onScanFinished(List<Server> server) {
+            public void onScanFinished() {
                 setScanModeOff();
                 Log.i(getClass().getSimpleName(), "Completed network scan");
             }
 
             @Override
-            public void onScanCancelled(List<Server> servers) {
+            public void onScanCancelled() {
                 setScanModeOff();
                 Log.i(getClass().getSimpleName(), "Cancelled network scan");
             }

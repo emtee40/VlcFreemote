@@ -57,7 +57,7 @@ public abstract class XmlMogrifier<T> extends AsyncTask<String, Void, List<T>> {
      * @param xmlKeyValReader A key=>value converter. @see XmlKeyValReader
      * @param callback Callback to invoke after processing.
      */
-    public XmlMogrifier(final String src, final String interestingTag,
+    protected XmlMogrifier(final String src, final String interestingTag,
                         final XmlKeyValReader<T> xmlKeyValReader, final Callback<T> callback) {
 
         if (xmlParserFactory == null) try {
@@ -77,7 +77,7 @@ public abstract class XmlMogrifier<T> extends AsyncTask<String, Void, List<T>> {
         final String src = strings[0];
         try {
             final XmlPullParser xpp = createXmlParserFor(src);
-            return xmlParseImpl(xpp, xmlKeyValReader, this.interestingTag, src);
+            return xmlParseImpl(xpp, xmlKeyValReader, this.interestingTag);
         } catch (CantCreateXmlParser|CantParseXmlResponse|InstantiationException|IllegalAccessException e) {
             this.request_exception = e;
             return null;
@@ -106,7 +106,7 @@ public abstract class XmlMogrifier<T> extends AsyncTask<String, Void, List<T>> {
         public String getMessage() { return "Can't create an XML parser"; }
     }
 
-    public static class CantParseXmlResponse extends Exception {
+    static class CantParseXmlResponse extends Exception {
         @Override
         public String getMessage() { return "The XML response was invalid"; }
     }
@@ -126,13 +126,13 @@ public abstract class XmlMogrifier<T> extends AsyncTask<String, Void, List<T>> {
     }
 
     protected abstract List<T> xmlParseImpl(final XmlPullParser xpp, final XmlKeyValReader<T> xmlKeyValReader,
-                                            final String interestingTag, final String src)
+                                            final String interestingTag)
                 throws CantParseXmlResponse, IllegalAccessException, InstantiationException;
 
     private static XmlPullParserFactory xmlParserFactory = null;
     private final Callback<T> callback;
     private final XmlKeyValReader<T> xmlKeyValReader;
-    private String interestingTag;
+    private final String interestingTag;
     private Exception request_exception = null;
 }
 

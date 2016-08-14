@@ -18,7 +18,7 @@ public abstract class VlcCommand_ReturnsVlcStatus implements VlcCommand {
     public Wget.Callback getWgetCallback(final VlcCommand.GeneralCallback generalCallback) {
         return new Wget.Callback() {
             @Override
-            public void onConnectionError(Exception request_exception) { generalCallback.onConnectionError(); }
+            public void onConnectionError() { generalCallback.onConnectionError(); }
 
             @Override
             public void onAuthFailure() {
@@ -26,7 +26,7 @@ public abstract class VlcCommand_ReturnsVlcStatus implements VlcCommand {
             }
 
             @Override
-            public void onHttpFail(int httpRetCode, String result) {
+            public void onHttpNotOkResponse() {
                 cb.onVlcStatusFetchError();
             }
 
