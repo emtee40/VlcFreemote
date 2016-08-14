@@ -18,6 +18,20 @@ In the future, whenever I get some free time, I'd like to add the ability to sta
 ### Why isn't this in Google play?
  Mostly cause I'm lazy and cheap. Getting a Google Play account costs 10 dollars or so, and I'm too lazy and too cheap to get one. Want me to upload it to Google Play? Feel free to buy me a beer. If not you can just get the APK from Github, or download the source code and build it yourself.
 
+### Contribute
+Bug reports are always welcome. Code contributions even more so!
+You should fork the repo as described here: http://help.github.com/fork-a-repo/
+
+### License
+
+VlcFreemote Copyright 2014-2016 Nicolas Brailovsky
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses
+
 ### TODO
 * Auto start Vlc if shutdown when an ssh server is present
 * Add widget to control Vlc from a "desktop" (?) widget
@@ -25,7 +39,6 @@ In the future, whenever I get some free time, I'd like to add the ability to sta
 * Control remote Vlc volume from local volume key
 * Add chron job to auto get last status
 * Fix current play indicator in playlist view
-* Add license
 * Publish updated apk to GH
 * Publish apk to store?
 
