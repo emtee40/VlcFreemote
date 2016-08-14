@@ -12,6 +12,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.nico.vlcfreemote.model.VlcStatus;
 import com.nico.vlcfreemote.vlc_connector.Cmd_ClearPlaylist;
 import com.nico.vlcfreemote.vlc_connector.Cmd_GetPlaylist;
 import com.nico.vlcfreemote.vlc_connector.Cmd_RemoveFromPlaylist;
@@ -143,6 +144,10 @@ public class PlaylistView extends VlcFragment implements View.OnClickListener {
         }));
     }
 
+    public void onVlcStatusUpdate(VlcStatus status) {
+        this.playlistViewAdapter.updateVlcStatus(status);
+    }
+
     /************************************************************/
     /* List view stuff                                          */
     /************************************************************/
@@ -150,7 +155,8 @@ public class PlaylistView extends VlcFragment implements View.OnClickListener {
         private static final int layoutResourceId = R.layout.fragment_playlist_list_element;
         private final Context context;
         private final View.OnClickListener onClickCallback;
-        //private String currentPlayingMediaTitle;
+        private String playingTitle;
+        private String playingFilename;
 
         public static class Row {
             Cmd_GetPlaylist.PlaylistEntry values;
@@ -164,23 +170,19 @@ public class PlaylistView extends VlcFragment implements View.OnClickListener {
             super(context, layoutResourceId, new ArrayList<Cmd_GetPlaylist.PlaylistEntry>());
             this.context = context;
             this.onClickCallback = onClickCallback;
-            // TODO this.currentPlayingMediaTitle = null;
+            playingTitle = "";
+            playingFilename = "";
         }
 
-        public void setCurrentPlayingMedia(String currentPlayingMediaTitle) {
-            /* TODO
-            @SuppressWarnings("ConstantConditions")
-            boolean mediaChanged =
-                    (this.currentPlayingMediaTitle == null) && (currentPlayingMediaTitle != null) ||
-                            (currentPlayingMediaTitle == null) && (this.currentPlayingMediaTitle != null) ||
-                            ((currentPlayingMediaTitle != null) && (this.currentPlayingMediaTitle != null) &&
-                                    currentPlayingMediaTitle.equals(this.currentPlayingMediaTitle));
+        public void updateVlcStatus(VlcStatus status) {
+            final String newTitle = (status.currentMedia_title != null)? status.currentMedia_title : "";
+            final String newFilename = (status.currentMedia_filename != null)? status.currentMedia_filename : "";
 
-            if (mediaChanged) {
-                this.currentPlayingMediaTitle = currentPlayingMediaTitle;
+            if ((!newTitle.equals(playingTitle)) || (!newFilename.equals(playingFilename))) {
+                playingTitle = newTitle;
+                playingFilename = newFilename;
                 this.notifyDataSetChanged();
             }
-            */
         }
 
         @Override
@@ -201,11 +203,13 @@ public class PlaylistView extends VlcFragment implements View.OnClickListener {
             holder.wPlaylistElement_CurrentStatus.setTag(holder.values);
             holder.wPlaylistElement_CurrentStatus.setOnClickListener(onClickCallback);
 
-            // TODO if (currentPlayingMediaTitle != null && currentPlayingMediaTitle.equals(holder.values.name)) {
+            if ((!playingTitle.isEmpty()) && playingTitle.equals(holder.values.name)) {
                 holder.wPlaylistElement_CurrentStatus.setVisibility(View.VISIBLE);
-            //} else {
-            //    holder.wPlaylistElement_CurrentStatus.setVisibility(View.INVISIBLE);
-            //}
+            } else if ((!playingFilename.isEmpty()) && playingFilename.equals(holder.values.name)) {
+                holder.wPlaylistElement_CurrentStatus.setVisibility(View.VISIBLE);
+            } else {
+                holder.wPlaylistElement_CurrentStatus.setVisibility(View.INVISIBLE);
+            }
 
             holder.wPlaylistElement_Name = (TextView)row.findViewById(R.id.wPlaylistElement_Name);
             holder.wPlaylistElement_Name.setText(holder.values.name);

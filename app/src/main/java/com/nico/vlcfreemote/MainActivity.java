@@ -184,6 +184,7 @@ public class MainActivity extends FragmentActivity
 
     @Override
     public void onVlcStatusUpdate(VlcStatus results) {
+        this.playlistView.onVlcStatusUpdate(results);
         this.playerControllerView.onStatusUpdated(this, results);
     }
 

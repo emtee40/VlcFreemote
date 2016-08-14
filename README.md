@@ -37,10 +37,7 @@ You should have received a copy of the GNU General Public License along with thi
 * Add widget to control Vlc from a "desktop" (?) widget
 * Idem for lock screen?
 * Control remote Vlc volume from local volume key
-* Add chron job to auto get last status
-* Fix current play indicator in playlist view
 * Publish updated apk to GH
-* Publish apk to store?
-
-
+* Publish apk to store
+* Remove flicker when switching to dir tab (check if path changed?)
 
