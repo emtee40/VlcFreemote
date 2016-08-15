@@ -37,6 +37,5 @@ You should have received a copy of the GNU General Public License along with thi
 * Add widget to control Vlc from a "desktop" (?) widget
 * Idem for lock screen?
 * Control remote Vlc volume from local volume key
-* Publish updated apk to GH
 * Publish apk to store
 
