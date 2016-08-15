@@ -148,7 +148,7 @@ public class DirListingView extends VlcFragment
                 break;
 
             case R.id.wDirListing_PlayRandom:
-                // TODO playRandomSubDir(currentPath);
+                playRandomSubDir();
                 break;
 
             default:
@@ -200,10 +200,25 @@ public class DirListingView extends VlcFragment
     private void onAddToPlaylistRequested(final Cmd_DirList.DirListEntry path) {
         callback.onAddToPlaylistRequested(path.path);
 
-
         if (! path.isDirectory) {
             vlcPath.onAddToPlaylistRequested(path.path);
         }
+    }
+
+    private void playRandomSubDir() {
+        vlcPath.getRandomSubdir(new VlcPath.RandomSubdirCallback() {
+            @Override
+            public void onRandomSubdirAvailable(String path) {
+                callback.onAddToPlaylistRequested(path);
+            }
+
+            @Override
+            public void onError() {
+                final String msg = getResources().getString(R.string.dir_listing_random_play_failed);
+                Toast toast = Toast.makeText(getActivity().getApplicationContext(), msg, Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        });
     }
 
     @Override

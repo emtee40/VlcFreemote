@@ -10,13 +10,20 @@ import com.nico.vlcfreemote.local_settings.RememberedServers;
 import com.nico.vlcfreemote.vlc_connector.Cmd_DirList;
 import com.nico.vlcfreemote.vlc_connector.RemoteVlc;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class VlcPath {
 
     public interface UICallback {
         void onNewDirListAvailable(List<Cmd_DirList.DirListEntry> results);
         void onDirListFatalFailure(VlcPath_ApplicationError vlcPath_applicationError);
+    }
+
+    public interface RandomSubdirCallback {
+        void onRandomSubdirAvailable(final String path);
+        void onError();
     }
 
     public class VlcPath_ApplicationError extends Exception {
@@ -144,6 +151,37 @@ public class VlcPath {
                 }
             }
         }));
+    }
+
+    public void getRandomSubdir(final RandomSubdirCallback cb) {
+        getRandomSubdir(currentPath, cb);
+    }
+
+    private void getRandomSubdir(final String startPath, final RandomSubdirCallback cb) {
+        vlcProvider.getActiveVlcConnection().exec(new Cmd_DirList(startPath, new ArrayList<String>(),
+                new Cmd_DirList.Callback() {
+                    @Override
+                    public void onContentAvailable(List<Cmd_DirList.DirListEntry> results) {
+                        List<String> subDirs = new ArrayList<>();
+                        for (Cmd_DirList.DirListEntry i : results) {
+                            if (i.isDirectory && (!i.name.equals(".."))) subDirs.add(i.path);
+                        }
+
+                        if (subDirs.isEmpty()) {
+                            // There are no more subdir here: it's a leaf and can be added
+                            cb.onRandomSubdirAvailable(startPath);
+                        } else {
+                            final Random rand = new Random();
+                            final int i = rand.nextInt(subDirs.size());
+                            getRandomSubdir(subDirs.get(i), cb);
+                        }
+                    }
+
+                    @Override
+                    public void onContentError() {
+                        cb.onError();
+                    }
+                }));
     }
 
     public void bookmarkCurrentDirectory() {
