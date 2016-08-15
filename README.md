@@ -39,5 +39,4 @@ You should have received a copy of the GNU General Public License along with thi
 * Control remote Vlc volume from local volume key
 * Publish updated apk to GH
 * Publish apk to store
-* Remove flicker when switching to dir tab (check if path changed?)
 

@@ -36,6 +36,9 @@ public class VlcPath {
     private String currentPath;
     private String prettyPath;
 
+    // @see thereIsCDWithNoUIUpdate
+    private boolean cdPendingUIUpdate = true;
+
     // Usually a person will cd to several directories before settling for one: there's no point
     // in saving them all, so there will be a timeout after which we can consider the user has
     // decided; only then will the directory be saved.
@@ -60,6 +63,7 @@ public class VlcPath {
     }
 
     public void onServerChanged(final Server srv) {
+        this.cdPendingUIUpdate = true;
         if (srv.getLastPath() != null) {
             this.currentPath = srv.getLastPath();
             this.prettyPath = srv.getLastPath();
@@ -74,6 +78,7 @@ public class VlcPath {
     public void cd(final String path, final String prettyPath) {
         this.currentPath = path;
         this.prettyPath = prettyPath;
+        this.cdPendingUIUpdate = true;
 
         final Server srv = vlcProvider.getActiveVlcConnection().getServer();
         srv.setLastPath(path);
@@ -104,7 +109,15 @@ public class VlcPath {
         updateDirContents_impl(true);
     }
 
+    /**
+     * Useful to prevent reloading the same dir twice (that'd result in an ugly flicker)
+     * @return True if there was a dir change and no UI update
+     */
+    public boolean thereIsCDWithNoUIUpdate() { return cdPendingUIUpdate; }
+
     private void updateDirContents_impl(final boolean mayRecurse) {
+        this.cdPendingUIUpdate = false;
+
         final Server srv = vlcProvider.getActiveVlcConnection().getServer();
         List<String> filesPlayedInDir = (new PlayedFiles(dbContext)).getListOfPlayedFiles(srv, currentPath);
 

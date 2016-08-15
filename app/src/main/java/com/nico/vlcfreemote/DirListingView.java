@@ -97,7 +97,7 @@ public class DirListingView extends VlcFragment
     {
         super.setUserVisibleHint(visible);
 
-        if (visible && isResumed())
+        if (visible && isResumed() && vlcPath.thereIsCDWithNoUIUpdate())
         {
             triggerCurrentPathListUpdate();
         }
@@ -190,7 +190,10 @@ public class DirListingView extends VlcFragment
     }
 
     public void onServerChanged(final Server srv) {
-        if (vlcPath != null) vlcPath.onServerChanged(srv);
+        if (vlcPath != null) {
+            vlcPath.onServerChanged(srv);
+            dirViewAdapter.clear();
+        }
     }
 
     private void saveCurrentPathAsBookmark() {
