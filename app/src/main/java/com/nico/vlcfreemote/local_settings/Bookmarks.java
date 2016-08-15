@@ -32,7 +32,7 @@ public class Bookmarks extends LocalSettings {
     @Override
     protected String getCreateTableSQL() {
         return "CREATE TABLE " + TABLE_NAME + " (" +
-                    COLUMN_IP      + " VARCHAR(15),, " +
+                    COLUMN_IP      + " VARCHAR(15), " +
                     COLUMN_VLCPORT + " INTEGER, " +
                     COLUMN_PATH    + " TEXT, " +
                     "PRIMARY KEY ("+ COLUMN_IP + "," + COLUMN_VLCPORT + ", " + COLUMN_PATH + ") " +
