@@ -30,7 +30,7 @@
         android:contentDescription="@string/dir_listing_already_seen_icon"
         android:background="?android:selectableItemBackground"
         android:tint="@android:color/holo_blue_light"
-        android:src="@android:drawable/presence_video_online"
+        android:src="@android:drawable/ic_menu_view"
         android:visibility="invisible"/>
 
     <ImageButton
