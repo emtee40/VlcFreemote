@@ -24,7 +24,7 @@ You should fork the repo as described here: http://help.github.com/fork-a-repo/
 
 ### License
 
-VlcFreemote Copyright 2014-2016 Nicolas Brailovsky
+VlcFreemote Copyright 2015-2016 Nicolas Brailovsky
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
