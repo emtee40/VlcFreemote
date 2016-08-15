@@ -7,12 +7,14 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,7 +30,7 @@ import java.util.List;
 
 public class DirListingView extends VlcFragment
                             implements View.OnClickListener,
-                                       VlcPath.UICallback {
+                                       VlcPath.UICallback, PopupMenu.OnMenuItemClickListener {
 
     public interface DirListingCallback {
         void onAddToPlaylistRequested(final String uri);
@@ -50,10 +52,7 @@ public class DirListingView extends VlcFragment
         View v = inflater.inflate(R.layout.fragment_dir_listing_view, container, false);
         dirViewAdapter = new DirListEntry_ViewAdapter(this, getActivity());
         ((ListView) v.findViewById(R.id.wDirListing_List)).setAdapter(dirViewAdapter);
-        v.findViewById(R.id.wDirListing_Bookmark).setOnClickListener(this);
-        v.findViewById(R.id.wDirListing_JumpToBookmark).setOnClickListener(this);
-        v.findViewById(R.id.wDirListing_ManageBookmark).setOnClickListener(this);
-        v.findViewById(R.id.wDirListing_PlayRandom).setOnClickListener(this);
+        v.findViewById(R.id.wDirListing_PopupMenu).setOnClickListener(this);
         return v;
 
     }
@@ -124,6 +123,18 @@ public class DirListingView extends VlcFragment
 
                 break;
 
+            case R.id.wDirListing_PopupMenu:
+                showPopupMenu();
+                break;
+
+            default:
+                throw new RuntimeException(DirListingView.class.getName() + " received a click event it can't handle.");
+        }
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem menuItem) {
+        switch (menuItem.getItemId()) {
             case R.id.wDirListing_Bookmark:
                 saveCurrentPathAsBookmark();
                 break;
@@ -141,13 +152,25 @@ public class DirListingView extends VlcFragment
                 break;
 
             default:
-                throw new RuntimeException(DirListingView.class.getName() + " received a click event it can't handle.");
+                throw new RuntimeException(DirListingView.class.getName() + " received a menu event it can't handle.");
         }
+
+        return true;
     }
+
 
     /************************************************************/
     /* UI stuff                                                 */
     /************************************************************/
+
+    private void showPopupMenu() {
+        final View menu = getActivity().findViewById(R.id.wDirListing_PopupMenu);
+        final PopupMenu popup = new PopupMenu(getContext(), menu);
+        popup.getMenuInflater().inflate(R.menu.fragment_dir_listing_popup_menu, popup.getMenu());
+        popup.setOnMenuItemClickListener(this);
+        popup.show();
+    }
+
     private void triggerCurrentPathListUpdate() {
         // If there's no activity we're not being displayed, so it's better not to update the UI
         if (!isAdded()) return;
@@ -159,7 +182,6 @@ public class DirListingView extends VlcFragment
         ((TextView) activity.findViewById(R.id.wDirListing_CurrentPath)).setText(vlcPath.getPrettyCWD());
         activity.findViewById(R.id.wDirListing_List).setEnabled(false);
         activity.findViewById(R.id.wDirListing_LoadingIndicator).setVisibility(View.VISIBLE);
-
     }
 
     @Override
@@ -289,7 +311,11 @@ public class DirListingView extends VlcFragment
             holder.values = this.getItem(position);
 
             holder.dirOrFile = (ImageView)row.findViewById(R.id.wDirListElement_DirOrFile);
-            if (!holder.values.isDirectory) holder.dirOrFile.setVisibility(View.INVISIBLE);
+            if (!holder.values.isDirectory) {
+                holder.dirOrFile.setVisibility(View.INVISIBLE);
+            } else {
+                holder.dirOrFile.setVisibility(View.VISIBLE);
+            }
 
             holder.fName = (TextView)row.findViewById(R.id.wDirListElement_Name);
             holder.fName.setText(holder.values.name);

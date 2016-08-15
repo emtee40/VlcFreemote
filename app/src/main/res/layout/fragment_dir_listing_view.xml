@@ -10,44 +10,28 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <Button
-            style="?android:buttonBarButtonStyle"
-            android:layout_width="wrap_content"
+        <TextView
+            android:singleLine="true"
+            android:ellipsize="end"
             android:layout_height="wrap_content"
-            android:text="@string/wDirListing_JumpToBookmark_label"
-            android:id="@+id/wDirListing_JumpToBookmark" />
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/dir_listing_current_path"
+            android:id="@+id/wDirListing_CurrentPath"
+            android:layout_gravity="center_horizontal" />
 
-        <Button
-            style="?android:buttonBarButtonStyle"
-            android:layout_width="wrap_content"
+        <ImageButton
+            android:id="@+id/wDirListing_PopupMenu"
+            android:layout_width="40dp"
             android:layout_height="wrap_content"
-            android:text="@string/wDirListing_Bookmark_label"
-            android:id="@+id/wDirListing_Bookmark" />
-
-        <Button
-            style="?android:buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/wDirListing_ManageBookmark_label"
-            android:id="@+id/wDirListing_ManageBookmark" />
-
-        <Button
-            style="?android:buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/wDirListing_AddRandom_label"
-            android:id="@+id/wDirListing_PlayRandom" />
+            android:contentDescription="@string/dir_listing_action_description"
+            android:background="?android:selectableItemBackground"
+            android:tint="@android:color/holo_blue_light"
+            android:src="@android:drawable/ic_menu_more" />
 
     </LinearLayout>
-
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="@string/dir_listing_current_path"
-        android:id="@+id/wDirListing_CurrentPath"
-        android:layout_gravity="center_horizontal" />
 
     <ProgressBar
         android:id="@+id/wDirListing_LoadingIndicator"
