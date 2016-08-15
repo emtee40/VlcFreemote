@@ -25,12 +25,15 @@ public class MainActivity extends FragmentActivity
                                      ServerSelectView.ServerSelectionCallback,
                                      DirListingView.DirListingCallback {
 
+    private static final int PERIODIC_VLC_STATUS_UPDATE_DELAY = 2500;
+
     private RemoteVlc vlcConnection;
     private PlayerControllerView playerControllerView;
     private PlaylistView playlistView;
     private DirListingView dirListView;
     private ServerSelectView serverSelectView;
     private MainMenuNavigation mainMenu;
+    private boolean periodicStatusUpdateRequested = false;
 
     private class MainMenuNavigation extends FragmentPagerAdapter
                                      implements ViewPager.OnPageChangeListener {
@@ -170,23 +173,21 @@ public class MainActivity extends FragmentActivity
         this.playlistView.triggerPlaylistUpdate();
     }
 
+
     @Override
-    public void onVlcStatusUpdate(VlcStatus result) {
+    public synchronized void onVlcStatusUpdate(VlcStatus result) {
         this.playlistView.onVlcStatusUpdate(result);
         this.playerControllerView.onStatusUpdated(this, result);
 
-        if (result.isPlaying()) {
-            /*
-            TODO: This works but if someone else requests a status update (eg by clicking play)
-            then there will be 2 postDealyed calls. We need to cancel the prev call.
+        if (!periodicStatusUpdateRequested && result.isPlaying()) {
+            periodicStatusUpdateRequested = true;
             (new Handler()).postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    Log.e("XXXXXXX", "DELAYED");
+                    periodicStatusUpdateRequested = false;
                     vlcConnection.exec(new Cmd_UpdateStatus(vlcConnection));
                 }
-            }, 2500);
-            */
+            }, PERIODIC_VLC_STATUS_UPDATE_DELAY);
         }
     }
 
