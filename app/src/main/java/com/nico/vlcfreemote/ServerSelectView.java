@@ -130,6 +130,7 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
         Server dbServer;
         try {
             dbServer = db.getRememberedServer(srv);
+            if (dbServer == null) dbServer = srv;
         } catch (LocalSettings.LocalSettingsError localSettingsError) {
             Log.e(getClass().getSimpleName(), localSettingsError.getMessage());
             dbServer = srv;
