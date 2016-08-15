@@ -34,9 +34,9 @@
     <string name="wPlayer_CurrentlyPlaying">Currently playing…</string>
     <string name="server_select_request_password_dialog_title">Enter password…</string>
     <string name="wPlayer_PlayPosition_CurrentPositionText">00:00</string>
-    <string name="playlist_view_clear_playlist_button">Clear</string>
+    <string name="playlist_view_clear_playlist_button">Clear playlist</string>
     <string name="playlist_item_duration_unknown"> </string>
-    <string name="playlist_view_refresh_playlist_button">Refresh</string>
+    <string name="playlist_view_refresh_playlist_button">Refresh playlist</string>
     <string name="wPlayer_ToggleMoreOptions">See more options</string>
     <string name="wPlayer_ToggleFullscreen">Toggle Fullscreen</string>
     <string name="wPlayer_CycleAudioTrack">Cycle audio track</string>

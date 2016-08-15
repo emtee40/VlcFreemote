@@ -6,31 +6,21 @@
     android:orientation="vertical"
     android:weightSum="1">
 
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    <ImageButton
+        android:id="@+id/wPlaylist_PopupMenu"
+        android:layout_width="40dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_gravity="end"
+        android:contentDescription="@string/dir_listing_action_description"
+        android:background="?android:selectableItemBackground"
+        android:tint="@android:color/holo_blue_light"
+        android:src="@android:drawable/ic_menu_more" />
 
-        <Button
-            style="?android:buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/playlist_view_clear_playlist_button"
-            android:id="@+id/wPlaylist_Clear" />
-
-        <Button
-            style="?android:buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/playlist_view_refresh_playlist_button"
-            android:id="@+id/wPlaylist_Refresh" />
-
-    </LinearLayout>
 
     <ListView
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:paddingTop="10dp"
         android:id="@+id/wPlaylist_List"
         android:layout_gravity="center_horizontal"
         android:layout_weight="1" />

@@ -4,11 +4,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,7 +25,7 @@ import java.util.List;
 import java.util.Locale;
 
 
-public class PlaylistView extends VlcFragment implements View.OnClickListener {
+public class PlaylistView extends VlcFragment implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
 
     private PlaylistEntry_ViewAdapter playlistViewAdapter;
     private boolean attached = false;
@@ -41,9 +43,8 @@ public class PlaylistView extends VlcFragment implements View.OnClickListener {
         View v = inflater.inflate(R.layout.fragment_playlist, container, false);
 
         playlistViewAdapter = new PlaylistEntry_ViewAdapter(this, getActivity());
-        v.findViewById(R.id.wPlaylist_Clear).setOnClickListener(this);
-        v.findViewById(R.id.wPlaylist_Refresh).setOnClickListener(this);
         ((ListView) v.findViewById(R.id.wPlaylist_List)).setAdapter(playlistViewAdapter);
+        v.findViewById(R.id.wPlaylist_PopupMenu).setOnClickListener(this);
 
         return v;
     }
@@ -79,11 +80,8 @@ public class PlaylistView extends VlcFragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.wPlaylist_Clear:
-                clearPlaylist();
-                return;
-            case R.id.wPlaylist_Refresh:
-                triggerPlaylistUpdate();
+            case R.id.wPlaylist_PopupMenu:
+                showPopupMenu();
                 return;
         }
 
@@ -105,6 +103,30 @@ public class PlaylistView extends VlcFragment implements View.OnClickListener {
                 throw new RuntimeException(Cmd_GetPlaylist.class.getName() + " received a click event for a view which doesn't exist.");
         }
 
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem menuItem) {
+        switch (menuItem.getItemId()) {
+            case R.id.wPlaylist_Clear:
+                clearPlaylist();
+                break;
+            case R.id.wPlaylist_Refresh:
+                triggerPlaylistUpdate();
+                break;
+            default:
+                throw new RuntimeException(DirListingView.class.getName() + " received a menu event it can't handle.");
+        }
+
+        return true;
+    }
+
+    private void showPopupMenu() {
+        final View menu = getActivity().findViewById(R.id.wPlaylist_PopupMenu);
+        final PopupMenu popup = new PopupMenu(getContext(), menu);
+        popup.getMenuInflater().inflate(R.menu.fragment_playlist_popup_menu, popup.getMenu());
+        popup.setOnMenuItemClickListener(this);
+        popup.show();
     }
 
     /************************************************************/
