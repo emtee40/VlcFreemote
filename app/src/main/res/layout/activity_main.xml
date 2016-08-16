@@ -32,7 +32,7 @@
 
     <fragment
         android:id="@+id/wPlayerControllerFragment"
-        android:name="com.nico.vlcfreemote.PlayerControllerView"
+        android:name="com.nicolasbrailo.vlcfreemote.PlayerControllerView"
         tools:layout="@layout/fragment_player_controller_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
