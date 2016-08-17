@@ -240,4 +240,5 @@ public class MainActivity extends FragmentActivity
 
         mainMenu.jumpToServerSelection();
     }
+
 }

@@ -258,11 +258,11 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
      *                known. Caller should specify activity context.
      * @return last used server
      */
-    public Server getLastUsedServer(Context context) {
+    static public Server getLastUsedServer(Context context) {
         try {
             return (new RememberedServers(context)).getLastUsedServer();
         } catch (LocalSettings.LocalSettingsError localSettingsError) {
-            Log.e(getClass().getSimpleName(), localSettingsError.getMessage());
+            Log.e(ServerSelectView.class.getSimpleName(), localSettingsError.getMessage());
             return null;
         }
     }

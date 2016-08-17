@@ -55,4 +55,7 @@
     <string name="playing_track_status">Track %1$s of %2$s</string>
     <string name="general_vlc_status">%1$s - %2$s</string>
     <string name="dir_listing_random_play_failed">Random directory selection failed</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
+    <string name="wPlayer_Open">Open VlcFreemote</string>
 </resources>

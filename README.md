@@ -38,4 +38,11 @@ You should have received a copy of the GNU General Public License along with thi
 * Idem for lock screen?
 * Control remote Vlc volume from local volume key
 * Publish apk to store
+* Seen: 
+    08-17 21:27:18.476 28902-28910/com.nicolasbrailo.vlcfreemote W/SQLiteConnectionPool: A SQLiteConnection object for database '/data/user/0/com.nicolasbrailo.vlcfreemote/databases/played_files.db' was leaked!  Please fix your application to end transactions in progress properly and to close the database when it is no longer needed.
+    08-17 21:27:18.478 28902-28910/com.nicolasbrailo.vlcfreemote W/SQLiteConnectionPool: A SQLiteConnection object for database '/data/user/0/com.nicolasbrailo.vlcfreemote/databases/played_files.db' was leaked!  Please fix your application to end transactions in progress properly and to close the database when it is no longer needed.
+    08-17 21:27:18.479 28902-28910/com.nicolasbrailo.vlcfreemote W/SQLiteConnectionPool: A SQLiteConnection object for database '/data/user/0/com.nicolasbrailo.vlcfreemote/databases/bookmarks.db' was leaked!  Please fix your application to end transactions in progress properly and to close the database when it is no longer needed.
+    08-17 21:27:18.480 28902-28910/com.nicolasbrailo.vlcfreemote W/SQLiteConnectionPool: A SQLiteConnection object for database '/data/user/0/com.nicolasbrailo.vlcfreemote/databases/played_files.db' was leaked!  Please fix your application to end transactions in progress properly and to close the database when it is no longer needed.
+    08-17 21:27:18.480 28902-28910/com.nicolasbrailo.vlcfreemote W/SQLiteConnectionPool: A SQLiteConnection object for database '/data/user/0/com.nicolasbrailo.vlcfreemote/databases/played_files.db' was leaked!  Please fix your application to end transactions in progress properly and to close the database when it is no longer needed.
+    08-17 21:27:31.895 28902-28908/com.nicolasbrailo.vlcfreemote W/art: Suspending all threads took: 10.345ms
 
