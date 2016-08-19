@@ -2,20 +2,12 @@ package com.nicolasbrailo.vlcfreemote.local_settings;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
 public abstract class LocalSettings extends SQLiteOpenHelper implements BaseColumns {
-
-    /**
-     * An error condition in the sql layer which can't be recovered.
-     * The only real purpose of this class is to force explicit handling in upper layers.
-     */
-    public static class LocalSettingsError extends Exception {
-        @Override
-        public String getMessage() { return "Unexpected SQLite error. Try clearing application data."; }
-    }
 
     LocalSettings(Context context, final String DbName, int DbVersion) {
         super(context, DbName, null, DbVersion);
@@ -54,6 +46,29 @@ public abstract class LocalSettings extends SQLiteOpenHelper implements BaseColu
         try {
             db.execSQL(query, args);
         } finally {
+            db.close();
+        }
+    }
+
+    protected interface QueryReadCallback {
+        void onCursorReady(final Cursor res);
+    }
+
+    protected void readQuery(final String query, final String[] args, final String[] columns,
+                             final QueryReadCallback cb) {
+        final SQLiteDatabase db = getReadableDatabase();
+        final Cursor res = db.rawQuery(query, args);
+
+        for (String col : columns) {
+            if (res.getColumnIndex(col) == -1) {
+                return;
+            }
+        }
+
+        try {
+            cb.onCursorReady(res);
+        } finally {
+            res.close();
             db.close();
         }
     }

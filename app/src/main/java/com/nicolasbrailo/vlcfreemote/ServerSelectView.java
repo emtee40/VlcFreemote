@@ -21,7 +21,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.nicolasbrailo.vlcfreemote.local_settings.LocalSettings;
 import com.nicolasbrailo.vlcfreemote.local_settings.RememberedServers;
 import com.nicolasbrailo.vlcfreemote.model.Server;
 import com.nicolasbrailo.vlcfreemote.net_utils.ServerScanner;
@@ -127,32 +126,25 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
         // Get last used pass for this server, if known. This server will have some settings saved
         // (Like last used path)
         final RememberedServers db = new RememberedServers(getContext());
-        Server dbServer;
-        try {
-            dbServer = db.getRememberedServer(srv);
-            if (dbServer == null) dbServer = srv;
-        } catch (LocalSettings.LocalSettingsError localSettingsError) {
-            Log.e(getClass().getSimpleName(), localSettingsError.getMessage());
-            dbServer = srv;
-        }
+        final Server rememberedServer = db.getRememberedServer(srv);
+        final Server srvToUse = (rememberedServer != null)? rememberedServer : srv;
 
         // Show a dialog to confirm the pass (or enter a new one)
-        final Server rememberedServer = dbServer;
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(getString(R.string.server_select_request_password_dialog_title));
         final EditText input = new EditText(getActivity());
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        input.setText(rememberedServer.getPassword());
+        input.setText(srvToUse.getPassword());
         builder.setView(input);
 
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 final String password = input.getText().toString();
-                rememberedServer.setPassword(password);
+                srvToUse.setPassword(password);
 
-                db.rememberServer(rememberedServer);
-                callback.onNewServerSelected(rememberedServer);
+                db.rememberServer(srvToUse);
+                callback.onNewServerSelected(srvToUse);
             }
         });
 
@@ -259,12 +251,7 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
      * @return last used server
      */
     static public Server getLastUsedServer(Context context) {
-        try {
-            return (new RememberedServers(context)).getLastUsedServer();
-        } catch (LocalSettings.LocalSettingsError localSettingsError) {
-            Log.e(ServerSelectView.class.getSimpleName(), localSettingsError.getMessage());
-            return null;
-        }
+        return (new RememberedServers(context)).getLastUsedServer();
     }
 
     /************************************************************/

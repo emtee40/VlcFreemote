@@ -54,26 +54,22 @@ public class Bookmarks extends LocalSettings {
 
     public List<String> getBookmarks(final Server srv) {
         final String query =
-            "SELECT " + COLUMN_PATH + " FROM " + TABLE_NAME +
-            " WHERE " + COLUMN_IP + " = ? " +
-            "   AND " + COLUMN_VLCPORT + " = ? ";
+                "SELECT " + COLUMN_PATH + " FROM " + TABLE_NAME +
+                        " WHERE " + COLUMN_IP + " = ? " +
+                        "   AND " + COLUMN_VLCPORT + " = ? ";
 
         final String[] args = new String[]{srv.ip, String.valueOf(srv.vlcPort)};
 
-        Cursor res = getReadableDatabase().rawQuery(query, args);
-
         final List<String> results = new ArrayList<>();
 
-        if (res.getColumnIndex(COLUMN_PATH) == -1) {
-            res.close();
-            return results;
-        }
-
-        while (res.moveToNext()) {
-            results.add(res.getString(res.getColumnIndex(COLUMN_PATH)));
-        }
-
-        res.close();
+        readQuery(query, args, new String[]{COLUMN_PATH}, new QueryReadCallback() {
+            @Override
+            public void onCursorReady(Cursor res) {
+                while (res.moveToNext()) {
+                    results.add(res.getString(res.getColumnIndex(COLUMN_PATH)));
+                }
+            }
+        });
 
         return results;
     }

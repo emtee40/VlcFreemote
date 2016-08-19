@@ -74,20 +74,29 @@ public class RememberedServers extends LocalSettings {
      *
      * @return Last used server
      */
-    public Server getLastUsedServer() throws LocalSettingsError {
+    public Server getLastUsedServer() {
         final String query = "SELECT * " +
                              "   FROM "  + TABLE_NAME +
                              "  WHERE "  + COLUMN_LAST_USED+ " =?";
         final String[] args = new String[]{"1"};
 
-        Cursor res = getReadableDatabase().rawQuery(query, args);
+        final Server[] dbSrv = new Server[1];
+        dbSrv[0] = null;
 
-        if (res.getCount() > 1) {
+        readQuery(query, args, new String[]{COLUMN_IP, COLUMN_VLCPORT, COLUMN_PASS, COLUMN_LAST_PATH},
+                new QueryReadCallback() {
+            @Override
+            public void onCursorReady(Cursor res) {
+                dbSrv[0] = readServerFrom(res);
+            }
+        });
+
+        if (dbSrv[0] == null) {
             Log.w(getClass().getSimpleName(), "Multiple last used servers. Will reset flag.");
             resetLastUsedServer();
         }
 
-        return readServerFrom(res);
+        return dbSrv[0];
     }
 
     /**
@@ -96,7 +105,7 @@ public class RememberedServers extends LocalSettings {
      * @param srv ip:port that needs a password
      * @return Known last password, or null if not known
      */
-    public Server getRememberedServer(final Server srv) throws LocalSettingsError {
+    public Server getRememberedServer(final Server srv)  {
         final String query = "SELECT * " +
                              "  FROM " + TABLE_NAME +
                              " WHERE " + COLUMN_IP + " =? " +
@@ -104,21 +113,22 @@ public class RememberedServers extends LocalSettings {
 
         final String[] args = new String[]{srv.ip, String.valueOf(srv.vlcPort)};
 
-        Cursor res = getReadableDatabase().rawQuery(query, args);
+        final Server[] dbSrv = new Server[1];
+        dbSrv[0] = null;
 
-        if ((res.getCount() > 1) || (res.getColumnIndex(COLUMN_PASS) == -1)) {
-            // End of world exception: either unique constrain failed in sqlite or the pass column
-            // is unknown. In any case, something is horribly wrong and we can't recover.
-            res.close();
-            throw new LocalSettingsError();
-        }
+        readQuery(query, args, new String[]{COLUMN_IP, COLUMN_VLCPORT, COLUMN_PASS, COLUMN_LAST_PATH},
+                new QueryReadCallback() {
+            @Override
+            public void onCursorReady(Cursor res) {
+                dbSrv[0] = readServerFrom(res);
+            }
+        });
 
-        return readServerFrom(res);
+        return dbSrv[0];
     }
 
-    private Server readServerFrom(final Cursor c) throws LocalSettingsError {
-        if (c.getCount() == 0) {
-            c.close();
+    private Server readServerFrom(final Cursor c)  {
+        if (c.getCount() != 1) {
             return null;
         }
 
@@ -134,9 +144,7 @@ public class RememberedServers extends LocalSettings {
             pass = c.getString(c.getColumnIndexOrThrow(COLUMN_PASS));
             lastPath = c.getString(c.getColumnIndexOrThrow(COLUMN_LAST_PATH));
         } catch (Exception e) {
-            throw new LocalSettingsError();
-        } finally {
-            c.close();
+            return null;
         }
 
         Server srv = new Server(ip, port, null);
