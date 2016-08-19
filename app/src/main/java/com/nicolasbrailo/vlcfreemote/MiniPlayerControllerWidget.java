@@ -31,7 +31,7 @@ public class MiniPlayerControllerWidget extends AppWidgetProvider {
     private static final String ACTION_TOGGLE_PLAY = "com.nicolasbrailo.vlcfreemote.ACTION_TOGGLE_PLAY";
     private static final String ACTION_PLAY_NEXT = "com.nicolasbrailo.vlcfreemote.ACTION_PLAY_NEXT";
 
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
+    private static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         Intent openApp = new Intent(context, MainActivity.class);
         PendingIntent pendingOpenApp = PendingIntent.getActivity(context, 0, openApp, 0);
 

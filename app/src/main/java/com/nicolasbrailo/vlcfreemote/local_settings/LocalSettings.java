@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
-public abstract class LocalSettings extends SQLiteOpenHelper implements BaseColumns {
+abstract class LocalSettings extends SQLiteOpenHelper implements BaseColumns {
 
     LocalSettings(Context context, final String DbName, int DbVersion) {
         super(context, DbName, null, DbVersion);
@@ -50,12 +50,12 @@ public abstract class LocalSettings extends SQLiteOpenHelper implements BaseColu
         }
     }
 
-    protected interface QueryReadCallback {
+    interface QueryReadCallback {
         void onCursorReady(final Cursor res);
     }
 
-    protected void readQuery(final String query, final String[] args, final String[] columns,
-                             final QueryReadCallback cb) {
+    void readQuery(final String query, final String[] args, final String[] columns,
+                   final QueryReadCallback cb) {
         final SQLiteDatabase db = getReadableDatabase();
         final Cursor res = db.rawQuery(query, args);
 
