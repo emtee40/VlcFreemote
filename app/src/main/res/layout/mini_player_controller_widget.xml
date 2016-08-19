@@ -23,4 +23,14 @@
         android:background="?android:selectableItemBackground"
         android:tint="@android:color/holo_blue_light" />
 
+    <ImageButton
+        android:id="@+id/wMiniPlayerController_BtnNext"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:contentDescription="@string/wPlayer_BtnNext"
+        android:src="@android:drawable/ic_media_next"
+        android:layout_gravity="center"
+        android:background="?android:selectableItemBackground"
+        android:tint="@android:color/holo_blue_light" />
+
 </LinearLayout>

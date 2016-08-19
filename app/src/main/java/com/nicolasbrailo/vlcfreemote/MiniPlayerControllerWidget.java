@@ -5,12 +5,12 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
-import android.util.Log;
 import android.widget.RemoteViews;
 
+import com.nicolasbrailo.vlcfreemote.local_settings.RememberedServers;
 import com.nicolasbrailo.vlcfreemote.model.Server;
 import com.nicolasbrailo.vlcfreemote.model.VlcStatus;
+import com.nicolasbrailo.vlcfreemote.vlc_connector.Cmd_Next;
 import com.nicolasbrailo.vlcfreemote.vlc_connector.Cmd_TogglePlay;
 import com.nicolasbrailo.vlcfreemote.vlc_connector.RemoteVlc;
 import com.nicolasbrailo.vlcfreemote.vlc_connector.VlcCommand;
@@ -28,17 +28,25 @@ import com.nicolasbrailo.vlcfreemote.vlc_connector.VlcCommand;
  */
 public class MiniPlayerControllerWidget extends AppWidgetProvider {
 
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
-        Intent intent = new Intent(context, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+    private static final String ACTION_TOGGLE_PLAY = "com.nicolasbrailo.vlcfreemote.ACTION_TOGGLE_PLAY";
+    private static final String ACTION_PLAY_NEXT = "com.nicolasbrailo.vlcfreemote.ACTION_PLAY_NEXT";
 
-        Intent intent2 = new Intent(context, MiniPlayerControllerWidget.class);
-        intent2.setAction("com.nicolasbrailo.vlcfreemote.FOOO");
-        PendingIntent pendingIntent2 = PendingIntent.getBroadcast(context, 42, intent2, 0);
+    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
+        Intent openApp = new Intent(context, MainActivity.class);
+        PendingIntent pendingOpenApp = PendingIntent.getActivity(context, 0, openApp, 0);
+
+        Intent togglePlay = new Intent(context, MiniPlayerControllerWidget.class);
+        togglePlay.setAction(ACTION_TOGGLE_PLAY);
+        PendingIntent pendingTogglePlay = PendingIntent.getBroadcast(context, 0, togglePlay, 0);
+
+        Intent playNext = new Intent(context, MiniPlayerControllerWidget.class);
+        playNext.setAction(ACTION_PLAY_NEXT);
+        PendingIntent pendingPlayNext = PendingIntent.getBroadcast(context, 0, playNext, 0);
 
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.mini_player_controller_widget);
-        views.setOnClickPendingIntent(R.id.wMiniPlayerController_Open, pendingIntent);
-        views.setOnClickPendingIntent(R.id.wMiniPlayerController_BtnPlayPause, pendingIntent2);
+        views.setOnClickPendingIntent(R.id.wMiniPlayerController_Open, pendingOpenApp);
+        views.setOnClickPendingIntent(R.id.wMiniPlayerController_BtnPlayPause, pendingTogglePlay);
+        views.setOnClickPendingIntent(R.id.wMiniPlayerController_BtnNext, pendingPlayNext);
 
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
@@ -60,48 +68,57 @@ public class MiniPlayerControllerWidget extends AppWidgetProvider {
         // Enter relevant functionality for when the last widget is disabled
     }
 
-    private static class Foo implements    VlcCommand.GeneralCallback, VlcStatus.Observer {
-        @Override
-        public void onAuthError() {
-            Log.e("XXXXXXXXXXX", "onAuthError");
+    private static class WidgetVlcCallback implements VlcCommand.GeneralCallback, VlcStatus.Observer {
+        private final Context ctx;
+
+        public WidgetVlcCallback(Context ctx) {
+            this.ctx = ctx;
         }
 
-        @Override
-        public void onConnectionError() {
-            Log.e("XXXXXXXXXXX", "onConnectionError");
+        public void reviveApp() {
+            Intent openApp = new Intent(ctx, MainActivity.class);
+            PendingIntent pendingOpenApp = PendingIntent.getActivity(ctx, 0, openApp, 0);
+
+            try {
+                pendingOpenApp.send();
+            } catch (PendingIntent.CanceledException ignored) {
+                // Nothing to do...
+            }
         }
 
-        @Override
-        public void onSystemError(Exception e) {
-            Log.e("XXXXXXXXXXX", "onSystemError");
+        // On any error condition, open the app: it will automatically request a new server if the
+        // current one has become invalid for whatever reason.
+        @Override public void onAuthError() {
+            reviveApp();
         }
+        @Override public void onConnectionError() {
+            reviveApp();
+        }
+        @Override public void onSystemError(Exception e) {
+            reviveApp();
+        }
+        @Override public void onVlcStatusFetchError() { reviveApp(); }
 
         @Override
         public void onVlcStatusUpdate(VlcStatus results) {
-            Log.e("XXXXXXXXXXX", "onVlcStatusUpdate");
+            // Nothing can be done with a status update in a widget, so just drop it
         }
 
-        @Override
-        public void onVlcStatusFetchError() {
-            Log.e("XXXXXXXXXXX", "onVlcStatusFetchError");
-        }
     }
 
     @Override
-    public void onReceive(Context context, Intent intent) {
-        Log.e("XXXXXXXXXXX", "XXXXXXXXXX");
+    public void onReceive(final Context context, final Intent intent) {
+        final WidgetVlcCallback vlcCallback = new WidgetVlcCallback(context);
 
-        if ("com.nicolasbrailo.vlcfreemote.FOOO".equals(intent.getAction())) {
-            Log.e("XXXXXXXXXXX", "IT LIVES!");
-            Server srv = ServerSelectView.getLastUsedServer(context);
-            if (srv != null) {
-                Log.e("XXXXXXXXX", "Last srv is " + srv.ip);
-
-                RemoteVlc vlc = new RemoteVlc(srv, new Foo());
+        final Server srv = (new RememberedServers(context)).getLastUsedServer();
+        if (srv == null) {
+            vlcCallback.reviveApp();
+        } else {
+            RemoteVlc vlc = new RemoteVlc(srv, vlcCallback);
+            if (ACTION_TOGGLE_PLAY.equals(intent.getAction())) {
                 vlc.exec(new Cmd_TogglePlay(vlc));
-
-            } else {
-                Log.e("XXXXXXXXX", "Last srv is null");
+            } else if (ACTION_PLAY_NEXT.equals(intent.getAction())) {
+                vlc.exec(new Cmd_Next(vlc));
             }
         }
 
