@@ -14,5 +14,5 @@ public class Cmd_TogglePlay extends VlcCommand_ReturnsVlcStatus {
     }
 
     @Override
-    public Priority getPriority() { return Priority.MustExecute; }
+    public Priority getPriority() { return Priority.CanDelay; }
 }

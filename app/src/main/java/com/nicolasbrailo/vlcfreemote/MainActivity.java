@@ -167,7 +167,16 @@ public class MainActivity extends FragmentActivity
         vlcConnection.exec(new Cmd_AddToPlaylist(uri, vlcConnection));
 
         if (vlcConnection.getLatestStats().isStopped()) {
-            vlcConnection.exec(new Cmd_TogglePlay(vlcConnection));
+            // Start playing with a small delay to give VLC some time to add the files to the playlist
+            (new Handler()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    // vlcConnection.exec(new Cmd_TogglePlay(vlcConnection));
+                    // TODO: When stopped, VLC keeps a "pointer" to the last played element, so just
+                    // toggling play status is not enough: it's necessary to actually tell VLC which
+                    // file to play
+                }
+            }, 500);
         }
 
         this.playlistView.triggerPlaylistUpdate();
