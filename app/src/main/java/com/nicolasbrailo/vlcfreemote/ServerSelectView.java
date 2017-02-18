@@ -263,14 +263,14 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
         private final Context context;
         private final View.OnClickListener onClickCallback;
 
-        public static class Row {
+        static class Row {
             Server value;
             ImageView wServerSelect_ServerTypeIcon;
             TextView wServerSelect_ScannedServerAddress;
             ImageButton wServerSelect_ScannedServerSelect;
         }
 
-        public Servers_ViewAdapter(View.OnClickListener onClickCallback, Context context) {
+        Servers_ViewAdapter(View.OnClickListener onClickCallback, Context context) {
             super(context, layoutResourceId, new ArrayList<Server>());
             this.context = context;
             this.onClickCallback = onClickCallback;

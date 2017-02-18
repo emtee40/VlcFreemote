@@ -12,7 +12,6 @@ import android.widget.Toast;
 
 import com.nicolasbrailo.vlcfreemote.model.Server;
 import com.nicolasbrailo.vlcfreemote.vlc_connector.Cmd_AddToPlaylist;
-import com.nicolasbrailo.vlcfreemote.vlc_connector.Cmd_TogglePlay;
 import com.nicolasbrailo.vlcfreemote.vlc_connector.Cmd_UpdateStatus;
 import com.nicolasbrailo.vlcfreemote.vlc_connector.RemoteVlc;
 import com.nicolasbrailo.vlcfreemote.vlc_connector.VlcCommand;
@@ -153,6 +152,7 @@ public class MainActivity extends FragmentActivity
             this.vlcConnection = new RemoteVlc(new Server("", 0, null), this);
         }
 
+        // XXX TODO Bug here: this may be called before the screen rotate is done, crashing everything
         playlistView.triggerPlaylistUpdate();
         dirListView.onServerChanged(srv);
         mainMenu.jumpToPlaylist();

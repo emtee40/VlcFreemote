@@ -71,11 +71,11 @@ public class MiniPlayerControllerWidget extends AppWidgetProvider {
     private static class WidgetVlcCallback implements VlcCommand.GeneralCallback, VlcStatus.Observer {
         private final Context ctx;
 
-        public WidgetVlcCallback(Context ctx) {
+        WidgetVlcCallback(Context ctx) {
             this.ctx = ctx;
         }
 
-        public void reviveApp() {
+        void reviveApp() {
             Intent openApp = new Intent(ctx, MainActivity.class);
             PendingIntent pendingOpenApp = PendingIntent.getActivity(ctx, 0, openApp, 0);
 

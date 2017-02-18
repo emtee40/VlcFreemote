@@ -2,7 +2,7 @@ package com.nicolasbrailo.vlcfreemote.model;
 
 public class Server {
     public final String ip;
-    public final Integer sshPort;
+    private final Integer sshPort;
     public final Integer vlcPort;
     private String password;
     private String lastPath;
