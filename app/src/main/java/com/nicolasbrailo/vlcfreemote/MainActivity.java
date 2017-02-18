@@ -139,7 +139,8 @@ public class MainActivity extends FragmentActivity
         this.mainMenu = new MainMenuNavigation(((ViewPager) super.findViewById(R.id.wMainMenu)),
                 getSupportFragmentManager(), playlistView, dirListView, serverSelectView);
 
-        onNewServerSelected(ServerSelectView.getLastUsedServer(this));
+        final Server srv = ServerSelectView.getLastUsedServer(this);
+        if (srv != null) onNewServerSelected(srv);
     }
 
     @Override
