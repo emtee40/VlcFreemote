@@ -110,7 +110,7 @@ public class ServerScanner extends AsyncTask<Void, Server, List<Server>> {
     /**
      * @return list of IPs for local networks, eg ["192.168.0.", "127.0.0."]
      */
-    private static List<String> getLocalNetworks() {
+    public static List<String> getLocalNetworks() {
         final Pattern ip_pattern = Pattern.compile(IP_ADDRESS_PATTERN);
 
         List<String> addresses = new ArrayList<>();

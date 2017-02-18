@@ -26,7 +26,7 @@ import com.nicolasbrailo.vlcfreemote.model.Server;
 import com.nicolasbrailo.vlcfreemote.net_utils.ServerScanner;
 
 import java.util.ArrayList;
-import java.util.StringTokenizer;
+import java.util.List;
 
 
 public class ServerSelectView extends Fragment implements View.OnClickListener {
@@ -57,6 +57,11 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
 
         v.findViewById(R.id.wServerSelect_ToggleServerScanning).setOnClickListener(this);
         v.findViewById(R.id.wServerSelect_CustomServerSet).setOnClickListener(this);
+
+        List<String> ips = ServerScanner.getLocalNetworks();
+        if (!ips.isEmpty()) {
+            ((EditText)v.findViewById(R.id.wServerSelect_CustomServerIp)).setText(ips.get(0));
+        }
 
         return v;
     }
