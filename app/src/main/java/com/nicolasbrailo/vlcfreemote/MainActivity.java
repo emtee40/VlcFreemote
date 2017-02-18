@@ -140,7 +140,11 @@ public class MainActivity extends FragmentActivity
                 getSupportFragmentManager(), playlistView, dirListView, serverSelectView);
 
         final Server srv = ServerSelectView.getLastUsedServer(this);
-        if (srv != null) onNewServerSelected(srv);
+        if (srv != null) {
+            onNewServerSelected(srv);
+        } else {
+            onConnectionError();
+        }
     }
 
     @Override

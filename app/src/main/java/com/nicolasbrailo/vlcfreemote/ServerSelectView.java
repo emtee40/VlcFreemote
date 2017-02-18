@@ -26,6 +26,7 @@ import com.nicolasbrailo.vlcfreemote.model.Server;
 import com.nicolasbrailo.vlcfreemote.net_utils.ServerScanner;
 
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 
 public class ServerSelectView extends Fragment implements View.OnClickListener {
@@ -52,6 +53,7 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
 
         this.listViewAdapter = new Servers_ViewAdapter(this, getActivity());
         ((ListView) v.findViewById(R.id.wServerSelect_ScannedServersList)).setAdapter(listViewAdapter);
+        populateLRUServersList(v);
 
         v.findViewById(R.id.wServerSelect_ToggleServerScanning).setOnClickListener(this);
         v.findViewById(R.id.wServerSelect_CustomServerSet).setOnClickListener(this);
@@ -241,6 +243,16 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
         activity.findViewById(R.id.wServerSelect_ScanningServersIndicator).setVisibility(View.GONE);
         ((Button)activity.findViewById(R.id.wServerSelect_ToggleServerScanning))
                 .setText(R.string.server_select_toggle_scanning_start);
+    }
+
+    private void populateLRUServersList(View v) {
+        final Servers_ViewAdapter lruServersListAdapter = new Servers_ViewAdapter(this, getActivity());
+        ListView lst = (ListView) v.findViewById(R.id.wServerSelect_LRUServersList);
+        lst.setAdapter(lruServersListAdapter);
+
+        for (final Server srv : (new RememberedServers(getContext())).getLastUsedServers(10)) {
+            lruServersListAdapter.add(srv);
+        }
     }
 
     /**

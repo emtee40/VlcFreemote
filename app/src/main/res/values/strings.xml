@@ -56,4 +56,5 @@
     <string name="general_vlc_status">%1$s - %2$s</string>
     <string name="dir_listing_random_play_failed">Random directory selection failed</string>
     <string name="wPlayer_Open">Open VlcFreemote</string>
+    <string name="server_select_lru_selection_label">Recently used servers</string>
 </resources>

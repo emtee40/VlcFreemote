@@ -2,9 +2,13 @@ package com.nicolasbrailo.vlcfreemote.local_settings;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.nicolasbrailo.vlcfreemote.model.Server;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RememberedServers extends LocalSettings {
 
@@ -87,7 +91,10 @@ public class RememberedServers extends LocalSettings {
                 new QueryReadCallback() {
             @Override
             public void onCursorReady(Cursor res) {
-                dbSrv[0] = readServerFrom(res);
+                if (res.getCount() == 1) {
+                    res.moveToFirst();
+                    dbSrv[0] = readServerFrom(res);
+                }
             }
         });
 
@@ -120,24 +127,46 @@ public class RememberedServers extends LocalSettings {
                 new QueryReadCallback() {
             @Override
             public void onCursorReady(Cursor res) {
-                dbSrv[0] = readServerFrom(res);
+                if (res.getCount() == 1) {
+                    res.moveToFirst();
+                    dbSrv[0] = readServerFrom(res);
+                }
             }
         });
 
         return dbSrv[0];
     }
 
-    private Server readServerFrom(final Cursor c)  {
-        if (c.getCount() != 1) {
-            return null;
-        }
+    /**
+     * Returns the last N used server, sorted by IP
+     * @param count Expected number of servers
+     * @return List of servers
+     */
+    public List<Server> getLastUsedServers(final int count) {
+        final String query = "SELECT * FROM " + TABLE_NAME +
+                " ORDER BY " + COLUMN_IP + " LIMIT ? ";
 
+        final String[] args = new String[]{String.valueOf(count)};
+
+        final List<Server> results = new ArrayList<>();
+        readQuery(query, args, new String[]{COLUMN_IP, COLUMN_VLCPORT, COLUMN_PASS, COLUMN_LAST_PATH}, new QueryReadCallback() {
+            @Override
+            public void onCursorReady(Cursor res) {
+                while (res.moveToNext()) {
+                    results.add(readServerFrom(res));
+                }
+            }
+        });
+
+        return results;
+    }
+
+    private Server readServerFrom(final Cursor c)  {
         final String ip;
         final Integer port;
         final String pass;
         final String lastPath;
 
-        c.moveToFirst();
         try {
             ip = c.getString(c.getColumnIndexOrThrow(COLUMN_IP));
             port = c.getInt(c.getColumnIndexOrThrow(COLUMN_VLCPORT));
