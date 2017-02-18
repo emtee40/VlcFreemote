@@ -198,6 +198,12 @@ public class DirListingView extends VlcFragment
     }
 
     private void onAddToPlaylistRequested(final Cmd_DirList.DirListEntry path) {
+        // The model (VlcPath) will update the "played before" flag in the database, but we also
+        // need to update the UI right now, otherwise the user will need to refresh the directory
+        // to see the "seen" flag
+        path.wasPlayedBefore = true;
+        this.dirViewAdapter.notifyDataSetChanged();
+
         callback.onAddToPlaylistRequested(path.path);
 
         if (! path.isDirectory) {
@@ -299,13 +305,13 @@ public class DirListingView extends VlcFragment
         final private LayoutInflater inflater;
         final private View.OnClickListener onClickCallback;
 
-        public DirListEntry_ViewAdapter(View.OnClickListener onClickCallback, Context context) {
+        DirListEntry_ViewAdapter(View.OnClickListener onClickCallback, Context context) {
             super(context, layoutResourceId, new ArrayList<Cmd_DirList.DirListEntry>());
             this.inflater = ((Activity) context).getLayoutInflater();
             this.onClickCallback = onClickCallback;
         }
 
-        public static class Row {
+        static class Row {
             Cmd_DirList.DirListEntry values;
             ImageView dirOrFile;
             TextView fName;
