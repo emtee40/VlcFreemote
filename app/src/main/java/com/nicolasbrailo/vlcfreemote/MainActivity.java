@@ -27,7 +27,7 @@ public class MainActivity extends FragmentActivity
 
     private static final int PERIODIC_VLC_STATUS_UPDATE_DELAY = 2500;
 
-    private RemoteVlc vlcConnection;
+    private RemoteVlc vlcConnection = null;
     private PlayerControllerView playerControllerView;
     private PlaylistView playlistView;
     private DirListingView dirListView;
@@ -202,6 +202,16 @@ public class MainActivity extends FragmentActivity
 
     @Override
     public RemoteVlc getActiveVlcConnection() {
+        // IF this method is somehow called before onCreate, vlcConnection will be null and
+        // we should try to create it from scratch
+        if (vlcConnection == null) {
+            onNewServerSelected(ServerSelectView.getLastUsedServer(this));
+        }
+
+        if (vlcConnection == null) {
+            onConnectionError();
+        }
+
         return vlcConnection;
     }
 

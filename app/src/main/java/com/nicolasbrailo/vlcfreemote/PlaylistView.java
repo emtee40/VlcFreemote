@@ -19,6 +19,7 @@ import com.nicolasbrailo.vlcfreemote.vlc_connector.Cmd_ClearPlaylist;
 import com.nicolasbrailo.vlcfreemote.vlc_connector.Cmd_GetPlaylist;
 import com.nicolasbrailo.vlcfreemote.vlc_connector.Cmd_RemoveFromPlaylist;
 import com.nicolasbrailo.vlcfreemote.vlc_connector.Cmd_StartPlaying;
+import com.nicolasbrailo.vlcfreemote.vlc_connector.RemoteVlc;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -150,7 +151,9 @@ public class PlaylistView extends VlcFragment implements View.OnClickListener, P
         // Vlc may be null if the parent activity hasn't attached yet
         if (! attached) return;
 
-        getVlc().exec(new Cmd_GetPlaylist(new Cmd_GetPlaylist.Callback() {
+        // getVlc() might return null on app start, if called before main's onCreate
+        final RemoteVlc vlc = getVlc();
+        vlc.exec(new Cmd_GetPlaylist(new Cmd_GetPlaylist.Callback() {
             @Override
             public void onContentAvailable(List<Cmd_GetPlaylist.PlaylistEntry> results) {
                 playlistViewAdapter.clear();
