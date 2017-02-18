@@ -62,6 +62,22 @@ public class PlayedFiles extends LocalSettings {
         deleteOldPlayedFiles();
     }
 
+    /**
+     * Removes a file from the recently played files list
+     * @param srv Server on which $path was played
+     * @param path Path to forget
+     */
+    public void rmPlayedFile(final Server srv, final String path) {
+        final String query =
+                "DELETE FROM " + TABLE_NAME +
+                " WHERE " + COLUMN_IP + " = ? " +
+                "   AND " + COLUMN_VLCPORT + " = ? " +
+                "   AND " + COLUMN_PATH + " = ? ";
+
+        final String[] args = new String[]{srv.ip, String.valueOf(srv.vlcPort), path};
+        run(query, args);
+    }
+
     private void deleteOldPlayedFiles() {
         // Hint: read from the inside out
         final String query = "DELETE FROM " + TABLE_NAME +

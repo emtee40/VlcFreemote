@@ -199,8 +199,12 @@ public class VlcPath {
         (new Bookmarks(dbContext)).deleteBookmark(srv, path);
     }
 
-    public void onAddToPlaylistRequested(String path) {
+    public void toggleSeen(String path, boolean seen) {
         final Server srv = vlcProvider.getActiveVlcConnection().getServer();
-        (new PlayedFiles(dbContext)).addPlayedFile(srv, path);
+        if (seen) {
+            (new PlayedFiles(dbContext)).addPlayedFile(srv, path);
+        } else {
+            (new PlayedFiles(dbContext)).rmPlayedFile(srv, path);
+        }
     }
 }

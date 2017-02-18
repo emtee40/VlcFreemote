@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,7 +31,9 @@ import java.util.List;
 
 public class DirListingView extends VlcFragment
                             implements View.OnClickListener,
-                                       VlcPath.UICallback, PopupMenu.OnMenuItemClickListener {
+                                       View.OnLongClickListener,
+                                       VlcPath.UICallback,
+                                       PopupMenu.OnMenuItemClickListener {
 
     public interface DirListingCallback {
         void onAddToPlaylistRequested(final String uri);
@@ -50,7 +53,7 @@ public class DirListingView extends VlcFragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_dir_listing_view, container, false);
-        dirViewAdapter = new DirListEntry_ViewAdapter(this, getActivity());
+        dirViewAdapter = new DirListEntry_ViewAdapter(this, this, getActivity());
         ((ListView) v.findViewById(R.id.wDirListing_List)).setAdapter(dirViewAdapter);
         v.findViewById(R.id.wDirListing_PopupMenu).setOnClickListener(this);
         return v;
@@ -133,6 +136,25 @@ public class DirListingView extends VlcFragment
     }
 
     @Override
+    public boolean onLongClick(View v) {
+        // If a user long-pressed a file marked as viewed, unmark it
+        Cmd_DirList.DirListEntry item = (Cmd_DirList.DirListEntry) v.getTag();
+        if (item == null) throw new RuntimeException(DirListingView.class.getName() + " long-pressed a menu item with no tag");
+        if (item.isDirectory) {
+            // Nothing to do with dirs
+            return false;
+        }
+
+        item.wasPlayedBefore = ! item.wasPlayedBefore;
+        this.dirViewAdapter.notifyDataSetChanged();
+
+        // Save to DB
+        vlcPath.toggleSeen(item.path, item.wasPlayedBefore);
+
+        return true;
+    }
+
+    @Override
     public boolean onMenuItemClick(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.wDirListing_Bookmark:
@@ -207,7 +229,7 @@ public class DirListingView extends VlcFragment
         callback.onAddToPlaylistRequested(path.path);
 
         if (! path.isDirectory) {
-            vlcPath.onAddToPlaylistRequested(path.path);
+            vlcPath.toggleSeen(path.path, true);
         }
     }
 
@@ -304,11 +326,14 @@ public class DirListingView extends VlcFragment
 
         final private LayoutInflater inflater;
         final private View.OnClickListener onClickCallback;
+        final private View.OnLongClickListener onLongClickCallback;
 
-        DirListEntry_ViewAdapter(View.OnClickListener onClickCallback, Context context) {
+        DirListEntry_ViewAdapter(View.OnClickListener onClickCallback,
+                                 View.OnLongClickListener onLongClickCallback, Context context) {
             super(context, layoutResourceId, new ArrayList<Cmd_DirList.DirListEntry>());
             this.inflater = ((Activity) context).getLayoutInflater();
             this.onClickCallback = onClickCallback;
+            this.onLongClickCallback = onLongClickCallback;
         }
 
         static class Row {
@@ -342,9 +367,13 @@ public class DirListingView extends VlcFragment
             holder.fName.setText(holder.values.name);
             holder.fName.setTag(holder.values);
             holder.fName.setOnClickListener(onClickCallback);
+            holder.fName.setOnLongClickListener(onLongClickCallback);
+            holder.fName.setLongClickable(true);
 
             holder.alreadySeen = (ImageView)row.findViewById(R.id.wDirListElement_AlreadySeen);
             holder.alreadySeen.setOnClickListener(onClickCallback);
+            holder.alreadySeen.setOnLongClickListener(onLongClickCallback);
+            holder.alreadySeen.setLongClickable(true);
             if (holder.values.wasPlayedBefore) {
                 holder.alreadySeen.setVisibility(View.VISIBLE);
             } else {
@@ -354,6 +383,8 @@ public class DirListingView extends VlcFragment
             holder.actionButton = (ImageButton)row.findViewById(R.id.wDirListElement_Action);
             holder.actionButton.setTag(holder.values);
             holder.actionButton.setOnClickListener(onClickCallback);
+            holder.actionButton.setOnLongClickListener(onLongClickCallback);
+            holder.actionButton.setLongClickable(true);
 
             row.setTag(holder);
 
