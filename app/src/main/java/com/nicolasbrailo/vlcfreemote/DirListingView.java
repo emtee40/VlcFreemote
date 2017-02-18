@@ -229,7 +229,7 @@ public class DirListingView extends VlcFragment
     public void onServerChanged(final Server srv) {
         if (vlcPath != null) {
             vlcPath.onServerChanged(srv);
-            dirViewAdapter.clear();
+            if (dirViewAdapter != null) dirViewAdapter.clear();
         }
     }
 

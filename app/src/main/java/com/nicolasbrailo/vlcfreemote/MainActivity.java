@@ -42,7 +42,7 @@ public class MainActivity extends FragmentActivity
         private final ServerSelectView serverSelectView;
         private final ViewPager parentView;
 
-        public MainMenuNavigation(ViewPager view, FragmentManager fm, PlaylistView playlistView,
+        MainMenuNavigation(ViewPager view, FragmentManager fm, PlaylistView playlistView,
                                   DirListingView dirListView, ServerSelectView serverSelectView)
         {
             super(fm);
@@ -93,8 +93,8 @@ public class MainActivity extends FragmentActivity
             }
         }
 
-        public void jumpToServerSelection() { parentView.setCurrentItem(2, true); }
-        public void jumpToPlaylist() { parentView.setCurrentItem(0, true); }
+        void jumpToServerSelection() { parentView.setCurrentItem(2, true); }
+        void jumpToPlaylist() { parentView.setCurrentItem(0, true); }
     }
 
     private void safePutFragment(final Bundle outState, final String name, Fragment obj) {
@@ -152,10 +152,12 @@ public class MainActivity extends FragmentActivity
             this.vlcConnection = new RemoteVlc(new Server("", 0, null), this);
         }
 
-        // XXX TODO Bug here: this may be called before the screen rotate is done, crashing everything
-        playlistView.triggerPlaylistUpdate();
-        dirListView.onServerChanged(srv);
-        mainMenu.jumpToPlaylist();
+        // This method may be called without an activity attached
+        if (playlistView != null && dirListView != null && mainMenu != null) {
+            playlistView.triggerPlaylistUpdate();
+            dirListView.onServerChanged(srv);
+            mainMenu.jumpToPlaylist();
+        }
 
         // Update status on new server
         vlcConnection.exec(new Cmd_UpdateStatus(vlcConnection));
