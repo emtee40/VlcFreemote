@@ -1,11 +1,14 @@
 package com.nicolasbrailo.vlcfreemote;
 
+import android.app.Notification;
+import android.media.AudioManager;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.widget.Toast;
@@ -235,7 +238,12 @@ public class MainActivity extends FragmentActivity
     public void onConnectionError() {
         mainMenu.jumpToServerSelection();
 
-        final String server = vlcConnection.getServer().ip + ':' + vlcConnection.getServer().vlcPort;
+        final String server;
+        if (vlcConnection != null && vlcConnection.getServer() != null) {
+            server = vlcConnection.getServer().ip + ':' + vlcConnection.getServer().vlcPort;
+        } else {
+            server = "unknown address";
+        }
         final String msg = getString(R.string.status_vlc_cant_connect);
         final String fmtMsg = String.format(msg, server);
         Toast toast = Toast.makeText(getApplicationContext(), fmtMsg, Toast.LENGTH_LONG);
