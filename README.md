@@ -24,7 +24,7 @@ You should fork the repo as described here: http://help.github.com/fork-a-repo/
 
 ### License
 
-VlcFreemote Copyright 2015-2016 Nicolas Brailovsky
+VlcFreemote Copyright 2015-? Nicolas Brailovsky
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -37,5 +37,4 @@ You should have received a copy of the GNU General Public License along with thi
 * Add widget to control Vlc from a "desktop" (?) widget
 * Idem for lock screen?
 * Control remote Vlc volume from local volume key
-* Publish apk to store
 
