@@ -5,6 +5,12 @@ How many times have you been comfortably watching a movie from the couch only to
 
 Worry no more: with VlcFreemote you can now install a tiny Android app to control your VLC server.
 
+### How do I setup VLC?
+
+Check this awesome guide with screenshots. Takes 30 seconds!
+
+https://github.com/azrafe7/vlc4youtube/blob/master/instructions/how-to-enable-vlc-web-interface.md
+
 ### Another VLC remote? Why?
 
 There are a few VLC remote controls out there. I think this is the only once that's open source (not 100% sure). It has some nice extra features I haven't found in other remote controls too: 
