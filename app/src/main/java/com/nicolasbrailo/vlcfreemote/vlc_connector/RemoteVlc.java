@@ -111,4 +111,8 @@ public class RemoteVlc implements VlcStatus.ObserverRegister,
         statusObserver.onVlcStatusFetchError();
     }
 
+    @Override
+    public void onVlcStatusFetchError(final String msg) {
+        statusObserver.onVlcStatusFetchError(msg);
+    }
 }

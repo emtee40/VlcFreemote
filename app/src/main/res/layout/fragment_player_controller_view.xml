@@ -31,6 +31,14 @@
             style="?android:buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="@string/wPlayer_AppInfoScreen"
+            android:id="@+id/wPlayer_AppInfoScreen"
+            android:layout_gravity="center_horizontal" />
+
+        <Button
+            style="?android:buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:text="@string/wPlayer_ToggleFullscreen"
             android:id="@+id/wPlayer_ToggleFullscreen"
             android:layout_gravity="center_horizontal" />

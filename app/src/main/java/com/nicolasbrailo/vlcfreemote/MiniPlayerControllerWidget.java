@@ -98,6 +98,7 @@ public class MiniPlayerControllerWidget extends AppWidgetProvider {
             reviveApp();
         }
         @Override public void onVlcStatusFetchError() { reviveApp(); }
+        @Override public void onVlcStatusFetchError(final String msg) { reviveApp(); }
 
         @Override
         public void onVlcStatusUpdate(VlcStatus results) {

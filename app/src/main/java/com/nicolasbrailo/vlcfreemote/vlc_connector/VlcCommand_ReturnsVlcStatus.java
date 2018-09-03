@@ -42,6 +42,16 @@ public abstract class VlcCommand_ReturnsVlcStatus implements VlcCommand {
                 kvReader = new XmlMogrifier.XmlKeyValReader<VlcStatus>(VlcStatus.class) {
                     @Override
                     protected void parseValue(VlcStatus obj, String key, String val) {
+                        try {
+                            unsafeParseValue(obj, key, val);
+                        } catch (final Exception ex) {
+                            final String msg = "Can't parse VLC status: (Key,Value) " +
+                                                    key + "," + val + " - Ex: " + ex.getMessage();
+                            cb.onVlcStatusFetchError(msg);
+                        }
+                    }
+
+                    private void unsafeParseValue(VlcStatus obj, String key, String val) {
                         switch (key) {
                             case "length":
                                 obj.length = Integer.parseInt(val);

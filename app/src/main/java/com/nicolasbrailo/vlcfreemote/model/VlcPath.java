@@ -33,8 +33,8 @@ public class VlcPath {
         }
     }
 
-    // Is this Windows compatible? Who knows...
-    private static final String VLC_DEFAULT_START_PATH = "~";
+    // Stackoverflow says this should work everywhere (ie Win and Linux)
+    private static final String VLC_DEFAULT_START_PATH = "/";
 
     private final RemoteVlc.ConnectionProvider vlcProvider;
     private final Context dbContext;

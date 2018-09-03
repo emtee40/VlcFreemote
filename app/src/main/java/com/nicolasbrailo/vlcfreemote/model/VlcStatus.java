@@ -12,6 +12,7 @@ public class VlcStatus {
     public interface Observer {
         void onVlcStatusUpdate(VlcStatus results);
         void onVlcStatusFetchError();
+        void onVlcStatusFetchError(String msg);
     }
 
     public int length;

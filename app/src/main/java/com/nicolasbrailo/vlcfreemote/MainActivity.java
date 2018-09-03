@@ -1,6 +1,12 @@
 package com.nicolasbrailo.vlcfreemote;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Handler;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -8,6 +14,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
 import android.widget.Toast;
 
 import com.nicolasbrailo.vlcfreemote.model.Server;
@@ -16,6 +24,9 @@ import com.nicolasbrailo.vlcfreemote.vlc_connector.Cmd_UpdateStatus;
 import com.nicolasbrailo.vlcfreemote.vlc_connector.RemoteVlc;
 import com.nicolasbrailo.vlcfreemote.vlc_connector.VlcCommand;
 import com.nicolasbrailo.vlcfreemote.model.VlcStatus;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 public class MainActivity extends FragmentActivity
                           implements RemoteVlc.ConnectionProvider,
@@ -175,6 +186,7 @@ public class MainActivity extends FragmentActivity
 
         if (vlcConnection.getLatestStats().isStopped()) {
             // Start playing with a small delay to give VLC some time to add the files to the playlist
+            // Horrible! Maybe add a "when done" callback to Vlc_Commands to make this cleaner?
             (new Handler()).postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -247,29 +259,67 @@ public class MainActivity extends FragmentActivity
         toast.show();
     }
 
+
+    @Override
+    public void onVlcStatusFetchError(final String msg) {
+        onAppBug(msg);
+        onVlcStatusFetchError();
+    }
+
     @Override
     public void onVlcStatusFetchError() {
-        // Getting here means there was an error that couldn't be handled. The only handled. The
+        // Getting here means there was an error that couldn't be handled. The
         // only reasonable thing to do is to disconnect and try again.
         onConnectionError();
     }
+
 
     @Override
     public void onSystemError(Exception e) {
         Log.e(getClass().getSimpleName(), "Programmer error! " + e.toString());
 
+        mainMenu.jumpToServerSelection();
+
         final String msg = getString(R.string.status_fatal_app_error);
         final String server = vlcConnection.getServer().ip + ':' + vlcConnection.getServer().vlcPort;
         final String fmtMsg = String.format(msg, server);
 
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+
         final String fmtMsgExtra;
         final String msgExtra = getString(R.string.status_fatal_app_error_extra_info);
-        fmtMsgExtra = String.format(msgExtra, e.getMessage());
+        fmtMsgExtra = fmtMsg + String.format(msgExtra, e.getMessage() + sw.toString());
 
-        Toast toast = Toast.makeText(getApplicationContext(), fmtMsg + fmtMsgExtra, Toast.LENGTH_LONG);
-        toast.show();
-
-        mainMenu.jumpToServerSelection();
+        onAppBug(fmtMsgExtra);
     }
 
+    public void onAppBug(final String bugDetails) {
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle(R.string.status_fatal_app_error_title)
+                .setMessage(bugDetails)
+                .setCancelable(false)
+                .setPositiveButton(R.string.app_bug_try_ignore, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // Do nothing
+                    }
+                })
+                .setNegativeButton(R.string.app_bug_submit_bug_report, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        final String url = Uri.parse("https://github.com/nicolasbrailo/VlcFreemote/issues/new")
+                                .buildUpon()
+                                .appendQueryParameter("title", "Bug report")
+                                .appendQueryParameter("body", bugDetails)
+                                .build().toString();
+
+                        final Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setData(Uri.parse(url));
+                        startActivity(intent);
+                    }
+                });
+        alert.create().show();
+    }
 }

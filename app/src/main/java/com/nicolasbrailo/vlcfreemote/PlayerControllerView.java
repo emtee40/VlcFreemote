@@ -1,7 +1,11 @@
 package com.nicolasbrailo.vlcfreemote;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,6 +51,7 @@ public class PlayerControllerView extends VlcFragment
         v.findViewById(R.id.wPlayer_Volume).setOnClickListener(this);
         v.findViewById(R.id.wPlayer_BtnPlayPause).setOnClickListener(this);
 
+        v.findViewById(R.id.wPlayer_AppInfoScreen).setOnClickListener(this);
         v.findViewById(R.id.wPlayer_ToggleFullscreen).setOnClickListener(this);
         v.findViewById(R.id.wPlayer_CycleAudioTrack).setOnClickListener(this);
         v.findViewById(R.id.wPlayer_CycleSubtitleTrack).setOnClickListener(this);
@@ -81,6 +86,7 @@ public class PlayerControllerView extends VlcFragment
             case R.id.wPlayer_BtnPrev: onBtnPrevClicked(); break;
             case R.id.wPlayer_BtnNext: onBtnNextClicked(); break;
             case R.id.wPlayer_BtnPlayPause: onBtnPlayPauseClicked(); break;
+            case R.id.wPlayer_AppInfoScreen: showAppInfo(); break;
             case R.id.wPlayer_ToggleFullscreen: onToggleFullscreen(); break;
             case R.id.wPlayer_CycleAudioTrack: onCycleAudioTrack(); break;
             case R.id.wPlayer_CycleSubtitleTrack: onCycleSubtitleTrack(); break;
@@ -175,5 +181,25 @@ public class PlayerControllerView extends VlcFragment
 
     private void onCycleAudioTrack() {
         getVlc().exec(new Cmd_CycleAudioTrack(getVlc()));
+    }
+
+    private void showAppInfo() {
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this.getContext());
+        alert.setTitle(R.string.about_this_app_title)
+                .setMessage(R.string.about_this_app_body)
+                .setCancelable(true)
+                .setPositiveButton(R.string.about_this_app_goto_site, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        final String url = Uri.parse("https://github.com/nicolasbrailo/VlcFreemote")
+                                .buildUpon()
+                                .build().toString();
+
+                        final Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setData(Uri.parse(url));
+                        startActivity(intent);
+                    }
+                });
+        alert.create().show();
     }
 }
