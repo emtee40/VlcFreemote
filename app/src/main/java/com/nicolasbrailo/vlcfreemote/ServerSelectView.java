@@ -172,7 +172,8 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
 
         if (visible && isResumed())
         {
-            toggleServerScanning();
+            // Don't start scanning by default when activity is shown
+            // toggleServerScanning();
         } else {
             setScanModeOff();
         }
