@@ -64,4 +64,5 @@
     <string name="about_this_app_title">About VlcFreemote</string>
     <string name="about_this_app_goto_site">Goto project\'s site</string>
     <string name="about_this_app_body">VlcFreemote is open source! If you have suggestions, feature requests or bug reports please visit the project\'s website.</string>
+    <string name="playlist_item_marked_as_unseen">Element removed from recently viewed history</string>
 </resources>

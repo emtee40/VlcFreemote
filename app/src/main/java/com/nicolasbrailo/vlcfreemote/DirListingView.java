@@ -158,6 +158,14 @@ public class DirListingView extends VlcFragment
         // Save to DB
         vlcPath.toggleSeen(item.path, item.wasPlayedBefore);
 
+        if (!item.wasPlayedBefore) {
+            // If item is marked as not played before it means the user toggled it
+            // Add a pop up notification to let the user know what this feature is
+            CharSequence msg = getString(R.string.playlist_item_marked_as_unseen);
+            Toast toast = Toast.makeText(getContext(), msg, Toast.LENGTH_LONG);
+            toast.show();
+        }
+
         return true;
     }
 
