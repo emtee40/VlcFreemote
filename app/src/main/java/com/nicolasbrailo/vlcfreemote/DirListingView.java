@@ -125,6 +125,10 @@ public class DirListingView extends VlcFragment
 
                 break;
 
+            case R.id.wDirListElement_AlreadySeen:
+                toggleItemSeen(item);
+                break;
+
             case R.id.wDirListing_PopupMenu:
                 showPopupMenu();
                 break;
@@ -138,6 +142,10 @@ public class DirListingView extends VlcFragment
     public boolean onLongClick(View v) {
         // If a user long-pressed a file marked as viewed, unmark it
         Cmd_DirList.DirListEntry item = (Cmd_DirList.DirListEntry) v.getTag();
+        return toggleItemSeen(item);
+    }
+
+    boolean toggleItemSeen(final Cmd_DirList.DirListEntry item) {
         if (item == null) throw new RuntimeException(DirListingView.class.getName() + " long-pressed a menu item with no tag");
         if (item.isDirectory) {
             // Nothing to do with dirs
@@ -370,6 +378,7 @@ public class DirListingView extends VlcFragment
             holder.fName.setLongClickable(true);
 
             holder.alreadySeen = (ImageView)row.findViewById(R.id.wDirListElement_AlreadySeen);
+            holder.alreadySeen.setTag(holder.values);
             holder.alreadySeen.setOnClickListener(onClickCallback);
             holder.alreadySeen.setOnLongClickListener(onLongClickCallback);
             holder.alreadySeen.setLongClickable(true);
