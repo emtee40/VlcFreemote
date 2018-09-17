@@ -23,6 +23,10 @@ In the future, whenever I get some free time, I'd like to add the ability to sta
  
 ### Why isn't this in Google play?
  Mostly cause I'm lazy and cheap. Getting a Google Play account costs 10 dollars or so, and I'm too lazy and too cheap to get one. Want me to upload it to Google Play? Feel free to buy me a beer. If not you can just get the APK from Github, or download the source code and build it yourself.
+ 
+[<img src="https://f-droid.org/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="90">](https://f-droid.org/packages/com.nicolasbrailo.vlcfreemote/)
 
 ### Contribute
 Bug reports are always welcome. Code contributions even more so!
