@@ -30,7 +30,7 @@
     <string name="server_element_forget_lru_server_hint">Forget this server</string>
     <string name="wPlayer_Volume_Label">Volume</string>
     <string name="wPlayer_BtnNext">Play next</string>
-    <string name="wPlayer_BtnPlayPause">Play</string>
+    <string name="wPlayer_BtnPlayPause">Play/Pause</string>
     <string name="wPlayer_BtnPrev">Play previous</string>
     <string name="wPlayer_PlayPosition_JumpForward">Jump 20 seconds forward</string>
     <string name="wPlayer_PlayPosition_JumpBack">Jump 25 seconds back</string>

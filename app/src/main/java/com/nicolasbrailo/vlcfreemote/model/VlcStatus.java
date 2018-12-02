@@ -34,6 +34,11 @@ public class VlcStatus {
     public int currentMedia_trackNumber;
     public int currentMedia_tracksTotal;
 
+    public static final String HUMAN_READABLE_STATE_PAUSED = "Paused";
+    public static final String HUMAN_READABLE_STATE_PLAYING = "Playing";
+    public static final String HUMAN_READABLE_STATE_STOPPED = "Stopped";
+    public static final String HUMAN_READABLE_STATE_UNKNOW = "?";
+
     public VlcStatus() { state = ""; }
 
     public boolean isStopped() { return state.equals("stopped"); }
@@ -42,10 +47,10 @@ public class VlcStatus {
 
     public String getHumanReadableState() {
         switch (state) {
-            case "paused":  return "Paused";
-            case "playing": return "Playing";
-            case "stopped": return "Stopped";
-            default:        return "?";
+            case "paused":  return HUMAN_READABLE_STATE_PAUSED;
+            case "playing": return HUMAN_READABLE_STATE_PLAYING;
+            case "stopped": return HUMAN_READABLE_STATE_STOPPED;
+            default:        return HUMAN_READABLE_STATE_UNKNOW;
         }
     }
 

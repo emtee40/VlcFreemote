@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -25,6 +26,8 @@ import com.nicolasbrailo.vlcfreemote.vlc_connector.Cmd_TogglePlay;
 import com.nicolasbrailo.vlcfreemote.model.VlcStatus;
 
 import java.util.Locale;
+
+import static com.nicolasbrailo.vlcfreemote.model.VlcStatus.HUMAN_READABLE_STATE_PLAYING;
 
 public class PlayerControllerView extends VlcFragment
                                   implements View.OnClickListener,
@@ -168,6 +171,13 @@ public class PlayerControllerView extends VlcFragment
         final String length = String.format(Locale.getDefault(), "%d:%02d", status.length / 60, status.length % 60);
         final TextView lengthTxt = ((TextView) activity.findViewById(R.id.wPlayer_PlayPosition_Length));
         lengthTxt.setText(length);
+
+        final ImageButton playPauseButton = (ImageButton) activity.findViewById(R.id.wPlayer_BtnPlayPause);
+        if (currState.equals(HUMAN_READABLE_STATE_PLAYING)) {
+            playPauseButton.setImageResource(android.R.drawable.ic_media_pause);
+        } else {
+            playPauseButton.setImageResource(android.R.drawable.ic_media_play);
+        }
     }
 
 
