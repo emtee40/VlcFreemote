@@ -101,6 +101,10 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
                 onCustomServerSelected();
                 break;
 
+            case R.id.wServerSelect_ServerForget:
+                onForgetServerClicked((Server) v.getTag());
+                break;
+
             case R.id.wServerSelect_ScannedServerAddress:
             case R.id.wServerSelect_ScannedServerSelect:
                 onServerSelected((Server) v.getTag());
@@ -120,6 +124,12 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
         final Server srv = new Server(ip, Integer.parseInt(str_port), null);
 
         onServerSelected(srv);
+    }
+
+    private void onForgetServerClicked(final Server srv) {
+        final RememberedServers db = new RememberedServers(getContext());
+        db.forget(srv);
+        populateLRUServersList(getView());
     }
 
     private void onServerSelected(final Server srv) {
@@ -301,6 +311,7 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
             Server value;
             ImageView wServerSelect_ServerTypeIcon;
             TextView wServerSelect_ScannedServerAddress;
+            ImageButton wServerSelect_ServerForget;
             ImageButton wServerSelect_ScannedServerSelect;
         }
 
@@ -340,6 +351,10 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
             holder.wServerSelect_ScannedServerSelect = (ImageButton)row.findViewById(R.id.wServerSelect_ScannedServerSelect);
             holder.wServerSelect_ScannedServerSelect.setTag(holder.value);
             holder.wServerSelect_ScannedServerSelect.setOnClickListener(onClickCallback);
+
+            holder.wServerSelect_ServerForget = (ImageButton)row.findViewById(R.id.wServerSelect_ServerForget);
+            holder.wServerSelect_ServerForget.setTag(holder.value);
+            holder.wServerSelect_ServerForget.setOnClickListener(onClickCallback);
 
             row.setTag(holder);
 

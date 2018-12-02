@@ -27,6 +27,7 @@
     <string name="server_select_toggle_scanning_stop">Stop scanning…</string>
     <string name="server_select_toggle_scanning_start">Start scanning…</string>
     <string name="server_element_select_server_hint">Use this server</string>
+    <string name="server_element_forget_lru_server_hint">Forget this server</string>
     <string name="wPlayer_Volume_Label">Volume</string>
     <string name="wPlayer_BtnNext">Play next</string>
     <string name="wPlayer_BtnPlayPause">Play</string>

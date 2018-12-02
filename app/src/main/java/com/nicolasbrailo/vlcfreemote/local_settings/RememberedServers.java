@@ -194,4 +194,12 @@ public class RememberedServers extends LocalSettings {
         final String[] args = new String[]{srv.getLastPath(), srv.ip, String.valueOf(srv.vlcPort)};
         run(query, args);
     }
+
+    public void forget(Server srv) {
+        final String query = " DELETE FROM " + TABLE_NAME + " WHERE " +
+                                COLUMN_IP + " = ? AND " +
+                                COLUMN_VLCPORT + " = ?";
+        final String[] args = new String[]{srv.ip, String.valueOf(srv.vlcPort)};
+        run(query, args);
+    }
 }

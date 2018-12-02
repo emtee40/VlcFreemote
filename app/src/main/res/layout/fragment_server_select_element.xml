@@ -19,6 +19,15 @@
         android:id="@+id/wServerSelect_ScannedServerAddress" />
 
     <ImageButton
+        android:id="@+id/wServerSelect_ServerForget"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/server_element_forget_lru_server_hint"
+        android:background="?android:selectableItemBackground"
+        android:tint="@android:color/holo_blue_light"
+        android:src="@android:drawable/ic_menu_delete" />
+
+    <ImageButton
         android:id="@+id/wServerSelect_ScannedServerSelect"
         android:layout_width="40dp"
         android:layout_height="wrap_content"
