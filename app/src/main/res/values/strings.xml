@@ -16,6 +16,7 @@
     <string name="status_vlc_wrong_password">The supplied password is not valid</string>
     <string name="main_menu_title_servers">Servers</string>
     <string name="status_no_network_detected">VlcFreemote can\'t detect any networking interfaces configured in this device. Are you sure you are online?</string>
+    <string name="server_select_current_server">Current server: %1$s</string>
     <string name="server_select_manual_selection_default_ip">192.168.1.</string>
     <string name="server_select_manual_selection_default_port">8080</string>
     <string name="server_select_manual_selection_set">Use this server…</string>

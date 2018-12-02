@@ -220,6 +220,11 @@ public class MainActivity extends FragmentActivity
     }
 
     @Override
+    public Server getActiveServer() {
+        return getActiveVlcConnection().getServer();
+    }
+
+    @Override
     public RemoteVlc getActiveVlcConnection() {
         // IF this method is somehow called before onCreate, vlcConnection will be null and
         // we should try to create it from scratch

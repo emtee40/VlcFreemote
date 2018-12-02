@@ -33,6 +33,7 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
 
     public interface ServerSelectionCallback {
         void onNewServerSelected(final Server srv);
+        Server getActiveServer();
     }
 
     private ServerScanner serverScanner = null;
@@ -57,6 +58,8 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
 
         v.findViewById(R.id.wServerSelect_ToggleServerScanning).setOnClickListener(this);
         v.findViewById(R.id.wServerSelect_CustomServerSet).setOnClickListener(this);
+
+        updateCurrentServerLabel(v);
 
         List<String> ips = ServerScanner.getLocalNetworks();
         if (!ips.isEmpty()) {
@@ -152,6 +155,7 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
 
                 db.rememberServer(srvToUse);
                 callback.onNewServerSelected(srvToUse);
+                updateCurrentServerLabel(getView());
             }
         });
 
@@ -182,6 +186,18 @@ public class ServerSelectView extends Fragment implements View.OnClickListener {
     /************************************************************/
     /* UI Logic                                                 */
     /************************************************************/
+    void updateCurrentServerLabel(final View v) {
+        final String currentServer;
+        if (callback == null || callback.getActiveServer() == null) {
+            currentServer = "Not connected";
+        } else {
+            currentServer = callback.getActiveServer().ip + ":" + callback.getActiveServer().vlcPort;
+        }
+
+        final TextView currServer = v.findViewById(R.id.wServerSelect_CurrentServer);
+        currServer.setText(String.format(getResources().getString(R.string.server_select_current_server), currentServer));
+    }
+
     synchronized private void toggleServerScanning() {
         if (serverScanner != null) {
             Log.i(getClass().getSimpleName(), "Cancelling network scan");
