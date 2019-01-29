@@ -5,14 +5,18 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.content.res.ComplexColorCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.nicolasbrailo.vlcfreemote.vlc_connector.Cmd_CycleAudioTrack;
 import com.nicolasbrailo.vlcfreemote.vlc_connector.Cmd_CycleSubtitle;
@@ -55,6 +59,7 @@ public class PlayerControllerView extends VlcFragment
         v.findViewById(R.id.wPlayer_BtnPlayPause).setOnClickListener(this);
 
         v.findViewById(R.id.wPlayer_AppInfoScreen).setOnClickListener(this);
+        v.findViewById(R.id.wPlayer_SetTheme).setOnClickListener(this);
         v.findViewById(R.id.wPlayer_ToggleFullscreen).setOnClickListener(this);
         v.findViewById(R.id.wPlayer_CycleAudioTrack).setOnClickListener(this);
         v.findViewById(R.id.wPlayer_CycleSubtitleTrack).setOnClickListener(this);
@@ -90,6 +95,7 @@ public class PlayerControllerView extends VlcFragment
             case R.id.wPlayer_BtnNext: onBtnNextClicked(); break;
             case R.id.wPlayer_BtnPlayPause: onBtnPlayPauseClicked(); break;
             case R.id.wPlayer_AppInfoScreen: showAppInfo(); break;
+            case R.id.wPlayer_SetTheme: toggleTheme(); break;
             case R.id.wPlayer_ToggleFullscreen: onToggleFullscreen(); break;
             case R.id.wPlayer_CycleAudioTrack: onCycleAudioTrack(); break;
             case R.id.wPlayer_CycleSubtitleTrack: onCycleSubtitleTrack(); break;
@@ -211,5 +217,40 @@ public class PlayerControllerView extends VlcFragment
                     }
                 });
         alert.create().show();
+    }
+
+    /* TODO: These actually belong in local settings, they are here simply to prototype theme
+             setting (and because there's no 'official' settings view */
+    private static SharedPreferences getSharedPrefs(final Context ctx) {
+        return ctx.getSharedPreferences("app_startup", Context.MODE_PRIVATE);
+    }
+
+    public static boolean shouldUseDarkTheme(final Context ctx) {
+        return shouldUseDarkTheme(getSharedPrefs(ctx));
+    }
+
+    public static boolean shouldUseDarkTheme(final SharedPreferences cfg) {
+        return cfg.getBoolean("UseDarkTheme", false);
+    }
+
+    // Adding a theme-toggle in the main menu is somewhat hackish, but the alternative is adding
+    // this in a dedicated settings tab. This should be ok for now.
+    private void toggleTheme() {
+        getSharedPrefs(activity).edit()
+                                .putBoolean("UseDarkTheme", ! shouldUseDarkTheme(activity))
+                                .apply();
+
+        try {
+            activity.setTheme(R.style.DarkTheme);
+
+            final String name = getContext().getPackageName();
+            final Intent intent = getContext().getPackageManager().getLaunchIntentForPackage(name);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        } catch (Exception ex) {
+            final String msg = getString(R.string.status_theme_apply_fail);
+            Toast toast = Toast.makeText(getContext(), msg, Toast.LENGTH_LONG);
+            toast.show();
+        }
     }
 }

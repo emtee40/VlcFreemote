@@ -10,6 +10,7 @@
     <string name="playlist_element_duration_placeholder">Duration</string>
     <string name="playlist_element_remove_from_playlist">Remove from playlist</string>
     <string name="status_vlc_cant_connect">Could not connect to VLC at %1$s. Please select a new server.</string>
+    <string name="status_theme_apply_fail">Could not apply new theme. Will try after restart.</string>
     <string name="status_fatal_app_error">A fatal error was found when connecting to server %1$s. This typically means there is a bug in the application.</string>
     <string name="status_fatal_app_error_extra_info">Please submit a bug report. Additional information: %1$s</string>
     <string name="status_fatal_app_error_title">Application bug!</string>
@@ -43,6 +44,7 @@
     <string name="wPlayer_ToggleMoreOptions">See more options</string>
     <string name="wPlayer_ToggleFullscreen">Toggle Fullscreen</string>
     <string name="wPlayer_AppInfoScreen">About this app…</string>
+    <string name="wPlayer_SetTheme">Change theme</string>
     <string name="wPlayer_CycleAudioTrack">Cycle audio track</string>
     <string name="wPlayer_CycleSubtitleTrack">Cycle subtitle</string>
     <string name="playlist_element_current_status">Status for this playlist item</string>
@@ -52,7 +54,7 @@
     <string name="dir_listing_saved_bookmark">Saved bookmark %1$s</string>
     <string name="R.string.dir_listing_goto_bookmark_title">Jump to bookmark…</string>
     <string name="R_string_dir_listing_delete_bookmark_title">Pick a bookmark to delete</string>
-    <string name="wPlayer_ExtraOptions_label">Extra VLC options</string>
+    <string name="wPlayer_ExtraOptions_label">Extra options</string>
     <string name="wDirListing_AddRandom_label">Play random subdirectory</string>
     <string name="dir_listing_already_seen_icon">Video already seen</string>
     <string name="error_on_playlist_retrieve">Error retrieving playlist. Please try reconnecting.</string>

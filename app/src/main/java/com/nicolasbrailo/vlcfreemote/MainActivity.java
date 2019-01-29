@@ -1,6 +1,7 @@
 package com.nicolasbrailo.vlcfreemote;
 
 import android.app.AlertDialog;
+import android.app.Application;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -132,6 +133,14 @@ public class MainActivity extends FragmentActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (PlayerControllerView.shouldUseDarkTheme(this)) {
+            setTheme(R.style.DarkTheme);
+        } else {
+            setTheme(R.style.LightTheme);
+        }
+
+        // Setting the content must be done after setting the theme
         setContentView(R.layout.activity_main);
 
         // Create or restore all views
